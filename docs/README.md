@@ -27,7 +27,7 @@ A HTML template integrated with the given GitHub repository templates, based on 
 -  E/22/364, S.M.L.E Senadhipathi, [email](e22364@eng.pdn.ac.lk)
 -  E/22/125, D.D.S.K.Gunawardhana, [email](e22125@eng.pdn.ac.lk)
 -  E/22/159, G.K.M JAYANGA, [email](e22159@eng.pdn.ac.lk)
--  e/22/004, D.D ABEYSINGHE, [email](e22004@eng.pdn.ac.lk)
+-  E/22/004, D.D ABEYSINGHE, [email](e22004@eng.pdn.ac.lk)
 
 <!-- Image (photo/drawing of the final hardware) should be here -->
 
