@@ -57,75 +57,75 @@ This system improves data accuracy, reduces manual work, and supports better dec
 Architecture Description
 
 Frontend (React)
-Provides the user interface for doctors, nurses, reception staff, and administrators.
-Handles patient registration, appointment scheduling, and viewing medical records.
+-Provides the user interface for doctors, nurses, reception staff, and administrators.
+-Handles patient registration, appointment scheduling, and viewing medical records.
 
 Backend (Spring Boot)
-Acts as the business logic layer.
-Handles authentication, authorization, data validation, and API endpoints.
+-Acts as the business logic layer.
+-Handles authentication, authorization, data validation, and API endpoints.
 
 Database
-Stores patient data, medical records, appointments, billing information, and audit logs.
+-Stores patient data, medical records, appointments, billing information, and audit logs.
 
 Security
-Uses authentication, role-based access control, and encrypted communication (HTTPS).
+-Uses authentication, role-based access control, and encrypted communication (HTTPS).
 
 ## Software Designs
 
 1. System Modules
 1.1 Patient Management Module
-  Create, update, and search patient records
-  Store demographic and emergency contact details
-  Handle duplicate patient detection
+  -Create, update, and search patient records
+  -Store demographic and emergency contact details
+  -Handle duplicate patient detection
 
 1.2 Medical Records Module
-  Store medical history, allergies, diagnoses, and treatments
-  Manage prescriptions and clinical notes
-  Attach medical documents and reports
+  -Store medical history, allergies, diagnoses, and treatments
+  -Manage prescriptions and clinical notes
+  -Attach medical documents and reports
 
 1.3 Appointment Management Module
-  Schedule, reschedule, and cancel appointments
-  Track appointment history and attendance
-  Manage provider availability
+  -Schedule, reschedule, and cancel appointments
+  -Track appointment history and attendance
+  -Manage provider availability
 
 1.4 User & Access Control Module
-  User login and authentication
-  Role-based access (Doctor, Nurse, Admin, Receptionist)
-  Audit logs for data access and changes
+  -User login and authentication
+  -Role-based access (Doctor, Nurse, Admin, Receptionist)
+  -Audit logs for data access and changes
 
 1.5 Billing & Insurance Module
-  Store insurance information
-  Generate invoices
-  Track payments and billing history
+  -Store insurance information
+  -Generate invoices
+  -Track payments and billing history
 
 1.6 Reporting Module
-  Generate patient summaries
-  Administrative and statistical reports
-  Export reports in standard formats
+  -Generate patient summaries
+  -Administrative and statistical reports
+  -Export reports in standard formats
   
 2. Database Design (High-Level)
 
 Key entities:
-  Patient
-  MedicalRecord
-  Appointment
-  User
-  Role
-  Billing
-  AuditLog
+  -Patient
+  -MedicalRecord
+  -Appointment
+  -User
+  -Role
+  -Billing
+  -AuditLog
 
 Relationships:
-  One patient → many appointments
-  One patient → many medical records
-  One user → one role
-(ER diagram will be designed in later phases)
+  -One patient → many appointments
+  -One patient → many medical records
+  -One user → one role
+-(ER diagram will be designed in later phases)
 
 3. Security Design
-  Password encryption
-  Role-based authorization
-  Secure APIs
-  Audit logging
-  Compliance with data privacy principles
+  -Password encryption
+  -Role-based authorization
+  -Secure APIs
+  -Audit logging
+  -Compliance with data privacy principles
 
 ## Testing
 
@@ -133,22 +133,22 @@ Testing Approach
 Since the project is in the early phase, testing focuses on basic functional validation and API-level testing.
 
 Types of Testing
-  Unit Testing
-      Tested backend services and controllers
-      Validated input data and business logic
-  Integration Testing
-      Tested communication between React frontend and Spring Boot backend
-      Verified REST API responses
-  Manual Testing
-    Tested patient registration flow
-    Tested appointment scheduling
-    Verified role-based access behavior
+  -Unit Testing
+      --Tested backend services and controllers
+      --Validated input data and business logic
+  -Integration Testing
+      --Tested communication between React frontend and Spring Boot backend
+      --Verified REST API responses
+  -Manual Testing
+    --Tested patient registration flow
+    --Tested appointment scheduling
+    --Verified role-based access behavior
 
 ## Technology Stack.Frontend: React
-  Backend: Spring Boot (Java)
-  Database: PostgreSQL
-  API: RESTful APIs
-  Security: JWT, HTTPS
+  -Backend: Spring Boot (Java)
+  -Database: PostgreSQL
+  -API: RESTful APIs
+  -Security: JWT, HTTPS
 
 ## Conclusion
 
@@ -157,10 +157,10 @@ This project defines the foundation of a Patient Management System that centrali
 At the current stage, system requirements and high-level designs have been clearly identified. The architecture using React and Spring Boot provides a scalable and maintainable solution.
 
 Future Enhancements
-  Full patient portal access
-  Advanced clinical decision support
-  Integration with labs and pharmacies
-  Mobile application support
+  -Full patient portal access
+  -Advanced clinical decision support
+  -Integration with labs and pharmacies
+  -Mobile application support
   
 
 
