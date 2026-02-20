@@ -1,35 +1,25 @@
 import React from "react";
+import { NavLink } from "react-router";
 
 const Login = () => {
   return (
     <div>
-      <div class="bg-gradient-to-r from-purple-900 via-purple-800 to-purple-600">
+      <div class="bg-linear-to-r from-blue-800 to-blue-400">
         <div class="min-h-screen flex fle-col items-center justify-center p-6">
           <div class="grid md:grid-cols-2 items-center gap-10 max-w-6xl w-full">
             <div class="max-w-lg max-md:mx-auto max-md:text-center">
-              <a href="javascript:void(0)">
-                <img
-                  src="https://readymadeui.com/readymadeui-white.svg"
-                  alt="logo"
-                  class="lg:w-52 w-44 mb-12 inline-block"
-                />
-              </a>
-              <h1 class="text-4xl font-semibold !leading-tight text-white">
-                Seamless Login for Exclusive Access
+              <h1 class="text-4xl font-semibold leading-tight! text-white">
+                Secure Your Health
               </h1>
-              <p class="text-[15px] mt-6 text-white leading-relaxed">
-                Immerse yourself in a hassle-free login journey with our
-                intuitively designed login form. Effortlessly access your
-                account.
-              </p>
+
               <p class="text-[15px] mt-12 text-white">
                 Don't have an account{" "}
-                <a
-                  href="javascript:void(0);"
-                  class="text-white font-semibold underline ml-1"
+                <NavLink
+                  to="/signup"
+                  class="text-white underline font-semibold  ml-1 "
                 >
                   Register here
-                </a>
+                </NavLink>
               </p>
             </div>
 

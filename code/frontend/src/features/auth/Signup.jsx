@@ -1,24 +1,24 @@
 export default function Signup() {
   return (
     <div>
-      <div class="text-center bg-gradient-to-r from-blue-800 to-blue-400 min-h-[180px] sm:p-6 p-4">
-        <h1 class="sm:text-3xl text-2xl text-white font-medium mt-3">
+      <div className="text-center bg-linear-to-r from-blue-800 to-blue-400 min-h-45 sm:p-6 p-4">
+        <h1 className="sm:text-3xl text-2xl text-white font-medium mt-3">
           Create your free account
         </h1>
       </div>
 
-      <div class="mx-4 mb-4 -mt-20">
-        <form class="max-w-4xl max-md:max-w-xl mx-auto bg-white [box-shadow:0_2px_13px_-6px_rgba(0,0,0,0.4)] sm:p-8 p-4 rounded-md">
-          <div class="grid md:grid-cols-2 gap-6">
+      <div className="mx-4 mb-4 -mt-20">
+        <form className="max-w-4xl max-md:max-w-xl mx-auto bg-white [box-shadow:0_2px_13px_-6px_rgba(0,0,0,0.4)] sm:p-8 p-4 rounded-md">
+          <div className="grid md:grid-cols-2 gap-6">
             <button
               type="button"
-              class="w-full px-4 py-2.5 flex items-center justify-center rounded-md text-slate-900 text-sm font-medium tracking-wider cursor-pointer border-0 outline-0 bg-slate-100 hover:bg-slate-200"
+              className="w-full px-4 py-2.5 flex items-center justify-center rounded-md text-slate-900 text-sm font-medium tracking-wider cursor-pointer border-0 outline-0 bg-slate-100 hover:bg-slate-200"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="22px"
                 fill="#fff"
-                class="inline shrink-0 mr-4"
+                className="inline shrink-0 mr-4"
                 viewBox="0 0 512 512"
               >
                 <path
@@ -56,13 +56,13 @@ export default function Signup() {
             </button>
             <button
               type="button"
-              class="w-full px-4 py-2.5 flex items-center justify-center rounded-md text-white text-sm font-medium tracking-wider cursor-pointer border-0 outline-0 bg-slate-800 hover:bg-slate-900"
+              className="w-full px-4 py-2.5 flex items-center justify-center rounded-md text-white text-sm font-medium tracking-wider cursor-pointer border-0 outline-0 bg-slate-800 hover:bg-slate-900"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="22px"
                 fill="#fff"
-                class="inline shrink-0 mr-4"
+                className="inline shrink-0 mr-4"
                 viewBox="0 0 22.773 22.773"
               >
                 <path
@@ -74,82 +74,82 @@ export default function Signup() {
             </button>
           </div>
 
-          <div class="my-6 flex items-center before:mt-0.5 before:flex-1 before:border-t before:border-neutral-300 after:mt-0.5 after:flex-1 after:border-t after:border-neutral-300">
-            <p class="mx-4 text-center text-slate-500">Or</p>
+          <div className="my-6 flex items-center before:mt-0.5 before:flex-1 before:border-t before:border-neutral-300 after:mt-0.5 after:flex-1 after:border-t after:border-neutral-300">
+            <p className="mx-4 text-center text-slate-500">Or</p>
           </div>
 
-          <div class="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <label class="text-slate-900 text-sm font-medium mb-2 block">
+              <label className="text-slate-900 text-sm font-medium mb-2 block">
                 First Name
               </label>
               <input
                 name="name"
                 type="text"
-                class="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
                 placeholder="Enter name"
               />
             </div>
             <div>
-              <label class="text-slate-900 text-sm font-medium mb-2 block">
+              <label className="text-slate-900 text-sm font-medium mb-2 block">
                 Last Name
               </label>
               <input
                 name="lname"
                 type="text"
-                class="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
                 placeholder="Enter last name"
               />
             </div>
             <div>
-              <label class="text-slate-900 text-sm font-medium mb-2 block">
+              <label className="text-slate-900 text-sm font-medium mb-2 block">
                 Email Id
               </label>
               <input
                 name="email"
                 type="text"
-                class="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
                 placeholder="Enter email"
               />
             </div>
             <div>
-              <label class="text-slate-900 text-sm font-medium mb-2 block">
+              <label className="text-slate-900 text-sm font-medium mb-2 block">
                 Mobile No.
               </label>
               <input
                 name="number"
                 type="number"
-                class="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
                 placeholder="Enter mobile number"
               />
             </div>
             <div>
-              <label class="text-slate-900 text-sm font-medium mb-2 block">
+              <label className="text-slate-900 text-sm font-medium mb-2 block">
                 Password
               </label>
               <input
                 name="password"
                 type="password"
-                class="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
                 placeholder="Enter password"
               />
             </div>
             <div>
-              <label class="text-slate-900 text-sm font-medium mb-2 block">
+              <label className="text-slate-900 text-sm font-medium mb-2 block">
                 Confirm Password
               </label>
               <input
                 name="cpassword"
                 type="password"
-                class="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
+                className="bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 px-4 py-2.5 rounded-sm border border-gray-200 focus:border-blue-600 outline-0 transition-all"
                 placeholder="Enter confirm password"
               />
             </div>
           </div>
-          <div class="mt-8">
+          <div className="mt-8">
             <button
               type="button"
-              class="w-full py-2.5 px-5 text-sm font-medium tracking-wider rounded-sm cursor-pointer text-white bg-blue-600 hover:bg-blue-700 focus:outline-0"
+              className="w-full py-2.5 px-5 text-sm font-medium tracking-wider rounded-sm cursor-pointer text-white bg-blue-600 hover:bg-blue-700 focus:outline-0"
             >
               Sign up
             </button>
