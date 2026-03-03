@@ -5,16 +5,16 @@
 import api from "./axiosClient";
 
 export const authService = {
-  signup: async (firstName, lastName, email, password) => {
+  signup: async (firstName, lastName, email, password, mobileNumber) => {
     const { data } = await api.post("/api/auth/signup", {
       firstName,
       lastName,
       email,
       password,
+      mobileNumber, // <-- Now this gets sent to Spring Boot!
     });
     return data; // { token, user }
   },
-
   login: async (email, password) => {
     const { data } = await api.post("/api/auth/login", {
       email,

@@ -25,12 +25,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleDataIntegrity(
             DataIntegrityViolationException ex) {
 
-        String message = "A record with this information already exists.";
-        String detail = ex.getMessage();
+        // 1. PRINT THE REAL ERROR TO YOUR CONSOLE SO YOU CAN READ IT!
+        System.out.println("REAL DB ERROR: " + ex.getMessage());
+        ex.printStackTrace();
 
-        if (detail != null && detail.contains("email")) {
+        String message = "A database constraint was violated.";
+        String detail = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+
+        // 2. Look for the EXACT constraint names your database generates,
+        // not just generic words. (Adjust these to match your actual DB constraint names).
+        if (detail.contains("users_email_key") || detail.contains("uk_email")) {
             message = "This email is already registered.";
-        } else if (detail != null && detail.contains("mobilenumber")) {
+        } else if (detail.contains("users_mobile_key") || detail.contains("uk_mobile")) {
             message = "This mobile number is already registered.";
         }
 
