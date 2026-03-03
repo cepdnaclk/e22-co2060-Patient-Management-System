@@ -6,11 +6,24 @@ import ReportAndAnalytics from "./DoctorDashboardComponents/ReportAndAnlytics";
 import Profile from "./DoctorDashboardComponents/Profile";
 import Records from "./DoctorDashboardComponents/Records";
 import LabReports from "./DoctorDashboardComponents/labreport";
+import { useAuth } from "../auth/AuthContext";
+import { doctorDashboardService } from "../../services/doctorDashboardService";
 
 const DoctorDashboard = () => {
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newMenuLabel, setNewMenuLabel] = useState("");
   const [customMenus, setCustomMenus] = useState([]);
+  const [doctor, setDoctor] = useState(null);
+  const [stats, setStats] = useState({
+    patients: 0,
+    appointmentsToday: 0,
+    criticalAlerts: 0,
+    records: 0,
+  });
+  const [appointments, setAppointments] = useState([]);
+  const [loadingDashboard, setLoadingDashboard] = useState(true);
+  const [dashboardError, setDashboardError] = useState("");
 
   const addMenu = (e) => {
     e.preventDefault();
@@ -22,6 +35,47 @@ const DoctorDashboard = () => {
   };
 
   const [section, setSection] = useState("dashboard");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadDashboardData = async () => {
+      if (!user?.id) {
+        setLoadingDashboard(false);
+        setDashboardError("Unable to identify logged in doctor.");
+        return;
+      }
+
+      setLoadingDashboard(true);
+      setDashboardError("");
+
+      try {
+        const data = await doctorDashboardService.getDashboardData(user.id);
+        if (!isMounted) return;
+
+        setDoctor(data.doctor);
+        setStats(data.stats);
+        setAppointments(data.appointments);
+      } catch (error) {
+        if (!isMounted) return;
+
+        setDashboardError(
+          error.response?.data?.message ||
+            "Failed to load doctor dashboard data.",
+        );
+      } finally {
+        if (isMounted) {
+          setLoadingDashboard(false);
+        }
+      }
+    };
+
+    loadDashboardData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id]);
 
   useEffect(() => {
     const dropdownToggle = document.getElementById("dropdownToggle");
@@ -615,7 +669,9 @@ const DoctorDashboard = () => {
                     <div class="w-1 h-10 border-l border-gray-400"></div>
                     <div class="dropdown-menu relative flex shrink-0 group">
                       <div class="flex items-center gap-4">
-                        <p class="text-slate-500 text-sm">Hi, John</p>
+                        <p class="text-slate-500 text-sm">
+                          Hi, {doctor?.firstName || user?.firstName || "Doctor"}
+                        </p>
                         <img
                           src="https://readymadeui.com/team-1.webp"
                           alt="profile-pic"
@@ -733,14 +789,26 @@ const DoctorDashboard = () => {
                 </div>
               </div>
             </header>
-            {section === "dashboard" && <Dashboard />}
+            {section === "dashboard" && (
+              <Dashboard
+                stats={stats}
+                appointments={appointments}
+                loading={loadingDashboard}
+                error={dashboardError}
+              />
+            )}
             {(section === "patients" || section === "patientList") && (
               <PaitentList />
             )}
             {section === "pharmacy" && <Pharmacy />}
-            // eslint-disable-next-line no-undef
             {section === "reportsandanalytics" && <ReportAndAnalytics />}
-            {section === "profile" && <Profile />}
+            {section === "profile" && (
+              <Profile
+                doctor={doctor}
+                loading={loadingDashboard}
+                error={dashboardError}
+              />
+            )}
             {section === "records" && <Records />}
             {section === "labreports" && <LabReports />}
           </section>
