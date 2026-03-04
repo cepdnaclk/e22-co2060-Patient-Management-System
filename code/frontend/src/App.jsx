@@ -7,6 +7,7 @@ import PatientDashboard from "./features/dashboard/PatientDashboard.jsx";
 import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute.jsx";
 import Navbar from "./components/Navbar.jsx";
+import AdminDashboard from "./features/dashboard/AdminDashboard.jsx";
 
 function App() {
   return (
@@ -33,6 +34,14 @@ function App() {
             <ProtectedRoute allowedRoles={["PATIENT"]}>
               <PatientDashboard />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/admin"
+          element={
+            // <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
+              <AdminDashboard />
+            // </ProtectedRoute>
           }
         />
         <Route
