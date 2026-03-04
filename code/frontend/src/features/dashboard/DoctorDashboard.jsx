@@ -395,20 +395,6 @@ const DoctorDashboard = () => {
                   )}
                 </ul>
 
-                <div class="mt-8">
-                  <div class="bg-[#00b074] p-4 rounded-md shadow-md max-w-49">
-                    <p class="text-white text-sm leading-relaxed">
-                      Organize your menus using the action button below!
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setIsModalOpen(true)}
-                      className="py-2 px-4 bg-white hover:bg-gray-100 text-slate-800 text-sm border-0 outline-0 rounded-md cursor-pointer mt-4"
-                    >
-                      Add Menu
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           </nav>

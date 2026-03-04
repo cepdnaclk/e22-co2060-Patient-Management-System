@@ -6,6 +6,43 @@ import React, { useState } from 'react';
 // } from 'react-icons/fa';
 
 const PatientProfile = () => {
+  const patients = [
+    {
+      id: "PMS-00421",
+      name: "Rajesh Kumar",
+      age: 52,
+      gender: "Male",
+      bloodGroup: "B+",
+      admittedDate: "20 February 2026",
+      primaryDoctor: "Dr. A. Perera",
+      avatar: "https://i.pravatar.cc/160?u=rajeshkumar",
+    },
+    {
+      id: "PMS-00456",
+      name: "Nimali Perera",
+      age: 44,
+      gender: "Female",
+      bloodGroup: "A+",
+      admittedDate: "11 January 2026",
+      primaryDoctor: "Dr. S. Fernando",
+      avatar: "https://i.pravatar.cc/160?u=nimaliperera",
+    },
+    {
+      id: "PMS-00502",
+      name: "Kasun Silva",
+      age: 61,
+      gender: "Male",
+      bloodGroup: "O-",
+      admittedDate: "03 March 2026",
+      primaryDoctor: "Dr. A. Perera",
+      avatar: "https://i.pravatar.cc/160?u=kasunsilva",
+    },
+  ];
+
+  const [searchText, setSearchText] = useState("");
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [searchError, setSearchError] = useState("");
+  const [activeRecordsTab, setActiveRecordsTab] = useState("all");
   const [historyRecords, setHistoryRecords] = useState([
     {
       id: 1,
@@ -67,26 +104,135 @@ const PatientProfile = () => {
     }
   };
 
+  const searchPatient = () => {
+    const query = searchText.trim().toLowerCase();
+
+    if (!query) {
+      setSearchError("Please enter patient ID or name.");
+      setSelectedPatient(null);
+      return;
+    }
+
+    const found = patients.find(
+      (patient) =>
+        patient.id.toLowerCase() === query ||
+        patient.name.toLowerCase().includes(query),
+    );
+
+    if (!found) {
+      setSearchError("Patient not found. Try a valid ID or name.");
+      setSelectedPatient(null);
+      return;
+    }
+
+    setSearchError("");
+    setSelectedPatient(found);
+  };
+
+  const selectPatient = (patient) => {
+    setSearchText(patient.id);
+    setSearchError("");
+    setSelectedPatient(patient);
+  };
+
+  const cancelSearch = () => {
+    setSearchText("");
+    setSearchError("");
+    setSelectedPatient(null);
+  };
+
+  const filteredHistoryRecords = historyRecords.filter((record) => {
+    if (activeRecordsTab === "all") return true;
+    if (activeRecordsTab === "clinical") {
+      return record.type !== "Lab Result";
+    }
+    return record.type === "Lab Result";
+  });
+
   return (
     <div className="flex-1 overflow-auto p-6 bg-slate-50">
+      <div className="bg-white rounded-2xl shadow p-5 mb-6">
+        <p className="text-sm font-medium text-slate-700 mb-3">
+          Search patient first to view profile and records
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          <input
+            type="text"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") searchPatient();
+            }}
+            placeholder="Enter Patient ID (e.g. PMS-00421) or Name"
+            className="md:col-span-3 bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm"
+          />
+          <button
+            onClick={searchPatient}
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-3 text-sm font-medium"
+          >
+            Search Patient
+          </button>
+          <button
+            onClick={cancelSearch}
+            className="bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl px-4 py-3 text-sm font-medium"
+          >
+            Cancel
+          </button>
+        </div>
+        {searchError && (
+          <p className="mt-3 text-sm text-red-600">{searchError}</p>
+        )}
+
+        {!selectedPatient && (
+          <div className="mt-4 border border-slate-200 rounded-xl overflow-hidden">
+            <div className="bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              Patient List
+            </div>
+            <div className="divide-y divide-slate-200">
+              {patients.map((patient) => (
+                <button
+                  key={patient.id}
+                  type="button"
+                  onClick={() => selectPatient(patient)}
+                  className="w-full text-left px-4 py-3 hover:bg-slate-50 transition"
+                >
+                  <p className="text-sm font-medium text-slate-800">{patient.name}</p>
+                  <p className="text-xs text-slate-500">{patient.id}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {!selectedPatient ? (
+        <div className="bg-white rounded-2xl shadow p-8 text-center text-slate-500">
+          Enter a patient ID or name, then click Search to display patient profile.
+        </div>
+      ) : (
+        <>
       {/* Patient Header Banner - Same as before */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-3xl shadow-2xl p-8 mb-10 flex items-center gap-8">
         <img 
-          src="https://i.pravatar.cc/160?u=rajeshkumar" 
-          alt="Rajesh Kumar"
+          src={selectedPatient.avatar}
+          alt={selectedPatient.name}
           className="w-40 h-40 rounded-3xl object-cover ring-8 ring-white/30"
         />
         
         <div className="flex-1">
           <div className="flex items-center gap-4">
-            <h1 className="text-5xl font-bold">Rajesh Kumar</h1>
+            <h1 className="text-5xl font-bold">{selectedPatient.name}</h1>
             <span className="bg-emerald-400 text-emerald-900 px-6 py-1.5 rounded-3xl text-sm font-semibold flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-emerald-900 rounded-full animate-pulse" />
               Active
             </span>
           </div>
-          <p className="text-2xl mt-2 opacity-90">PMS-00421 • 52 years • Male • B+</p>
-          <p className="mt-3 text-lg opacity-75">Admitted: 20 February 2026 • Primary Doctor: Dr. A. Perera</p>
+          <p className="text-2xl mt-2 opacity-90">
+            {selectedPatient.id} • {selectedPatient.age} years • {selectedPatient.gender} • {selectedPatient.bloodGroup}
+          </p>
+          <p className="mt-3 text-lg opacity-75">
+            Admitted: {selectedPatient.admittedDate} • Primary Doctor: {selectedPatient.primaryDoctor}
+          </p>
         </div>
 
         <div className="hidden lg:grid grid-cols-2 gap-8 text-sm">
@@ -137,6 +283,53 @@ const PatientProfile = () => {
               </div>
             </div>
           </div>
+          
+          <div className="bg-white rounded-2xl shadow p-4">
+            <div className="w-max flex gap-2">
+              <button
+                type="button"
+                onClick={() => setActiveRecordsTab("all")}
+                className={`text-[15px] text-center py-2.5 px-5 border-b-2 cursor-pointer transition-all ${
+                  activeRecordsTab === "all"
+                    ? "text-blue-700 font-semibold border-blue-700"
+                    : "text-slate-600 font-medium border-transparent hover:text-blue-700"
+                }`}
+              >
+                All Records
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveRecordsTab("clinical")}
+                className={`text-[15px] text-center py-2.5 px-5 border-b-2 cursor-pointer transition-all ${
+                  activeRecordsTab === "clinical"
+                    ? "text-blue-700 font-semibold border-blue-700"
+                    : "text-slate-600 font-medium border-transparent hover:text-blue-700"
+                }`}
+              >
+                Clinical Notes
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveRecordsTab("lab")}
+                className={`text-[15px] text-center py-2.5 px-5 border-b-2 cursor-pointer transition-all ${
+                  activeRecordsTab === "lab"
+                    ? "text-blue-700 font-semibold border-blue-700"
+                    : "text-slate-600 font-medium border-transparent hover:text-blue-700"
+                }`}
+              >
+                Lab Results
+              </button>
+            </div>
+
+            <p className="text-sm text-slate-600 mt-4">
+              {activeRecordsTab === "all" &&
+                "Showing all medical history entries."}
+              {activeRecordsTab === "clinical" &&
+                "Showing diagnosis, notes, and non-lab clinical records."}
+              {activeRecordsTab === "lab" &&
+                "Showing only records with lab result type."}
+            </p>
+          </div>
 
           {/* ==================== SCROLLABLE MEDICAL HISTORY / RECORDS ==================== */}
           <div className="bg-white rounded-3xl shadow p-8">
@@ -144,7 +337,9 @@ const PatientProfile = () => {
               <h2 className="text-2xl font-semibold flex items-center gap-3">
                 📋 Medical History & Records
               </h2>
-              <span className="text-xs bg-slate-100 px-3 py-1 rounded-full">{historyRecords.length} entries</span>
+              <span className="text-xs bg-slate-100 px-3 py-1 rounded-full">
+                {filteredHistoryRecords.length} / {historyRecords.length} entries
+              </span>
             </div>
 
             {/* Add New Record Form */}
@@ -192,7 +387,7 @@ const PatientProfile = () => {
 
             {/* Scrollable Records List */}
             <div className="max-h-[460px] overflow-y-auto pr-2 custom-scroll space-y-4">
-              {historyRecords.map((record) => (
+              {filteredHistoryRecords.map((record) => (
                 <div key={record.id} className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-blue-200 transition group">
                   <div className="flex justify-between items-start">
                     <div>
@@ -215,8 +410,10 @@ const PatientProfile = () => {
               ))}
             </div>
 
-            {historyRecords.length === 0 && (
-              <p className="text-center text-slate-400 py-12">No records yet. Add one above.</p>
+            {filteredHistoryRecords.length === 0 && (
+              <p className="text-center text-slate-400 py-12">
+                No records in this tab. Add one above.
+              </p>
             )}
           </div>
         </div>
@@ -273,6 +470,8 @@ const PatientProfile = () => {
           </div>
         </div>
       </div>
+    </>
+      )}
     </div>
   );
 };

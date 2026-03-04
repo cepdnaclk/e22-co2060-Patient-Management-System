@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 // } from 'react-icons/fa';
 
 const LabReports = () => {
+  const [activeLabTab, setActiveLabTab] = useState("all");
   // ==================== MEDICAL HISTORY RECORDS ====================
   const [historyRecords, setHistoryRecords] = useState([
     {
@@ -102,6 +103,12 @@ const LabReports = () => {
     }
   };
 
+  const filteredLabReports = labReports.filter((report) => {
+    if (activeLabTab === "all") return true;
+    if (activeLabTab === "normal") return report.status === "Normal";
+    return report.status !== "Normal";
+  });
+
   return (
     <div className="flex-1 overflow-auto p-6 bg-slate-50">
       {/* Patient Header (same as before) */}
@@ -135,7 +142,45 @@ const LabReports = () => {
               <h2 className="text-2xl font-semibold flex items-center gap-3">
                 🧪 Lab Reports
               </h2>
-              <span className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full">{labReports.length} reports</span>
+              <span className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+                {filteredLabReports.length} / {labReports.length} reports
+              </span>
+            </div>
+
+            <div className="mb-6 w-max flex gap-2 border-b border-slate-200">
+              <button
+                type="button"
+                onClick={() => setActiveLabTab("all")}
+                className={`text-[15px] text-center py-2.5 px-5 border-b-2 transition-all ${
+                  activeLabTab === "all"
+                    ? "text-purple-700 font-semibold border-purple-700"
+                    : "text-slate-600 font-medium border-transparent hover:text-purple-700"
+                }`}
+              >
+                All Reports
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveLabTab("normal")}
+                className={`text-[15px] text-center py-2.5 px-5 border-b-2 transition-all ${
+                  activeLabTab === "normal"
+                    ? "text-purple-700 font-semibold border-purple-700"
+                    : "text-slate-600 font-medium border-transparent hover:text-purple-700"
+                }`}
+              >
+                Normal
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveLabTab("abnormal")}
+                className={`text-[15px] text-center py-2.5 px-5 border-b-2 transition-all ${
+                  activeLabTab === "abnormal"
+                    ? "text-purple-700 font-semibold border-purple-700"
+                    : "text-slate-600 font-medium border-transparent hover:text-purple-700"
+                }`}
+              >
+                Abnormal
+              </button>
             </div>
 
             {/* Add New Lab Report Form */}
@@ -192,7 +237,7 @@ const LabReports = () => {
 
             {/* Scrollable Lab Reports List */}
             <div className="max-h-[460px] overflow-y-auto pr-2 space-y-4 custom-scroll">
-              {labReports.map(report => (
+              {filteredLabReports.map(report => (
                 <div key={report.id} className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-purple-200 transition group">
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-3">
@@ -235,6 +280,11 @@ const LabReports = () => {
                   </button>
                 </div>
               ))}
+              {filteredLabReports.length === 0 && (
+                <p className="text-center text-slate-400 py-12">
+                  No lab reports in this tab.
+                </p>
+              )}
             </div>
           </div>
 
