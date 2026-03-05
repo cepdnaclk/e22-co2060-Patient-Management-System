@@ -83,7 +83,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(
-                "http://localhost:5174",  // Vite dev server
+                "http://localhost:5173",  // Vite dev server
                 "http://localhost:3000"   // Create React App (if used)
         ));
         config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));

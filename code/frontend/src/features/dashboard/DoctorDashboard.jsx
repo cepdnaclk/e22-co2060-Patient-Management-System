@@ -240,7 +240,7 @@ const DoctorDashboard = () => {
                       <span>Patient</span>
                     </a>
                   </li>
-                  <li>
+                  {/* <li>
                     <a
                       href="javascript:void(0)"
                       onClick={(e) => {
@@ -268,7 +268,7 @@ const DoctorDashboard = () => {
                       </svg>
                       <span>Lab Reports</span>
                     </a>
-                  </li>
+                  </li> */}
                   
                   {/* <li>
                     <a
@@ -297,7 +297,7 @@ const DoctorDashboard = () => {
                       <span>Pharmacy</span>
                     </a>
                   </li> */}
-                  <li>
+                  {/* <li>
                     <a
                       href="javascript:void(0)"
                       class="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
@@ -316,7 +316,7 @@ const DoctorDashboard = () => {
                       </svg>
                       <span>Settings</span>
                     </a>
-                  </li>
+                  </li> */}
                   {/* <li>
                   <a href="javascript:void(0)"
                     class="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#d9f3ea] rounded-md px-3 py-3 transition-all duration-300">

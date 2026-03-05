@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 
-const PrescriptionEditor = ({ patientName = "Rajesh Kumar", patientId = "PMS-00421" }) => {
+const PrescriptionEditor = ({
+  patientName = "Rajesh Kumar",
+  patientId = "PMS-00421",
+  onSavePrescription,
+  saving = false,
+}) => {
   const [medicines, setMedicines] = useState([
     {
       id: 1,
@@ -53,10 +58,23 @@ const PrescriptionEditor = ({ patientName = "Rajesh Kumar", patientId = "PMS-004
     setMedicines(medicines.filter(med => med.id !== id));
   };
 
-  const savePrescription = () => {
-    console.log("Prescription Saved:", medicines);
+  const savePrescription = async () => {
+    const validMedicines = medicines.filter(
+      (med) => med.name.trim() || med.dosage.trim() || med.frequency.trim() || med.duration.trim() || med.notes.trim(),
+    );
+
+    if (validMedicines.length === 0) {
+      alert("Please add at least one medicine before saving.");
+      return;
+    }
+
+    if (onSavePrescription) {
+      await onSavePrescription(validMedicines);
+      return;
+    }
+
+    console.log("Prescription Saved:", validMedicines);
     alert("Prescription saved successfully for " + patientName + "!");
-    // Here you would normally send to API / backend
   };
 
   const cancel = () => {
@@ -174,9 +192,10 @@ const PrescriptionEditor = ({ patientName = "Rajesh Kumar", patientId = "PMS-004
           </button>
           <button
             onClick={savePrescription}
+            disabled={saving}
             className="flex items-center gap-2 px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-medium transition-all active:scale-95"
           >
-             Save Prescription
+             {saving ? "Saving..." : "Save Prescription"}
           </button>
         </div>
       </div>
