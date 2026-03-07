@@ -2,6 +2,9 @@ import Signup from "./features/auth/Signup.jsx";
 import Login from "./features/auth/Login.jsx";
 import "./App.css";
 import Home from "./pages/Home.jsx";
+import Aboutus from "./pages/Aboutus.jsx";
+import ContactUs from "./pages/ContactUs.jsx";
+import FAQ from "./pages/FAQ.jsx";
 import DoctorDashboard from "./features/dashboard/DoctorDashboard.jsx";
 import PatientDashboard from "./features/dashboard/PatientDashboard.jsx";
 import { Routes, Route } from "react-router-dom";
@@ -15,6 +18,9 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<Aboutus />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/faq" element={<FAQ />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
 
