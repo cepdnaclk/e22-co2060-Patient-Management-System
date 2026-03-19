@@ -1,7 +1,12 @@
 import React, { useState } from "react";
-
+// import { userService } from "../../../../services/userService";
+import { userService } from "../../../services/userService";
 const AddStaff = () => {
   const [role, setRole] = useState(""); // "" = not selected yet
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -45,39 +50,54 @@ const AddStaff = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccessMessage("");
 
-    // You can add validation here if needed
+    if (!role) {
+      setError("Please select a staff role.");
+      return;
+    }
+    if (!password || password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
 
-    const submissionData = {
-      role,
-      ...formData,
-    };
+    setLoading(true);
 
-    console.log(`${role} added:`, submissionData);
+    try {
+      const userRequest = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        mobileNumber: formData.phone,
+        password,
+        role: role.toUpperCase(),
+      };
 
-    setSubmitted(true);
+      const createdUser = await userService.createUser(userRequest);
 
-    // Reset form after 2 seconds
-    setTimeout(() => {
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        specialization: "",
-        licenseNumber: "",
-        experience: "",
-        availability: "",
-        certification: "",
-        department: "",
-        shift: "",
-      });
-      setSubmitted(false);
-      // Optional: keep role selected or reset it
-      // setRole("");
-    }, 2000);
+      if (role === "doctor") {
+        await userService.createDoctorProfile(createdUser.id, {
+          specialization: formData.specialization,
+          licenseNumber: formData.licenseNumber,
+          hospital: formData.department || "General Hospital",
+          department: formData.department || "General",
+          consultationFee: 0,
+          bio: "Doctor profile created from admin dashboard",
+          isAvailable: true,
+        });
+      }
+
+      setSuccessMessage(`${role === "doctor" ? "Doctor" : "Nurse"} registered successfully.`);
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 2500);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to add staff. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isDoctor = role === "doctor";
@@ -93,8 +113,18 @@ const AddStaff = () => {
       </div>
 
       <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-center text-sm">
+            {error}
+          </div>
+        )}
+        {successMessage && (
+          <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md text-center text-sm">
+            {successMessage}
+          </div>
+        )}
         {submitted && (
-          <div className="mb-6 p-4 bg-green-100 text-green-700 rounded-md text-center font-medium">
+          <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md text-center font-medium">
             ✓ {role === "doctor" ? "Doctor" : "Nurse"} added successfully!
           </div>
         )}
@@ -196,6 +226,18 @@ const AddStaff = () => {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium mb-1">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Choose a secure password"
+                />
+              </div>
+
               {/* ── Doctor specific fields ── */}
               {isDoctor && (
                 <>
@@ -204,21 +246,14 @@ const AddStaff = () => {
                       <label className="block text-sm font-medium mb-1">
                         Specialization
                       </label>
-                      <select
+                      <input
+                        type="text"
                         name="specialization"
                         value={formData.specialization}
                         onChange={handleChange}
-                        required
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">Select Specialization</option>
-                        <option value="Cardiology">Cardiology</option>
-                        <option value="Neurology">Neurology</option>
-                        <option value="Orthopedics">Orthopedics</option>
-                        <option value="General Medicine">General Medicine</option>
-                        <option value="Pediatrics">Pediatrics</option>
-                        <option value="Surgery">Surgery</option>
-                      </select>
+                        placeholder="e.g., Cardiology"
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">
@@ -229,45 +264,9 @@ const AddStaff = () => {
                         name="licenseNumber"
                         value={formData.licenseNumber}
                         onChange={handleChange}
-                        required
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="LIC123456"
                       />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Years of Experience
-                      </label>
-                      <input
-                        type="number"
-                        name="experience"
-                        value={formData.experience}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="10"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Availability
-                      </label>
-                      <select
-                        name="availability"
-                        value={formData.availability}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">Select Availability</option>
-                        <option value="Full-time">Full-time</option>
-                        <option value="Part-time">Part-time</option>
-                        <option value="Contract">Contract</option>
-                      </select>
                     </div>
                   </div>
                 </>
@@ -279,90 +278,30 @@ const AddStaff = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Certification
-                      </label>
-                      <select
-                        name="certification"
-                        value={formData.certification}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">Select Certification</option>
-                        <option value="RN">Registered Nurse (RN)</option>
-                        <option value="LPN">Licensed Practical Nurse (LPN)</option>
-                        <option value="CNA">Certified Nursing Assistant (CNA)</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        License Number
+                        Department
                       </label>
                       <input
                         type="text"
-                        name="licenseNumber"
-                        value={formData.licenseNumber}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="LIC789456"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Years of Experience
-                      </label>
-                      <input
-                        type="number"
-                        name="experience"
-                        value={formData.experience}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="5"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        Department
-                      </label>
-                      <select
                         name="department"
                         value={formData.department}
                         onChange={handleChange}
-                        required
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">Select Department</option>
-                        <option value="ICU">ICU</option>
-                        <option value="Emergency">Emergency</option>
-                        <option value="Cardiology">Cardiology</option>
-                        <option value="Pediatrics">Pediatrics</option>
-                        <option value="Surgery">Surgery</option>
-                        <option value="General Ward">General Ward</option>
-                      </select>
+                        placeholder="e.g., ICU"
+                      />
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Shift</label>
-                    <select
-                      name="shift"
-                      value={formData.shift}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select Shift</option>
-                      <option value="Morning">Morning (6 AM - 2 PM)</option>
-                      <option value="Evening">Evening (2 PM - 10 PM)</option>
-                      <option value="Night">Night (10 PM - 6 AM)</option>
-                      <option value="Flexible">Flexible</option>
-                    </select>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Shift
+                      </label>
+                      <input
+                        type="text"
+                        name="shift"
+                        value={formData.shift}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="e.g., Morning"
+                      />
+                    </div>
                   </div>
                 </>
               )}
@@ -372,9 +311,10 @@ const AddStaff = () => {
                 <div className="flex gap-4 pt-6">
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+                    disabled={loading}
+                    className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium disabled:opacity-60"
                   >
-                    Add {isDoctor ? "Doctor" : "Nurse"}
+                    {loading ? "Saving..." : `Add ${isDoctor ? "Doctor" : "Nurse"}`}
                   </button>
                   <button
                     type="reset"
