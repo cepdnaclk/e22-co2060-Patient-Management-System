@@ -1,12 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "../../../services/axiosClient";
 
 const Dashboard = () => {
+  const [statsData, setStatsData] = useState({
+    totalUsers: 0,
+    activeDoctors: 0,
+    activeNurses: 0,
+    totalAppointments: 0,
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get("/api/v1/admin/stats");
+        setStatsData(response.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching admin stats:", err);
+        setError("Failed to load dashboard statistics");
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const stats = [
-    { id: 1, label: "Total Users", value: 542 },
-    { id: 2, label: "Active Doctors", value: 42 },
-    { id: 3, label: "Active Nurses", value: 28 },
-    { id: 4, label: "Appointments", value: 312 },
+    { id: 1, label: "Total Users", value: statsData.totalUsers },
+    { id: 2, label: "Active Doctors", value: statsData.activeDoctors },
+    { id: 3, label: "Active Nurses", value: statsData.activeNurses },
+    { id: 4, label: "Appointments", value: statsData.totalAppointments },
   ];
 
   const recentActivities = [

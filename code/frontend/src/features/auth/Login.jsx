@@ -4,7 +4,7 @@ import { useAuth } from "./AuthContext";
 import { authService } from "../../services/authService";
 
 const ROLE_ROUTES = {
-  SUPER_ADMIN: "/dashboard/superadmin",
+  SUPER_ADMIN: "/dashboard/admin",
   ADMIN: "/dashboard/admin",
   DOCTOR: "/dashboard/doctor",
   NURSE: "/dashboard/nurse",

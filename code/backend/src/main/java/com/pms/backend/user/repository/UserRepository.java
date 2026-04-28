@@ -1,9 +1,11 @@
 package com.pms.backend.user.repository;
 
-import com.pms.backend.user.entity.User;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.Optional;
+
+import com.pms.backend.user.entity.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -22,4 +24,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
     // Used in signup to check if email is already taken.
     boolean existsByMobileNumber(String mobileNumber);
+
+    long countByRole(com.pms.backend.role.entity.Role role);
 }
