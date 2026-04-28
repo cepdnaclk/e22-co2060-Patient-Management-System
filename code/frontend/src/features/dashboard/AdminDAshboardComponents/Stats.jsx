@@ -1,13 +1,34 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { adminService } from "../../../services/adminService";
 
 const Stats = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("month");
+  const [statsData, setStatsData] = useState({
+    totalUsers: 0,
+    activeDoctors: 0,
+    activeNurses: 0,
+    totalAppointments: 0,
+  });
+  const [roleCounts, setRoleCounts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([adminService.fetchStats(), adminService.fetchRoleCounts()])
+      .then(([stats, roles]) => {
+        setStatsData(stats);
+        setRoleCounts(roles);
+      })
+      .catch(() => setError("Failed to load statistics"))
+      .finally(() => setLoading(false));
+  }, []);
 
   const stats = [
-    { id: 1, label: "Total Users", value: 542, change: "+12%", icon: "👥" },
-    { id: 2, label: "Active Doctors", value: 42, change: "+5%", icon: "👨‍⚕️" },
-    { id: 3, label: "Active Nurses", value: 28, change: "+3%", icon: "👩‍⚕️" },
-    { id: 4, label: "Total Appointments", value: 312, change: "+18%", icon: "📅" },
+    { id: 1, label: "Total Users", value: statsData.totalUsers, change: "+12%", icon: "👥" },
+    { id: 2, label: "Active Doctors", value: statsData.activeDoctors, change: "+5%", icon: "👨‍⚕️" },
+    { id: 3, label: "Active Nurses", value: statsData.activeNurses, change: "+3%", icon: "👩‍⚕️" },
+    { id: 4, label: "Total Appointments", value: statsData.totalAppointments, change: "+18%", icon: "📅" },
   ];
 
   const doctorsBySpecialization = [
@@ -35,6 +56,10 @@ const Stats = () => {
         <p className="text-sm text-gray-600">Comprehensive overview of hospital management metrics</p>
       </div>
 
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">{error}</div>
+      )}
+
       {/* Key Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map((s) => (
@@ -51,6 +76,8 @@ const Stats = () => {
           </div>
         ))}
       </div>
+
+      {loading && <div className="mb-6">Loading statistics...</div>}
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -96,6 +123,19 @@ const Stats = () => {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Role Summary */}
+      <div className="bg-white p-6 rounded-lg shadow-md mt-6">
+        <h2 className="text-lg font-semibold mb-4">User Role Summary</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {roleCounts.map((item) => (
+            <div key={item.role} className="border border-gray-200 rounded-md p-4">
+              <div className="text-sm text-gray-500 mb-1">{item.role}</div>
+              <div className="text-2xl font-semibold text-gray-800">{item.count}</div>
+            </div>
+          ))}
         </div>
       </div>
 

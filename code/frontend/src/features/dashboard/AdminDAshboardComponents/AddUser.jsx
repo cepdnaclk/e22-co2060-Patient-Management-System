@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { adminService } from "../../../services/adminService";
 
 const AddStaff = () => {
   const [role, setRole] = useState(""); // "" = not selected yet
@@ -8,6 +9,7 @@ const AddStaff = () => {
     lastName: "",
     email: "",
     phone: "",
+    password: "",
     // Doctor-specific
     specialization: "",
     licenseNumber: "",
@@ -20,6 +22,8 @@ const AddStaff = () => {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const handleRoleChange = (e) => {
     setRole(e.target.value);
@@ -29,6 +33,7 @@ const AddStaff = () => {
       lastName: "",
       email: "",
       phone: "",
+      password: "",
       specialization: "",
       licenseNumber: "",
       experience: "",
@@ -47,37 +52,45 @@ const AddStaff = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setError("");
 
-    // You can add validation here if needed
-
-    const submissionData = {
-      role,
-      ...formData,
+    const payload = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      password: formData.password,
+      mobileNumber: formData.phone,
+      role: role.toUpperCase(),
     };
 
-    console.log(`${role} added:`, submissionData);
-
-    setSubmitted(true);
-
-    // Reset form after 2 seconds
-    setTimeout(() => {
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        specialization: "",
-        licenseNumber: "",
-        experience: "",
-        availability: "",
-        certification: "",
-        department: "",
-        shift: "",
-      });
-      setSubmitted(false);
-      // Optional: keep role selected or reset it
-      // setRole("");
-    }, 2000);
+    setIsSaving(true);
+    adminService
+      .createUser(payload)
+      .then(() => {
+        setSubmitted(true);
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          password: "",
+          specialization: "",
+          licenseNumber: "",
+          experience: "",
+          availability: "",
+          certification: "",
+          department: "",
+          shift: "",
+        });
+        setTimeout(() => {
+          setSubmitted(false);
+        }, 2000);
+      })
+      .catch((err) => {
+        const msg = err?.response?.data?.message || "Failed to add user";
+        setError(msg);
+      })
+      .finally(() => setIsSaving(false));
   };
 
   const isDoctor = role === "doctor";
@@ -96,6 +109,11 @@ const AddStaff = () => {
         {submitted && (
           <div className="mb-6 p-4 bg-green-100 text-green-700 rounded-md text-center font-medium">
             ✓ {role === "doctor" ? "Doctor" : "Nurse"} added successfully!
+          </div>
+        )}
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-md text-center font-medium">
+            {error}
           </div>
         )}
 
@@ -178,6 +196,19 @@ const AddStaff = () => {
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="name@example.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    minLength={8}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="At least 8 characters"
                   />
                 </div>
                 <div>
@@ -372,9 +403,10 @@ const AddStaff = () => {
                 <div className="flex gap-4 pt-6">
                   <button
                     type="submit"
-                    className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium"
+                    disabled={isSaving}
+                    className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium disabled:opacity-60"
                   >
-                    Add {isDoctor ? "Doctor" : "Nurse"}
+                    {isSaving ? "Saving..." : `Add ${isDoctor ? "Doctor" : "Nurse"}`}
                   </button>
                   <button
                     type="reset"

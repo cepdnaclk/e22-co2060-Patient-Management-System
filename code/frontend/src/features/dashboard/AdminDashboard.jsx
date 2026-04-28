@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import AddNurse from "./AdminDashboardComponents/AddUser";
 import Stats from "./AdminDashboardComponents/Stats";           
 import Dashboard from "./AdminDashboardComponents/Dashboard";  
+import UsersList from "./AdminDashboardComponents/UsersList";
 
 const AdminDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -159,7 +160,28 @@ const AdminDashboard = () => {
                       href="javascript:void(0)"
                       onClick={(e) => {
                         e.preventDefault();
-                        setSection("patients");
+                        setSection("users");
+                      }}
+                      className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        className="w-[18px] h-[18px] mr-3"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                      </svg>
+                      <span>User List</span>
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="javascript:void(0)"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setSection("stats");
                       }}
                       className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
                     >
@@ -333,6 +355,7 @@ const AdminDashboard = () => {
             {/* {section === "addDoctor" && <AddDoctor />}  */}
             {section === "addNurse" && <AddNurse />}
             {section === "stats" && <Stats />}  
+            {section === "users" && <UsersList />}
          
 
             {/* Custom menu sections */}
