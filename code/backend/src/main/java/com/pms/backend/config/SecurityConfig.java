@@ -85,7 +85,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",      // Vite dev server
                 "http://localhost:3000",      // Create React App (if used)
-                "https://your-app.vercel.app" // UPDATE: Replace with your actual Vercel URL after deployment
+                "https://your-vercel-url.vercel.app" // UPDATE: Replace with your actual Vercel deployment URL
         ));
         config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

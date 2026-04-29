@@ -4,7 +4,7 @@ import Pharmacy from "./DoctorDashboardComponents/Pharmacy";
 import ReportAndAnalytics from "./DoctorDashboardComponents/ReportAndAnlytics";
 import Profile from "./DoctorDashboardComponents/Profile";
 import Records from "./DoctorDashboardComponents/Records";
-import LabReports from "./DoctorDashboardComponents/labreport";
+import LabReports from "./DoctorDashboardComponents/Labreport";
 import { useAuth } from "../auth/AuthContext";
 import { doctorDashboardService } from "../../services/doctorDashboardService";
 
