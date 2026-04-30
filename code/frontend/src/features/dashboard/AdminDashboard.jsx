@@ -5,6 +5,8 @@ import AddNurse from "./AdminDAshboardComponents/AddUser";
 import Stats from "./AdminDAshboardComponents/Stats";
 import Dashboard from "./AdminDAshboardComponents/Dashboard";
 import UsersList from "./AdminDAshboardComponents/UsersList";
+import PatientsManager from "./AdminDAshboardComponents/PatientsManager";
+import AllTables from "./AdminDAshboardComponents/AllTables";
 
 const AdminDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -217,6 +219,48 @@ const AdminDashboard = () => {
                       href="javascript:void(0)"
                       onClick={(e) => {
                         e.preventDefault();
+                        handleSectionChange("patients");
+                      }}
+                      className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        className="w-[18px] h-[18px] mr-3"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                      </svg>
+                      <span>Patients</span>
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="javascript:void(0)"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleSectionChange("allTables");
+                      }}
+                      className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        className="w-[18px] h-[18px] mr-3"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M4 5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5zm0 10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4zm10-10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5zm0 10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4z" />
+                      </svg>
+                      <span>All Tables</span>
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="javascript:void(0)"
+                      onClick={(e) => {
+                        e.preventDefault();
                         handleSectionChange("stats");
                       }}
                       className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
@@ -354,6 +398,8 @@ const AdminDashboard = () => {
             {section === "addNurse" && <AddNurse />}
             {section === "stats" && <Stats />}  
             {section === "users" && <UsersList />}
+            {section === "patients" && <PatientsManager />}
+            {section === "allTables" && <AllTables />}
          
 
             {/* Custom menu sections */}

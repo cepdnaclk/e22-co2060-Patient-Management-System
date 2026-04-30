@@ -17,42 +17,42 @@ public class PatientController {
     private final PatientService patientService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('PATIENT')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('PATIENT')")
     public ResponseEntity<PatientDto> createPatient(@RequestParam Long userId, @RequestBody PatientDto patientDto) {
         PatientDto createdPatient = patientService.createPatient(userId, patientDto);
         return new ResponseEntity<>(createdPatient, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT')")
     public ResponseEntity<PatientDto> getPatientById(@PathVariable Long id) {
         PatientDto patient = patientService.getPatientById(id);
         return ResponseEntity.ok(patient);
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT')")
     public ResponseEntity<PatientDto> getPatientByUserId(@PathVariable Long userId) {
         PatientDto patient = patientService.getPatientByUserId(userId);
         return ResponseEntity.ok(patient);
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR')")
     public ResponseEntity<List<PatientDto>> getAllPatients() {
         List<PatientDto> patients = patientService.getAllPatients();
         return ResponseEntity.ok(patients);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('PATIENT')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('PATIENT')")
     public ResponseEntity<PatientDto> updatePatient(@PathVariable Long id, @RequestBody PatientDto patientDto) {
         PatientDto updatedPatient = patientService.updatePatient(id, patientDto);
         return ResponseEntity.ok(updatedPatient);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
         patientService.deletePatient(id);
         return ResponseEntity.noContent().build();

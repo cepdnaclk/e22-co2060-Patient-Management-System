@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,30 +50,39 @@ public class DoctorService {
     public DoctorDto getDoctorById(Long id) {
         Doctor doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new AppException("Doctor not found", HttpStatus.NOT_FOUND));
+        if (doctor.getUser() == null) {
+            throw new AppException("Doctor profile has no linked user", HttpStatus.CONFLICT);
+        }
         return convertToDto(doctor);
     }
 
     public DoctorDto getDoctorByUserId(Long userId) {
         Doctor doctor = doctorRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException("Doctor profile not found", HttpStatus.NOT_FOUND));
+        if (doctor.getUser() == null) {
+            throw new AppException("Doctor profile has no linked user", HttpStatus.CONFLICT);
+        }
         return convertToDto(doctor);
     }
 
     public List<DoctorDto> getAllDoctors() {
         return doctorRepository.findAll().stream()
                 .map(this::convertToDto)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
     public List<DoctorDto> getDoctorsBySpecialization(String specialization) {
         return doctorRepository.findBySpecialization(specialization).stream()
                 .map(this::convertToDto)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
     public List<DoctorDto> getAvailableDoctors() {
         return doctorRepository.findByIsAvailableTrue().stream()
                 .map(this::convertToDto)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
@@ -110,13 +120,17 @@ public class DoctorService {
     }
 
     private DoctorDto convertToDto(Doctor doctor) {
+        User user = doctor.getUser();
+        if (user == null) {
+            return null;
+        }
         return DoctorDto.builder()
                 .id(doctor.getId())
-                .userId(doctor.getUser().getId())
-                .firstName(doctor.getUser().getFirstName())
-                .lastName(doctor.getUser().getLastName())
-                .email(doctor.getUser().getEmail())
-                .mobileNumber(doctor.getUser().getMobileNumber())
+                .userId(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .mobileNumber(user.getMobileNumber())
                 .specialization(doctor.getSpecialization())
                 .licenseNumber(doctor.getLicenseNumber())
                 .hospital(doctor.getHospital())

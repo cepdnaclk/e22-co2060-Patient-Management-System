@@ -17,63 +17,63 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
 
     @PostMapping
-    @PreAuthorize("hasRole('PATIENT') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('PATIENT') or hasRole('ADMIN')")
     public ResponseEntity<AppointmentDto> createAppointment(@RequestBody AppointmentDto appointmentDto) {
         AppointmentDto createdAppointment = appointmentService.createAppointment(appointmentDto);
         return new ResponseEntity<>(createdAppointment, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT')")
     public ResponseEntity<AppointmentDto> getAppointmentById(@PathVariable Long id) {
         AppointmentDto appointment = appointmentService.getAppointmentById(id);
         return ResponseEntity.ok(appointment);
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<List<AppointmentDto>> getAllAppointments() {
         List<AppointmentDto> appointments = appointmentService.getAllAppointments();
         return ResponseEntity.ok(appointments);
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('PATIENT') or hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('PATIENT') or hasRole('DOCTOR')")
     public ResponseEntity<List<AppointmentDto>> getAppointmentsByPatientId(@PathVariable Long patientId) {
         List<AppointmentDto> appointments = appointmentService.getAppointmentsByPatientId(patientId);
         return ResponseEntity.ok(appointments);
     }
 
     @GetMapping("/doctor/{doctorId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR')")
     public ResponseEntity<List<AppointmentDto>> getAppointmentsByDoctorId(@PathVariable Long doctorId) {
         List<AppointmentDto> appointments = appointmentService.getAppointmentsByDoctorId(doctorId);
         return ResponseEntity.ok(appointments);
     }
 
     @GetMapping("/status/{status}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<List<AppointmentDto>> getAppointmentsByStatus(@PathVariable String status) {
         List<AppointmentDto> appointments = appointmentService.getAppointmentsByStatus(status);
         return ResponseEntity.ok(appointments);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR')")
     public ResponseEntity<AppointmentDto> updateAppointment(@PathVariable Long id, @RequestBody AppointmentDto appointmentDto) {
         AppointmentDto updatedAppointment = appointmentService.updateAppointment(id, appointmentDto);
         return ResponseEntity.ok(updatedAppointment);
     }
 
     @PutMapping("/{id}/cancel")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('PATIENT')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('PATIENT')")
     public ResponseEntity<Void> cancelAppointment(@PathVariable Long id) {
         appointmentService.cancelAppointment(id);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<Void> deleteAppointment(@PathVariable Long id) {
         appointmentService.deleteAppointment(id);
         return ResponseEntity.noContent().build();
