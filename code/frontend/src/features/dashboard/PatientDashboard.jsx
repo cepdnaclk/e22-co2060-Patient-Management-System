@@ -261,7 +261,7 @@ const PatientDashboard = () => {
       )}
       <div className="flex items-start">
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-lg p-6 transition-transform duration-300 lg:static lg:translate-x-0 lg:w-[250px] ${
+          className={`fixed inset-y-0 left-0 z-40 w-full min-h-screen bg-white shadow-lg p-6 transition-transform duration-300 lg:static lg:translate-x-0 lg:w-[250px] lg:min-h-screen ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >

@@ -89,7 +89,7 @@ const UsersList = () => {
         {loading ? (
           <div className="p-6">Loading users...</div>
         ) : (
-          <table className="w-full text-left">
+          <table className="w-full min-w-[720px] text-left">
             <thead>
               <tr className="border-b">
                 <th className="p-4 text-sm font-semibold text-gray-600">Name</th>

@@ -78,11 +78,11 @@ const AdminDashboard = () => {
               className="fixed inset-0 bg-black/40 z-30 lg:hidden"
             />
           )}
-          <nav
-            className={`fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-lg overflow-auto transition-transform duration-300 lg:static lg:translate-x-0 lg:w-64 ${
-              isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
-          >
+         <nav
+  className={`fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-lg overflow-y-auto transition-transform duration-300 lg:static lg:translate-x-0 lg:w-64 min-h-screen ${
+    isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+  }`}
+>
             <div className="py-6 px-6">
               <div className="flex items-center justify-between pb-4 lg:hidden">
                 <span className="text-sm font-semibold text-slate-800">Admin Menu</span>
@@ -288,20 +288,7 @@ const AdminDashboard = () => {
                   )}
                 </ul>
 
-                <div className="mt-8">
-                  <div className="bg-[#00b074] p-4 rounded-md shadow-md max-w-49">
-                    <p className="text-white text-sm leading-relaxed">
-                      Organize your menus using the action button below!
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setIsModalOpen(true)}
-                      className="py-2 px-4 bg-white hover:bg-gray-100 text-slate-800 text-sm border-0 outline-0 rounded-md cursor-pointer mt-4"
-                    >
-                      Add Menu
-                    </button>
-                  </div>
-                </div>
+               
               </div>
           </nav>
 
@@ -359,33 +346,7 @@ const AdminDashboard = () => {
           </button>
 
           <section className="main-content w-full px-4 sm:px-6 lg:px-8">
-            <header className="z-50 bg-[#f7f6f9] sticky top-0 pt-8">
-              <div className="flex flex-wrap items-center w-full relative tracking-wide">
-                <div className="flex items-center gap-y-6 max-sm:flex-col z-50 w-full pb-2">
-                  <div className="flex items-center gap-4 w-full px-6 bg-white shadow-sm min-h-[48px] sm:mr-20 rounded-md outline-0 border-0">
-                    <input
-                      type="text"
-                      placeholder="Search something..."
-                      className="w-full text-sm bg-transparent rounded-sm outline-0"
-                    />
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 192.904 192.904"
-                      className="w-4 cursor-pointer fill-gray-400 ml-auto"
-                    >
-                      <path d="m190.707 180.101-47.078-47.077c11.702-14.072 18.752-32.142 18.752-51.831C162.381 36.423 125.959 0 81.191 0 36.422 0 0 36.423 0 81.193c0 44.767 36.422 81.187 81.191 81.187 19.688 0 37.759-7.049 51.831-18.751l47.079 47.078a7.474 7.474 0 0 0 5.303 2.197 7.498 7.498 0 0 0 5.303-12.803zM15 81.193C15 44.694 44.693 15 81.191 15c36.497 0 66.189 29.694 66.189 66.193 0 36.496-29.692 66.187-66.189 66.187C44.693 147.38 15 117.689 15 81.193z" />
-                    </svg>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-6 ml-auto">
-                    <div className="flex items-center space-x-6">
-                      {/* Notification icons + profile dropdown*/}
-                      {/* You can copy-paste the exact block from DoctorDashboard header here */}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </header>
+            
 
             {/* Conditional rendering */}
             {section === "dashboard" && <Dashboard />}

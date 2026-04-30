@@ -136,10 +136,11 @@ const DoctorDashboard = () => {
             />
           )}
           <nav
-            className={`fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-lg overflow-auto transition-transform duration-300 lg:static lg:translate-x-0 lg:w-64 ${
-              isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
-          >
+          className={`fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-lg overflow-auto transition-transform duration-300 
+            lg:static lg:translate-x-0 lg:w-64 lg:min-h-screen ${ // Added lg:min-h-screen
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
             <div className="py-6 px-6">
               <div className="flex items-center justify-between pb-4 lg:hidden">
                 <span className="text-sm font-semibold text-slate-800">Doctor Menu</span>
