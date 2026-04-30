@@ -112,7 +112,7 @@ Look for message:
 Started BackendApplication in X.XXX seconds
 ```
 
-Access API at: `http://localhost:8082`
+Access API at: `http://localhost:8080`
 
 ## 📡 API Endpoints Overview
 
@@ -187,7 +187,7 @@ DELETE /api/medical-records/{id}                 - Delete record
 
 1. **Login** to get JWT token:
 ```bash
-POST http://localhost:8082/api/auth/login
+POST http://localhost:8080/api/auth/login
 {
   "email": "patient@example.com",
   "password": "password"
@@ -196,7 +196,7 @@ POST http://localhost:8082/api/auth/login
 
 2. **Create Patient Profile**:
 ```bash
-POST http://localhost:8082/api/patients?userId=1
+POST http://localhost:8080/api/patients?userId=1
 Authorization: Bearer YOUR_JWT_TOKEN
 {
   "dateOfBirth": "1990-01-15",
@@ -209,7 +209,7 @@ Authorization: Bearer YOUR_JWT_TOKEN
 
 3. **Get Patient**:
 ```bash
-GET http://localhost:8082/api/patients/1
+GET http://localhost:8080/api/patients/1
 Authorization: Bearer YOUR_JWT_TOKEN
 ```
 
@@ -262,7 +262,7 @@ All 23 files have been created and tested. The project compiles successfully wit
 1. Set the JWT_SECRET environment variable
 2. Create the PostgreSQL database
 3. Run `./mvnw.cmd spring-boot:run`
-4. Access the API at `http://localhost:8082`
+4. Access the API at `http://localhost:8080`
 
 For detailed setup instructions, see `PROJECT_STRUCTURE_AND_SETUP.md`
 

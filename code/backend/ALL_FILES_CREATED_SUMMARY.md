@@ -5,6 +5,7 @@
 ### ✅ Successfully Created 23 New Files
 
 #### Patient Module (5 files)
+
 - ✅ `patient/entity/Patient.java` - JPA entity for patient data
 - ✅ `patient/repository/PatientRepository.java` - Database access layer
 - ✅ `patient/dto/PatientDto.java` - Data transfer object
@@ -12,6 +13,7 @@
 - ✅ `patient/controller/PatientController.java` - REST API endpoints
 
 #### Doctor Module (5 files)
+
 - ✅ `doctor/entity/Doctor.java` - JPA entity for doctor data
 - ✅ `doctor/repository/DoctorRepository.java` - Database access layer
 - ✅ `doctor/dto/DoctorDto.java` - Data transfer object
@@ -19,6 +21,7 @@
 - ✅ `doctor/controller/DoctorController.java` - REST API endpoints
 
 #### Appointment Module (5 files)
+
 - ✅ `appointment/entity/Appointment.java` - JPA entity for appointments
 - ✅ `appointment/repository/AppointmentRepository.java` - Database access layer
 - ✅ `appointment/dto/AppointmentDto.java` - Data transfer object
@@ -26,6 +29,7 @@
 - ✅ `appointment/controller/AppointmentController.java` - REST API endpoints
 
 #### Medical Records Module (5 files)
+
 - ✅ `medicalrecord/entity/MedicalRecord.java` - JPA entity for medical records
 - ✅ `medicalrecord/repository/MedicalRecordRepository.java` - Database access layer
 - ✅ `medicalrecord/dto/MedicalRecordDto.java` - Data transfer object
@@ -33,9 +37,11 @@
 - ✅ `medicalrecord/controller/MedicalRecordController.java` - REST API endpoints
 
 #### User Module (1 file)
+
 - ✅ `user/service/UserService.java` - User management service
 
 #### Already Existed (No Update Needed)
+
 - ✅ `role/entity/Role.java` - Role entity
 - ✅ `user/entity/User.java` - User entity
 - ✅ `user/repository/UserRepository.java` - User repository
@@ -119,12 +125,14 @@ backend/
 ## 🔑 Key Features of All Created Files
 
 ### Patient Module
+
 - Complete patient profile management
 - Medical history, allergies, medications tracking
 - Emergency contact information
 - User-to-Patient one-to-one relationship
 
 ### Doctor Module
+
 - Doctor profile with specialization
 - License number and hospital information
 - Availability status management
@@ -132,12 +140,14 @@ backend/
 - Search doctors by specialization
 
 ### Appointment Module
+
 - Schedule appointments between patients and doctors
 - Status management (SCHEDULED, COMPLETED, CANCELLED, NO_SHOW)
 - Duration tracking
 - Notes and reason for visit
 
 ### Medical Records Module
+
 - Comprehensive patient medical records
 - Multiple record types (DIAGNOSIS, PRESCRIPTION, LAB_RESULT, IMAGING)
 - Doctor attribution
@@ -145,12 +155,14 @@ backend/
 - Treatment and diagnosis history
 
 ### User Management
+
 - Full user profile management
 - Role-based access control (ADMIN, DOCTOR, PATIENT)
 - User activation/deactivation
 - Timestamp tracking (createdAt, updatedAt)
 
 ### Security & Authentication
+
 - JWT-based authentication
 - Spring Security integration
 - Global exception handling
@@ -169,10 +181,12 @@ backend/
 ## 📡 API Endpoints Summary
 
 ### Authentication
+
 - `POST /api/auth/signup` - Register new user
 - `POST /api/auth/login` - Login user
 
 ### Patients
+
 - `POST /api/patients` - Create patient profile
 - `GET /api/patients` - Get all patients
 - `GET /api/patients/{id}` - Get patient by ID
@@ -181,6 +195,7 @@ backend/
 - `DELETE /api/patients/{id}` - Delete patient
 
 ### Doctors
+
 - `POST /api/doctors` - Create doctor profile
 - `GET /api/doctors` - Get all doctors
 - `GET /api/doctors/{id}` - Get doctor by ID
@@ -190,6 +205,7 @@ backend/
 - `DELETE /api/doctors/{id}` - Delete doctor
 
 ### Appointments
+
 - `POST /api/appointments` - Create appointment
 - `GET /api/appointments` - Get all appointments
 - `GET /api/appointments/{id}` - Get appointment by ID
@@ -201,6 +217,7 @@ backend/
 - `DELETE /api/appointments/{id}` - Delete appointment
 
 ### Medical Records
+
 - `POST /api/medical-records` - Create medical record
 - `GET /api/medical-records` - Get all records
 - `GET /api/medical-records/{id}` - Get record by ID
@@ -213,16 +230,19 @@ backend/
 ## ✅ Next Steps
 
 1. **Set Environment Variable**
+
    ```powershell
    $env:JWT_SECRET = "your-super-secret-key-make-it-long-and-random-123!@#"
    ```
 
 2. **Create Database**
+
    ```sql
    CREATE DATABASE pms;
    ```
 
 3. **Run the Application**
+
    ```powershell
    cd D:\Git_document\e22-co2060-Patient-Management-System\code\backend
    ./mvnw.cmd spring-boot:run
@@ -230,11 +250,12 @@ backend/
 
 4. **Verify Application Started**
    - Check logs for: `Started BackendApplication`
-   - Access API at: `http://localhost:8082`
+   - Access API at: `http://localhost:8080`
 
 ## 📦 Database Schema
 
 The application uses JPA/Hibernate to automatically create the following tables:
+
 - `users` - User accounts
 - `roles` - User roles
 - `user_roles` - User-role mapping
@@ -244,6 +265,7 @@ The application uses JPA/Hibernate to automatically create the following tables:
 - `medical_records` - Medical records
 
 All tables include audit columns:
+
 - `created_at` - Record creation timestamp
 - `updated_at` - Record last update timestamp
 
@@ -252,4 +274,3 @@ All tables include audit columns:
 **Status**: ✅ All Files Created Successfully
 **Last Updated**: March 3, 2026
 **Ready to Build & Run**: YES
-

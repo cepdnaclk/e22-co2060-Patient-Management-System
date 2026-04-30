@@ -3,6 +3,7 @@
 ## Quick Start
 
 ### Prerequisites
+
 - GitHub account
 - Vercel account (free: https://vercel.com/signup)
 - Your backend running somewhere (local/Heroku/etc.)
@@ -12,6 +13,7 @@
 ## **Deployment Process**
 
 ### **Step 1: Push Code to GitHub**
+
 ```bash
 cd c:\Users\erand\Downloads\Programs\e22-co2060-Patient-Management-System
 git add .
@@ -30,6 +32,7 @@ git push origin main
 ### **Step 3: Configure Deployment Settings**
 
 **Important: Set the correct root directory!**
+
 - **Root Directory:** `code/frontend`
 - **Framework Preset:** Vite
 - **Build Command:** `npm run build` (should auto-detect)
@@ -40,16 +43,19 @@ git push origin main
 In Vercel Dashboard → Your Project → Settings → Environment Variables:
 
 **Add this variable:**
+
 ```
-VITE_API_URL = https://your-backend-url.com:8082
+VITE_API_URL = https://your-backend-url.com:8080
 ```
 
 Replace `https://your-backend-url.com` with your actual backend URL:
-- **Local testing:** `http://localhost:8082`
+
+- **Local testing:** `http://localhost:8080`
 - **Heroku backend:** `https://your-heroku-app.herokuapp.com`
 - **Your server:** Your actual backend domain
 
 ### **Step 5: Deploy**
+
 1. Click **"Deploy"**
 2. Wait for build to complete (usually 1-2 minutes)
 3. Get your Vercel URL (e.g., `https://your-app.vercel.app`)
@@ -59,15 +65,18 @@ Replace `https://your-backend-url.com` with your actual backend URL:
 ## **Troubleshooting**
 
 ### **API calls failing (CORS error)**
+
 - Ensure `VITE_API_URL` environment variable is set correctly
 - Backend should have CORS enabled for your Vercel URL
 
 ### **Build fails**
+
 - Check that `code/frontend` is the root directory
 - Ensure `package.json` exists in that folder
 - Run `npm install` and `npm run build` locally to test
 
 ### **Seeing old site after deploy**
+
 - Clear browser cache (Ctrl+Shift+Delete)
 - Wait 2-3 minutes for Vercel CDN to update
 
@@ -93,5 +102,6 @@ Update `code/backend/src/main/java/com/pms/backend/config/...` (CORS config):
 ---
 
 ## **Need Help?**
+
 - Vercel Docs: https://vercel.com/docs
 - React + Vite Guide: https://vitejs.dev/guide/

@@ -77,6 +77,7 @@ backend/
 This is a **Spring Boot REST API** application following a **layered architecture**:
 
 ### Layer Structure:
+
 1. **Controller Layer** - Handles HTTP requests/responses
 2. **Service Layer** - Business logic and operations
 3. **Repository Layer** - Data access using Spring Data JPA
@@ -85,17 +86,17 @@ This is a **Spring Boot REST API** application following a **layered architectur
 
 ### Key Modules:
 
-| Module | Purpose |
-|--------|---------|
-| **auth** | JWT-based authentication, login, signup |
-| **user** | User management and data |
-| **patient** | Patient information and management |
-| **doctor** | Doctor information and management |
-| **appointment** | Appointment scheduling and management |
-| **medicalrecord** | Patient medical records |
-| **role** | User roles (ADMIN, DOCTOR, PATIENT) |
-| **common** | Shared exceptions and utilities |
-| **config** | Spring Security and application configuration |
+| Module            | Purpose                                       |
+| ----------------- | --------------------------------------------- |
+| **auth**          | JWT-based authentication, login, signup       |
+| **user**          | User management and data                      |
+| **patient**       | Patient information and management            |
+| **doctor**        | Doctor information and management             |
+| **appointment**   | Appointment scheduling and management         |
+| **medicalrecord** | Patient medical records                       |
+| **role**          | User roles (ADMIN, DOCTOR, PATIENT)           |
+| **common**        | Shared exceptions and utilities               |
+| **config**        | Spring Security and application configuration |
 
 ## ⚙️ Prerequisites
 
@@ -138,21 +139,25 @@ GRANT ALL PRIVILEGES ON DATABASE pms TO postgres;
 Set the JWT secret environment variable:
 
 **Windows (PowerShell):**
+
 ```powershell
 $env:JWT_SECRET = "your-secret-key-here-make-it-long-and-random"
 ```
 
 **Windows (Command Prompt):**
+
 ```cmd
 set JWT_SECRET=your-secret-key-here-make-it-long-and-random
 ```
 
 **Linux/Mac:**
+
 ```bash
 export JWT_SECRET="your-secret-key-here-make-it-long-and-random"
 ```
 
 > **Security Tip:** Use a strong, random secret. Example:
+>
 > ```
 > JWT_SECRET=sXkP9#mL@2qR7$vN!4tB&5xZ*8wY(3)jA=dF-cG+hE^6iO~1uP
 > ```
@@ -178,7 +183,7 @@ app.jwt.secret=${JWT_SECRET}          # From environment variable
 app.jwt.expiration-ms=86400000        # 24 hours in milliseconds
 
 # Server Configuration
-server.port=8082
+server.port=8080
 ```
 
 ## 🚀 How to Run the Application
@@ -186,12 +191,14 @@ server.port=8082
 ### Option 1: Using Maven Wrapper (Recommended - No Maven Installation Required)
 
 **Windows:**
+
 ```powershell
 cd D:\Git_document\e22-co2060-Patient-Management-System\code\backend
 ./mvnw.cmd spring-boot:run
 ```
 
 **Linux/Mac:**
+
 ```bash
 cd path/to/backend
 ./mvnw spring-boot:run
@@ -217,21 +224,25 @@ java -jar target/backend-0.0.1-SNAPSHOT.jar
 ## 📋 Build and Compile
 
 ### Clean Build:
+
 ```bash
 mvn clean
 ```
 
 ### Compile Only (without running):
+
 ```bash
 mvn compile
 ```
 
 ### Run Tests:
+
 ```bash
 mvn test
 ```
 
 ### Full Build with Tests:
+
 ```bash
 mvn clean package
 ```
@@ -245,64 +256,76 @@ Started BackendApplication in X.XXX seconds
 ```
 
 The application will be accessible at:
+
 ```
-http://localhost:8082
+http://localhost:8080
 ```
 
 ## 📡 API Endpoints
 
 ### Authentication:
+
 - `POST /api/auth/signup` - Register new user
 - `POST /api/auth/login` - User login (returns JWT token)
 
 ### Example Request (Login):
+
 ```bash
-curl -X POST http://localhost:8082/api/auth/login \
+curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"user@example.com","password":"password123"}'
 ```
 
 ### Using JWT Token:
+
 ```bash
 curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  http://localhost:8082/api/patients
+  http://localhost:8080/api/patients
 ```
 
 ## 🐛 Troubleshooting
 
 ### Issue: "Connection refused" to PostgreSQL
-**Solution:** 
+
+**Solution:**
+
 - Ensure PostgreSQL is running
 - Check database credentials in `application.properties`
 - Verify PostgreSQL is listening on port 5432
 
 ### Issue: "JWT_SECRET not set"
+
 **Solution:**
+
 - Set the environment variable before running
 - Restart your terminal/IDE after setting the environment variable
 
 ### Issue: "Java version not supported"
+
 **Solution:**
+
 - Project requires Java 25
 - Download and install Java 25 from Oracle
 
 ### Issue: Maven build fails
+
 **Solution:**
+
 ```bash
 mvn clean install -U  # Clear cache and update dependencies
 ```
 
 ## 📚 Key Dependencies
 
-| Dependency | Purpose |
-|------------|---------|
-| Spring Boot 4.0.3 | Framework foundation |
-| Spring Security | Authentication & Authorization |
-| Spring Data JPA | Database ORM |
-| PostgreSQL Driver | Database connectivity |
-| JJWT 0.12.6 | JWT token generation/validation |
-| Lombok | Reduce boilerplate code |
-| Validation Starter | Input validation |
+| Dependency         | Purpose                         |
+| ------------------ | ------------------------------- |
+| Spring Boot 4.0.3  | Framework foundation            |
+| Spring Security    | Authentication & Authorization  |
+| Spring Data JPA    | Database ORM                    |
+| PostgreSQL Driver  | Database connectivity           |
+| JJWT 0.12.6        | JWT token generation/validation |
+| Lombok             | Reduce boilerplate code         |
+| Validation Starter | Input validation                |
 
 ## 🔐 Security Features
 
@@ -314,16 +337,19 @@ mvn clean install -U  # Clear cache and update dependencies
 ## 📝 Development Notes
 
 ### Adding a New Module:
+
 1. Create a new folder under `com.pms.backend`
 2. Follow the pattern: `controller/`, `service/`, `repository/`, `entity/`, `dto/`
 3. Create appropriate classes in each package
 4. Register routes in controller with `@RestController` and `@RequestMapping`
 
 ### Database Changes:
+
 - `spring.jpa.hibernate.ddl-auto=update` automatically syncs schema
 - For production, use `validate` instead
 
 ### Common Annotations Used:
+
 - `@Entity` - JPA entity mapping to database table
 - `@RestController` - REST API endpoint
 - `@Service` - Business logic
@@ -346,4 +372,3 @@ mvn clean install -U  # Clear cache and update dependencies
 **Framework:** Spring Boot 4.0.3
 **Language:** Java 25
 **Database:** PostgreSQL
-
