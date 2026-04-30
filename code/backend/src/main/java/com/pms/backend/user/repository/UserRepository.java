@@ -25,5 +25,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Used in signup to check if email is already taken.
     boolean existsByMobileNumber(String mobileNumber);
 
+    boolean existsByEmailAndIdNot(String email, Long id);
+    boolean existsByMobileNumberAndIdNot(String mobileNumber, Long id);
+
     long countByRole(com.pms.backend.role.entity.Role role);
 }
