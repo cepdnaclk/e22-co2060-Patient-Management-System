@@ -5,6 +5,7 @@ import { patientDashboardService } from "../../services/patientDashboardService"
 const PatientDashboard = () => {
   const { user } = useAuth();
   const [section, setSection] = useState("dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [patient, setPatient] = useState(null);
   const [records, setRecords] = useState([]);
   const [stats, setStats] = useState({
@@ -68,7 +69,7 @@ const PatientDashboard = () => {
   ];
 
   const renderDashboardSection = () => (
-    <div className="p-6 bg-slate-50 min-h-screen">
+    <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-slate-800">Patient Dashboard</h1>
         <p className="text-sm text-gray-600">Overview of your account and health data</p>
@@ -154,7 +155,7 @@ const PatientDashboard = () => {
   );
 
   const renderDetailsSection = () => (
-    <div className="p-6 bg-slate-50 min-h-screen">
+    <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
       <div className="bg-white rounded-xl shadow p-6 [box-shadow:0_4px_12px_-5px_rgba(0,0,0,0.4)]">
         <h1 className="text-2xl font-semibold text-slate-800">My Details</h1>
         <p className="text-sm text-gray-600 mt-1">Patient profile and contact information</p>
@@ -209,7 +210,7 @@ const PatientDashboard = () => {
   );
 
   const renderRecordsSection = () => (
-    <div className="p-6 bg-slate-50 min-h-screen">
+    <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
       <div className="bg-white rounded-xl shadow p-6 [box-shadow:0_4px_12px_-5px_rgba(0,0,0,0.4)]">
         <h1 className="text-2xl font-semibold text-slate-800">Medical Records</h1>
         <p className="text-sm text-gray-600 mt-1">Your recent clinical history and notes</p>
@@ -250,8 +251,20 @@ const PatientDashboard = () => {
 
   return (
     <div className="relative bg-[#f7f6f9] min-h-screen">
+      {isSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-black/40 z-30 lg:hidden"
+        />
+      )}
       <div className="flex items-start">
-        <aside className="w-full max-w-[250px] min-h-screen bg-white shadow-lg p-6">
+        <aside
+          className={`fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-lg p-6 transition-transform duration-300 lg:static lg:translate-x-0 lg:w-[250px] ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
           <h2 className="text-lg font-semibold text-slate-800">Patient Panel</h2>
           <p className="text-xs text-gray-500 mt-1 break-all">{user?.email || ""}</p>
 
@@ -263,7 +276,10 @@ const PatientDashboard = () => {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setSection(item.id)}
+                  onClick={() => {
+                    setSection(item.id);
+                    setIsSidebarOpen(false);
+                  }}
                   className={`w-full text-left rounded-md px-3 py-2.5 text-sm font-medium transition-all ${
                     active
                       ? "bg-[#F0F8FF] text-green-800"
@@ -278,6 +294,30 @@ const PatientDashboard = () => {
         </aside>
 
         <section className="w-full">
+          <div className="lg:hidden sticky top-0 z-20 bg-white border-b px-4 py-3 flex items-center gap-3">
+            <button
+              type="button"
+              aria-label="Open sidebar"
+              onClick={() => setIsSidebarOpen(true)}
+              className="h-9 w-9 rounded-full border border-gray-200 flex items-center justify-center text-slate-700"
+            >
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-800">Patient Panel</p>
+              <p className="text-xs text-gray-500 truncate">{user?.email || ""}</p>
+            </div>
+          </div>
           {section === "dashboard" && renderDashboardSection()}
           {section === "details" && renderDetailsSection()}
           {section === "records" && renderRecordsSection()}

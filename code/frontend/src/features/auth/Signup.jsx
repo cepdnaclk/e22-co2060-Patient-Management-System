@@ -97,7 +97,7 @@ export default function SignupPage() {
       </div>
 
       {/* Form Card */}
-      <div className="mx-4 mb-8 -mt-16">
+      <div className="mx-4 sm:mx-6 mb-8 -mt-16">
         <form
           onSubmit={handleSubmit}
           className="max-w-4xl max-md:max-w-xl mx-auto bg-white

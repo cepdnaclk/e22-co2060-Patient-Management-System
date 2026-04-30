@@ -70,7 +70,7 @@ const UsersList = () => {
   };
 
   return (
-    <div className="p-6 bg-slate-50 min-h-screen">
+    <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">User Management</h1>
         <p className="text-sm text-gray-600">View, update roles, or delete users</p>

@@ -20,7 +20,7 @@ const Aboutus = () => {
 	];
 
 	return (
-		<main className="px-4 sm:px-8 lg:px-12 py-12">
+		<main className="px-4 sm:px-8 lg:px-12 py-10 sm:py-12">
 			<section className="max-w-5xl mx-auto">
 				<h1 className="text-3xl md:text-4xl font-semibold text-slate-800 text-center">
 					About Our Patient Management System

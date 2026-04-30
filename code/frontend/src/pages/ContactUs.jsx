@@ -21,7 +21,7 @@ const ContactUs = () => {
 	};
 
 	return (
-		<main className="px-4 sm:px-8 lg:px-12 py-12">
+		<main className="px-4 sm:px-8 lg:px-12 py-10 sm:py-12">
 			<section className="max-w-6xl mx-auto grid gap-8 lg:grid-cols-2">
 				<article className="rounded-lg border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
 					<h1 className="text-3xl md:text-4xl font-semibold text-slate-800">
