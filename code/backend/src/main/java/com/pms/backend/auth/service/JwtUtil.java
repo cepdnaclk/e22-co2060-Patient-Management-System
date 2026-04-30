@@ -16,7 +16,7 @@ import java.util.Date;
 // Other classes can inject it with @Autowired or @RequiredArgsConstructor.
 public class JwtUtil {
 
-    @Value("${JWT_SECRET}")
+    @Value("${app.jwt.secret}")
     // @Value reads from application.properties: app.jwt.secret
     private String secret;
 
