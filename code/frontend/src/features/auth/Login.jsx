@@ -52,11 +52,11 @@ export default function LoginPage() {
 
   return (
     <div className="bg-linear-to-r from-blue-800 to-blue-400 min-h-screen">
-      <div className="min-h-screen flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-8">
         <div className="grid md:grid-cols-2 items-center gap-10 max-w-6xl w-full">
           {/* Left Side — Branding */}
           <div className="max-w-lg max-md:mx-auto max-md:text-center">
-            <h1 className="text-4xl font-semibold leading-tight text-white">
+            <h1 className="text-3xl sm:text-4xl font-semibold leading-tight text-white">
               Secure Your Health
             </h1>
             <p className="text-sm mt-6 text-white">
@@ -73,7 +73,7 @@ export default function LoginPage() {
           {/* Right Side — Form */}
           <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-xl px-8 py-12 max-w-md md:ml-auto
+            className="bg-white rounded-xl px-6 py-10 sm:px-8 sm:py-12 max-w-md md:ml-auto
                                    max-md:mx-auto w-full shadow-2xl"
           >
             <h2 className="text-slate-900 text-3xl font-bold mb-8">Sign in</h2>

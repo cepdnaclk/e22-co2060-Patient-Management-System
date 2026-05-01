@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pms.backend.admin.dto.AdminCreateUserRequest;
 import com.pms.backend.admin.dto.AdminStatsDto;
 import com.pms.backend.admin.dto.AdminUpdateRoleRequest;
+import com.pms.backend.admin.dto.AdminUpdateUserRequest;
 import com.pms.backend.admin.dto.RoleCountDto;
 import com.pms.backend.admin.service.AdminService;
 import com.pms.backend.user.dto.UserDto;
@@ -57,6 +58,14 @@ public class AdminController {
             @Valid @RequestBody AdminUpdateRoleRequest req
     ) {
         return ResponseEntity.ok(adminService.updateUserRole(id, req));
+    }
+
+    @PatchMapping("/users/{id}")
+    public ResponseEntity<UserDto> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody AdminUpdateUserRequest req
+    ) {
+        return ResponseEntity.ok(adminService.updateUser(id, req));
     }
 
     @DeleteMapping("/users/{id}")

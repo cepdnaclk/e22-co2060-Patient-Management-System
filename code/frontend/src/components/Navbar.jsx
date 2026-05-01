@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext.jsx";
 
@@ -6,28 +6,76 @@ const Navbar = () => {
   //  Destructure the auth states and logout function
   const { isLoggedIn, user, logout, isDoctor, isPatient } = useAuth();
   const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
 
   // Handle the logout button click
   const handleLogout = () => {
     logout(); // Clears session and user state
     navigate("/login"); // Redirects to login page
   };
+
+  const closeMenu = () => setIsMenuOpen(false);
+  const toggleMenu = () => setIsMenuOpen((open) => !open);
+
   return (
     <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-17.5 tracking-wide relative z-50">
       <div className="flex flex-wrap items-center justify-between gap-5 w-full">
-        <NavLink to="/" className="max-sm:hidden">
+        <NavLink to="/" className="flex items-center gap-2">
           <img src="/navbarlogo.png" alt="logo" className="w-10 h-10" />
+          <span className="text-sm font-semibold text-slate-800 sm:hidden">
+            PMS
+          </span>
         </NavLink>
 
-        <div
-          id="collapseMenu"
-          className="max-lg:hidden lg:block! max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50"
+        {isMenuOpen && (
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={closeMenu}
+            className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          />
+        )}
+
+        <nav
+          className={`fixed top-0 left-0 z-50 h-full w-72 bg-white p-6 shadow-lg transition-transform duration-300 lg:static lg:z-auto lg:h-auto lg:w-auto lg:bg-transparent lg:p-0 lg:shadow-none ${
+            isMenuOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0`}
         >
-          <ul className="lg:flex gap-x-4 max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-75 max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50">
+          <div className="flex items-center justify-between pb-4 lg:hidden">
+            <span className="text-sm font-semibold text-slate-800">Menu</span>
+            <button
+              type="button"
+              onClick={closeMenu}
+              className="rounded-full border border-gray-200 p-2 text-slate-600"
+              aria-label="Close menu"
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+          <ul className="lg:flex lg:items-center gap-x-4 space-y-3 lg:space-y-0">
             {!isLoggedIn && (
-              <li className="max-lg:border-b max-lg:border-gray-300 max-lg:py-3 px-3">
+              <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
                 <NavLink
                   to="/"
+                  onClick={closeMenu}
                   className="hover:text-blue-700 text-blue-700 block font-medium text-[15px]"
                 >
                   Home
@@ -35,9 +83,10 @@ const Navbar = () => {
               </li>
             )}
             {isLoggedIn && isPatient && (
-              <li className="max-lg:border-b max-lg:border-gray-300 max-lg:py-3 px-3">
+              <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
                 <NavLink
                   to="/dashboard/patient"
+                  onClick={closeMenu}
                   className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
                 >
                   My Profile
@@ -45,41 +94,45 @@ const Navbar = () => {
               </li>
             )}
             {isLoggedIn && isDoctor && (
-              <li className="max-lg:border-b max-lg:border-gray-300 max-lg:py-3 px-3">
+              <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
                 <NavLink
                   to="/dashboard/doctor"
+                  onClick={closeMenu}
                   className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
                 >
                   Dashboard
                 </NavLink>
               </li>
             )}
-            <li className="max-lg:border-b max-lg:border-gray-300 max-lg:py-3 px-3">
+            <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
               <NavLink
                 to="/about"
+                onClick={closeMenu}
                 className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
               >
                 About
               </NavLink>
             </li>
-            <li className="max-lg:border-b max-lg:border-gray-300 max-lg:py-3 px-3">
+            <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
               <NavLink
                 to="/contact"
+                onClick={closeMenu}
                 className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
               >
                 Contact
               </NavLink>
             </li>
-            <li className="max-lg:border-b max-lg:border-gray-300 max-lg:py-3 px-3">
+            <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
               <NavLink
                 to="/faq"
+                onClick={closeMenu}
                 className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
               >
                 FAQ
               </NavLink>
             </li>
           </ul>
-        </div>
+        </nav>
 
         <div className="flex max-lg:ml-auto space-x-4">
           {!isLoggedIn ? (
@@ -112,7 +165,13 @@ const Navbar = () => {
               </button>
             </>
           )}
-          <button id="toggleOpen" className="lg:hidden cursor-pointer">
+          <button
+            type="button"
+            aria-label="Toggle menu"
+            aria-expanded={isMenuOpen}
+            onClick={toggleMenu}
+            className="lg:hidden cursor-pointer"
+          >
             <svg
               className="w-7 h-7"
               fill="#000"

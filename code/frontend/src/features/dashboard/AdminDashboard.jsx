@@ -5,11 +5,14 @@ import AddNurse from "./AdminDAshboardComponents/AddUser";
 import Stats from "./AdminDAshboardComponents/Stats";
 import Dashboard from "./AdminDAshboardComponents/Dashboard";
 import UsersList from "./AdminDAshboardComponents/UsersList";
+import PatientsManager from "./AdminDAshboardComponents/PatientsManager";
+import AllTables from "./AdminDAshboardComponents/AllTables";
 
 const AdminDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newMenuLabel, setNewMenuLabel] = useState("");
   const [customMenus, setCustomMenus] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const addMenu = (e) => {
     e.preventDefault();
@@ -21,6 +24,10 @@ const AdminDashboard = () => {
   };
 
   const [section, setSection] = useState("dashboard");
+  const handleSectionChange = (nextSection) => {
+    setSection(nextSection);
+    setIsSidebarOpen(false);
+  };
 
   useEffect(() => {
     const dropdownToggle = document.getElementById("dropdownToggle");
@@ -65,19 +72,49 @@ const AdminDashboard = () => {
     <div>
       <div className="relative bg-[#f7f6f9] h-full min-h-screen">
         <div className="flex items-start">
-          <nav id="sidebar" className="lg:min-w-67.5 w-max max-lg:min-w-8">
-            <div
-              id="sidebar-collapse-menu"
-              className="bg-white shadow-lg h-screen fixed top-0 left-0 overflow-auto z-99 lg:min-w-62.5 lg:w-max max-lg:w-0 max-lg:invisible transition-all duration-500"
-            >
-              <div className="py-6 px-6">
+          {isSidebarOpen && (
+            <button
+              type="button"
+              aria-label="Close sidebar"
+              onClick={() => setIsSidebarOpen(false)}
+              className="fixed inset-0 bg-black/40 z-30 lg:hidden"
+            />
+          )}
+         <nav
+  className={`fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-lg overflow-y-auto transition-transform duration-300 lg:static lg:translate-x-0 lg:w-64 min-h-screen ${
+    isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+  }`}
+>
+            <div className="py-6 px-6">
+              <div className="flex items-center justify-between pb-4 lg:hidden">
+                <span className="text-sm font-semibold text-slate-800">Admin Menu</span>
+                <button
+                  type="button"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="rounded-full border border-gray-200 p-2 text-slate-600"
+                  aria-label="Close sidebar"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
                 <ul className="space-y-2">
                   <li>
                     <a
                       href="javascript:void(0)"
                       onClick={(e) => {
                         e.preventDefault();
-                        setSection("dashboard");
+                        handleSectionChange("dashboard");
                       }}
                       className="menu-item text-green-800 text-[15px] font-medium flex items-center cursor-pointer bg-[#F0F8FF] hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
                     >
@@ -123,7 +160,7 @@ const AdminDashboard = () => {
                       href="javascript:void(0)"
                       onClick={(e) => {
                         e.preventDefault();
-                        setSection("addNurse");
+                        handleSectionChange("addNurse");
                       }}
                       className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
                     >
@@ -161,7 +198,7 @@ const AdminDashboard = () => {
                       href="javascript:void(0)"
                       onClick={(e) => {
                         e.preventDefault();
-                        setSection("users");
+                        handleSectionChange("users");
                       }}
                       className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
                     >
@@ -182,7 +219,49 @@ const AdminDashboard = () => {
                       href="javascript:void(0)"
                       onClick={(e) => {
                         e.preventDefault();
-                        setSection("stats");
+                        handleSectionChange("patients");
+                      }}
+                      className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        className="w-[18px] h-[18px] mr-3"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                      </svg>
+                      <span>Patients</span>
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="javascript:void(0)"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleSectionChange("allTables");
+                      }}
+                      className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        className="w-[18px] h-[18px] mr-3"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M4 5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5zm0 10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4zm10-10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5zm0 10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4z" />
+                      </svg>
+                      <span>All Tables</span>
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="javascript:void(0)"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleSectionChange("stats");
                       }}
                       className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
                     >
@@ -241,7 +320,7 @@ const AdminDashboard = () => {
                             href="javascript:void(0)"
                             onClick={(e) => {
                               e.preventDefault();
-                              setSection(`custom_${i}`);
+                              handleSectionChange(`custom_${i}`);
                             }}
                             className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
                           >
@@ -253,22 +332,8 @@ const AdminDashboard = () => {
                   )}
                 </ul>
 
-                <div className="mt-8">
-                  <div className="bg-[#00b074] p-4 rounded-md shadow-md max-w-49">
-                    <p className="text-white text-sm leading-relaxed">
-                      Organize your menus using the action button below!
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setIsModalOpen(true)}
-                      className="py-2 px-4 bg-white hover:bg-gray-100 text-slate-800 text-sm border-0 outline-0 rounded-md cursor-pointer mt-4"
-                    >
-                      Add Menu
-                    </button>
-                  </div>
-                </div>
+               
               </div>
-            </div>
           </nav>
 
           {/* Modal */}
@@ -309,8 +374,10 @@ const AdminDashboard = () => {
           )}
 
           <button
-            id="toggle-sidebar"
-            className="lg:hidden w-8 h-8 z-[100] fixed top-[36px] left-[10px] cursor-pointer bg-[#007bff] flex items-center justify-center rounded-full outline-0 transition-all duration-500"
+            type="button"
+            aria-label="Open sidebar"
+            onClick={() => setIsSidebarOpen(true)}
+            className="lg:hidden w-8 h-8 z-[100] fixed top-[24px] left-[10px] cursor-pointer bg-[#007bff] flex items-center justify-center rounded-full outline-0 transition-all duration-500"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -322,34 +389,8 @@ const AdminDashboard = () => {
             </svg>
           </button>
 
-          <section className="main-content w-full px-8">
-            <header className="z-50 bg-[#f7f6f9] sticky top-0 pt-8">
-              <div className="flex flex-wrap items-center w-full relative tracking-wide">
-                <div className="flex items-center gap-y-6 max-sm:flex-col z-50 w-full pb-2">
-                  <div className="flex items-center gap-4 w-full px-6 bg-white shadow-sm min-h-[48px] sm:mr-20 rounded-md outline-0 border-0">
-                    <input
-                      type="text"
-                      placeholder="Search something..."
-                      className="w-full text-sm bg-transparent rounded-sm outline-0"
-                    />
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 192.904 192.904"
-                      className="w-4 cursor-pointer fill-gray-400 ml-auto"
-                    >
-                      <path d="m190.707 180.101-47.078-47.077c11.702-14.072 18.752-32.142 18.752-51.831C162.381 36.423 125.959 0 81.191 0 36.422 0 0 36.423 0 81.193c0 44.767 36.422 81.187 81.191 81.187 19.688 0 37.759-7.049 51.831-18.751l47.079 47.078a7.474 7.474 0 0 0 5.303 2.197 7.498 7.498 0 0 0 5.303-12.803zM15 81.193C15 44.694 44.693 15 81.191 15c36.497 0 66.189 29.694 66.189 66.193 0 36.496-29.692 66.187-66.189 66.187C44.693 147.38 15 117.689 15 81.193z" />
-                    </svg>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-6 ml-auto">
-                    <div className="flex items-center space-x-6">
-                      {/* Notification icons + profile dropdown*/}
-                      {/* You can copy-paste the exact block from DoctorDashboard header here */}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </header>
+          <section className="main-content w-full px-4 sm:px-6 lg:px-8">
+            
 
             {/* Conditional rendering */}
             {section === "dashboard" && <Dashboard />}
@@ -357,6 +398,8 @@ const AdminDashboard = () => {
             {section === "addNurse" && <AddNurse />}
             {section === "stats" && <Stats />}  
             {section === "users" && <UsersList />}
+            {section === "patients" && <PatientsManager />}
+            {section === "allTables" && <AllTables />}
          
 
             {/* Custom menu sections */}

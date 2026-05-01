@@ -14,6 +14,7 @@ const DoctorDashboard = () => {
   const [newMenuLabel, setNewMenuLabel] = useState("");
   const [customMenus, setCustomMenus] = useState([]);
   const [doctor, setDoctor] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [stats, setStats] = useState({
     patients: 0,
     appointmentsToday: 0,
@@ -34,6 +35,10 @@ const DoctorDashboard = () => {
   };
 
   const [section, setSection] = useState("dashboard");
+  const handleSectionChange = (nextSection) => {
+    setSection(nextSection);
+    setIsSidebarOpen(false);
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -122,26 +127,57 @@ const DoctorDashboard = () => {
     <div>
       <div className="relative bg-[#f7f6f9] h-full min-h-screen">
         <div className="flex items-start">
-          <nav id="sidebar" className="lg:min-w-67.5 w-max max-lg:min-w-8">
-            <div
-              id="sidebar-collapse-menu"
-              class="bg-white shadow-lg h-screen fixed top-0 left-0 overflow-auto z-99 lg:min-w-62.5 lg:w-max max-lg:w-0 max-lg:invisible transition-all duration-500"
-            >
-              <div class="py-6 px-6">
-                <ul class="space-y-2">
+          {isSidebarOpen && (
+            <button
+              type="button"
+              aria-label="Close sidebar"
+              onClick={() => setIsSidebarOpen(false)}
+              className="fixed inset-0 bg-black/40 z-30 lg:hidden"
+            />
+          )}
+          <nav
+          className={`fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-lg overflow-auto transition-transform duration-300 
+            lg:static lg:translate-x-0 lg:w-64 lg:min-h-screen ${ // Added lg:min-h-screen
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+            <div className="py-6 px-6">
+              <div className="flex items-center justify-between pb-4 lg:hidden">
+                <span className="text-sm font-semibold text-slate-800">Doctor Menu</span>
+                <button
+                  type="button"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="rounded-full border border-gray-200 p-2 text-slate-600"
+                  aria-label="Close sidebar"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+              <ul className="space-y-2">
                   <li>
                     <a
                       href="javascript:void(0)"
                       onClick={(e) => {
                         e.preventDefault();
-                        setSection("dashboard");
+                        handleSectionChange("dashboard");
                       }}
-                      class="menu-item text-green-800 text-[15px] font-medium flex items-center cursor-pointer bg-[#F0F8FF] hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                      className="menu-item text-green-800 text-[15px] font-medium flex items-center cursor-pointer bg-[#F0F8FF] hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
-                        class="w-4.5 h-[18px] mr-3"
+                        className="w-4.5 h-[18px] mr-3"
                         viewBox="0 0 24 24"
                       >
                         <path
@@ -161,14 +197,14 @@ const DoctorDashboard = () => {
                       href="javascript:void(0)"
                       onClick={(e) => {
                         e.preventDefault();
-                        setSection("profile");
+                        handleSectionChange("profile");
                       }}
-                      class="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                      className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
-                        class="w-4.5 h-[18px] mr-3"
+                        className="w-4.5 h-[18px] mr-3"
                         viewBox="0 0 60.123 60.123"
                       >
                         <path
@@ -202,14 +238,14 @@ const DoctorDashboard = () => {
                       href="javascript:void(0)"
                       onClick={(e) => {
                         e.preventDefault();
-                        setSection("records");
+                        handleSectionChange("records");
                       }}
-                      class="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                      className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="currentColor"
-                        class="w-[18px] h-[18px] mr-3"
+                        className="w-[18px] h-[18px] mr-3"
                         viewBox="0 0 682.667 682.667"
                       >
                         <defs>
@@ -220,11 +256,11 @@ const DoctorDashboard = () => {
                         <g
                           fill="none"
                           stroke="#000"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-miterlimit="10"
-                          stroke-width="30"
-                          clip-path="url(#a)"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeMiterlimit="10"
+                          strokeWidth="30"
+                          clipPath="url(#a)"
                           transform="matrix(1.33333 0 0 -1.33333 0 682.667)"
                         >
                           <path
@@ -351,7 +387,7 @@ const DoctorDashboard = () => {
                 </li>*/}
                   {/* render any custom menus created via the Add Menu button */}
                   {customMenus.length > 0 && (
-                    <ul class="space-y-2 mt-4">
+                    <ul className="space-y-2 mt-4">
                       {customMenus.map((m, i) => (
                         <li key={i}>
                           <a
@@ -367,7 +403,7 @@ const DoctorDashboard = () => {
                 </ul>
 
               </div>
-            </div>
+            
           </nav>
 
           {/* Modal for creating a new menu item */}
@@ -408,13 +444,15 @@ const DoctorDashboard = () => {
           )}
 
           <button
-            id="toggle-sidebar"
-            class="lg:hidden w-8 h-8 z-[100] fixed top-[36px] left-[10px] cursor-pointer bg-[#007bff] flex items-center justify-center rounded-full outline-0 transition-all duration-500"
+            type="button"
+            aria-label="Open sidebar"
+            onClick={() => setIsSidebarOpen(true)}
+            className="lg:hidden w-8 h-8 z-[100] fixed top-[24px] left-[10px] cursor-pointer bg-[#007bff] flex items-center justify-center rounded-full outline-0 transition-all duration-500"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="#fff"
-              class="w-3 h-3"
+              className="w-3 h-3"
               viewBox="0 0 55.752 55.752"
             >
               <path
@@ -424,7 +462,7 @@ const DoctorDashboard = () => {
             </svg>
           </button>
 
-          <section class="main-content w-full px-8">
+          <section className="main-content w-full px-4 sm:px-6 lg:px-8">
             
             {section === "dashboard" && (
               <Dashboard

@@ -12,7 +12,7 @@ const formatCurrency = (amount) => {
 const Profile = ({ doctor, loading, error }) => {
   if (loading) {
     return (
-      <div className="p-6 bg-slate-50 min-h-screen">
+      <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
         <div className="bg-white rounded-2xl shadow p-6 text-gray-600">
           Loading profile...
         </div>
@@ -22,7 +22,7 @@ const Profile = ({ doctor, loading, error }) => {
 
   if (error) {
     return (
-      <div className="p-6 bg-slate-50 min-h-screen">
+      <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
         <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-red-700">
           {error}
         </div>
@@ -31,7 +31,7 @@ const Profile = ({ doctor, loading, error }) => {
   }
 
   return (
-    <div className="p-6 bg-slate-50 min-h-screen">
+    <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
       <div className="bg-white rounded-2xl shadow p-6 mb-6">
         <h1 className="text-2xl font-semibold">
           Dr. {doctor?.firstName || ""} {doctor?.lastName || ""}

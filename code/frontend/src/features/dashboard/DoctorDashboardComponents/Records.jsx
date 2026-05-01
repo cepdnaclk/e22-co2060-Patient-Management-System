@@ -272,12 +272,12 @@ const PatientProfile = () => {
   });
 
   return (
-    <div className="flex-1 overflow-auto p-6 bg-slate-50">
+    <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-50">
       <div className="bg-white rounded-2xl shadow p-5 mb-6">
         <p className="text-sm font-medium text-slate-700 mb-3">
           Search patient first to view profile and records
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
           <input
             type="text"
             value={searchText}
@@ -290,13 +290,13 @@ const PatientProfile = () => {
           />
           <button
             onClick={searchPatient}
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-3 text-sm font-medium"
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-4 py-3 text-sm font-medium w-full"
           >
             Search Patient
           </button>
           <button
             onClick={cancelSearch}
-            className="bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl px-4 py-3 text-sm font-medium"
+            className="bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl px-4 py-3 text-sm font-medium w-full"
           >
             Cancel
           </button>
@@ -339,25 +339,25 @@ const PatientProfile = () => {
       ) : (
         <>
       {/* Patient Header Banner - Same as before */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-3xl shadow-2xl p-8 mb-10 flex items-center gap-8">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-3xl shadow-2xl p-5 sm:p-8 mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
         <img 
           src={selectedPatient.avatar}
           alt={selectedPatient.name}
-          className="w-40 h-40 rounded-3xl object-cover ring-8 ring-white/30"
+          className="w-24 h-24 sm:w-40 sm:h-40 rounded-3xl object-cover ring-4 sm:ring-8 ring-white/30"
         />
         
         <div className="flex-1">
-          <div className="flex items-center gap-4">
-            <h1 className="text-5xl font-bold">{selectedPatient.name}</h1>
-            <span className="bg-emerald-400 text-emerald-900 px-6 py-1.5 rounded-3xl text-sm font-semibold flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <h1 className="text-2xl sm:text-5xl font-bold">{selectedPatient.name}</h1>
+            <span className="bg-emerald-400 text-emerald-900 px-4 sm:px-6 py-1.5 rounded-3xl text-xs sm:text-sm font-semibold flex items-center gap-2">
               <div className="w-2.5 h-2.5 bg-emerald-900 rounded-full animate-pulse" />
               Active
             </span>
           </div>
-          <p className="text-2xl mt-2 opacity-90">
+          <p className="text-sm sm:text-2xl mt-2 opacity-90">
             {selectedPatient.displayId} • {selectedPatient.age} years • {selectedPatient.gender} • {selectedPatient.bloodGroup}
           </p>
-          <p className="mt-3 text-lg opacity-75">
+          <p className="mt-2 sm:mt-3 text-sm sm:text-lg opacity-75">
             Admitted: {selectedPatient.admittedDate} • Primary Doctor: {selectedPatient.primaryDoctor}
           </p>
         </div>
@@ -387,36 +387,37 @@ const PatientProfile = () => {
           
 
           {/* Current Vitals (same) */}
-          <div className="bg-white rounded-3xl shadow p-8">
+          <div className="bg-white rounded-3xl shadow p-5 sm:p-8">
             <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3">
               Current Vitals
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
               <div className="text-center">
-                <div className="text-5xl font-semibold text-red-600">{selectedPatient.bloodPressure || "N/A"}</div>
+                <div className="text-2xl sm:text-5xl font-semibold text-red-600">{selectedPatient.bloodPressure || "N/A"}</div>
                 <div className="text-sm text-slate-500 mt-1">Blood Pressure</div>
               </div>
               <div className="text-center">
-                <div className="text-5xl font-semibold">{selectedPatient.heartRate ?? "N/A"}</div>
+                <div className="text-2xl sm:text-5xl font-semibold">{selectedPatient.heartRate ?? "N/A"}</div>
                 <div className="text-sm text-slate-500 mt-1">Heart Rate <span className="text-xs">bpm</span></div>
               </div>
               <div className="text-center">
-                <div className="text-5xl font-semibold">{selectedPatient.temperature ?? "N/A"}</div>
+                <div className="text-2xl sm:text-5xl font-semibold">{selectedPatient.temperature ?? "N/A"}</div>
                 <div className="text-sm text-slate-500 mt-1">Temperature <span className="text-xs">°C</span></div>
               </div>
               <div className="text-center">
-                <div className="text-5xl font-semibold text-blue-600">{selectedPatient.oxygenSaturation != null ? `${selectedPatient.oxygenSaturation}%` : "N/A"}</div>
+                <div className="text-2xl sm:text-5xl font-semibold text-blue-600">{selectedPatient.oxygenSaturation != null ? `${selectedPatient.oxygenSaturation}%` : "N/A"}</div>
                 <div className="text-sm text-slate-500 mt-1">O₂ Saturation</div>
               </div>
             </div>
           </div>
           
           <div className="bg-white rounded-2xl shadow p-4">
-            <div className="w-max flex gap-2">
+            <div className="w-full overflow-x-auto">
+              <div className="flex gap-2 min-w-max">
               <button
                 type="button"
                 onClick={() => setActiveRecordsTab("all")}
-                className={`text-[15px] text-center py-2.5 px-5 border-b-2 cursor-pointer transition-all ${
+                className={`text-[15px] whitespace-nowrap text-center py-2.5 px-4 sm:px-5 border-b-2 cursor-pointer transition-all ${
                   activeRecordsTab === "all"
                     ? "text-blue-700 font-semibold border-blue-700"
                     : "text-slate-600 font-medium border-transparent hover:text-blue-700"
@@ -427,7 +428,7 @@ const PatientProfile = () => {
               <button
                 type="button"
                 onClick={() => setActiveRecordsTab("clinical")}
-                className={`text-[15px] text-center py-2.5 px-5 border-b-2 cursor-pointer transition-all ${
+                className={`text-[15px] whitespace-nowrap text-center py-2.5 px-4 sm:px-5 border-b-2 cursor-pointer transition-all ${
                   activeRecordsTab === "clinical"
                     ? "text-blue-700 font-semibold border-blue-700"
                     : "text-slate-600 font-medium border-transparent hover:text-blue-700"
@@ -438,7 +439,7 @@ const PatientProfile = () => {
               <button
                 type="button"
                 onClick={() => setActiveRecordsTab("lab")}
-                className={`text-[15px] text-center py-2.5 px-5 border-b-2 cursor-pointer transition-all ${
+                className={`text-[15px] whitespace-nowrap text-center py-2.5 px-4 sm:px-5 border-b-2 cursor-pointer transition-all ${
                   activeRecordsTab === "lab"
                     ? "text-blue-700 font-semibold border-blue-700"
                     : "text-slate-600 font-medium border-transparent hover:text-blue-700"
@@ -449,7 +450,7 @@ const PatientProfile = () => {
               <button
                 type="button"
                 onClick={() => setActiveRecordsTab("prescription")}
-                className={`text-[15px] text-center py-2.5 px-5 border-b-2 cursor-pointer transition-all ${
+                className={`text-[15px] whitespace-nowrap text-center py-2.5 px-4 sm:px-5 border-b-2 cursor-pointer transition-all ${
                   activeRecordsTab === "prescription"
                     ? "text-blue-700 font-semibold border-blue-700"
                     : "text-slate-600 font-medium border-transparent hover:text-blue-700"
@@ -457,6 +458,7 @@ const PatientProfile = () => {
               >
                 Prescription History
               </button>
+            </div>
             </div>
 
             <p className="text-sm text-slate-600 mt-4">
@@ -473,7 +475,7 @@ const PatientProfile = () => {
 
           {activeRecordsTab === "prescription" ? (
             <>
-              <div className="bg-white rounded-3xl shadow p-8">
+              <div className="bg-white rounded-3xl shadow p-5 sm:p-8">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-semibold flex items-center gap-3">
                     Prescription History
@@ -512,7 +514,7 @@ const PatientProfile = () => {
               </div>
             </>
           ) : (
-            <div className="bg-white rounded-3xl shadow p-8">
+            <div className="bg-white rounded-3xl shadow p-5 sm:p-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold flex items-center gap-3">
                   Medical History & Records
@@ -522,7 +524,7 @@ const PatientProfile = () => {
                 </span>
               </div>
 
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-6">
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 mb-6">
                 <p className="text-sm font-medium mb-3 text-slate-600">Add New Record</p>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <input 
@@ -553,7 +555,7 @@ const PatientProfile = () => {
                   <button 
                     onClick={addNewRecord}
                     disabled={!selectedPatient || loadingRecords || savingRecord}
-                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium flex items-center justify-center gap-2 active:scale-95 transition"
+                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium flex items-center justify-center gap-2 active:scale-95 transition px-4 py-3"
                   >
                     {/* <FaPlus /> */} {savingRecord ? "Saving..." : "Add Record"}
                   </button>
@@ -606,7 +608,7 @@ const PatientProfile = () => {
 
         {/* Right Sidebar - Quick Actions (same as before) */}
         <div className="lg:col-span-4 space-y-8 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-2">
-          <div className="bg-white rounded-3xl shadow p-8">
+          <div className="bg-white rounded-3xl shadow p-5 sm:p-8">
             <h2 className="text-xl font-semibold mb-6">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-4">
               <button onClick={() => alert('New Prescription')} className="flex flex-col items-center justify-center gap-3 py-7 bg-blue-50 hover:bg-blue-100 rounded-3xl transition-all active:scale-95">
@@ -629,7 +631,7 @@ const PatientProfile = () => {
           </div>
 
           {/* Next Appointment & Insurance (same) */}
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-3xl p-8 shadow">
+          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-3xl p-5 sm:p-8 shadow">
             <p className="text-blue-200 text-sm mb-1">NEXT APPOINTMENT</p>
             <p className="text-3xl font-bold">Tomorrow<br />10:30 AM</p>
             <div className="mt-8 flex items-center gap-4">
@@ -641,7 +643,7 @@ const PatientProfile = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow p-8 text-sm">
+          <div className="bg-white rounded-3xl shadow p-5 sm:p-8 text-sm">
             <h2 className="font-semibold text-xl mb-6">Insurance &amp; Billing</h2>
             <div className="space-y-6">
               <div>

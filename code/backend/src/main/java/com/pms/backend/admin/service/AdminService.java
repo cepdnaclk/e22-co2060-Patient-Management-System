@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.pms.backend.admin.dto.AdminCreateUserRequest;
 import com.pms.backend.admin.dto.AdminStatsDto;
 import com.pms.backend.admin.dto.AdminUpdateRoleRequest;
+import com.pms.backend.admin.dto.AdminUpdateUserRequest;
 import com.pms.backend.admin.dto.RoleCountDto;
 import com.pms.backend.appointment.repository.AppointmentRepository;
 import com.pms.backend.common.exception.AppException;
@@ -74,6 +75,43 @@ public class AdminService {
                 .orElseThrow(() -> AppException.notFound("User not found"));
 
         user.setRole(req.getRole());
+        return UserDto.from(userRepository.save(user));
+    }
+
+    public UserDto updateUser(Long id, AdminUpdateUserRequest req) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> AppException.notFound("User not found"));
+
+        if (req.getEmail() != null && !req.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmailAndIdNot(req.getEmail(), user.getId())) {
+                throw AppException.conflict("This email is already registered");
+            }
+            user.setEmail(req.getEmail());
+        }
+
+        if (req.getMobileNumber() != null && !req.getMobileNumber().equals(user.getMobileNumber())) {
+            if (userRepository.existsByMobileNumberAndIdNot(req.getMobileNumber(), user.getId())) {
+                throw AppException.conflict("This mobile number is already registered");
+            }
+            user.setMobileNumber(req.getMobileNumber());
+        }
+
+        if (req.getFirstName() != null) {
+            user.setFirstName(req.getFirstName());
+        }
+        if (req.getLastName() != null) {
+            user.setLastName(req.getLastName());
+        }
+        if (req.getRole() != null) {
+            user.setRole(req.getRole());
+        }
+        if (req.getIsActive() != null) {
+            user.setActive(req.getIsActive());
+        }
+        if (req.getPassword() != null && !req.getPassword().isBlank()) {
+            user.setPasswordHash(passwordEncoder.encode(req.getPassword()));
+        }
+
         return UserDto.from(userRepository.save(user));
     }
 

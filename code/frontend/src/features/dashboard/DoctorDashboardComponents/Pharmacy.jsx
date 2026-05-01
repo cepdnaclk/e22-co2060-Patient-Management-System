@@ -85,14 +85,18 @@ const PrescriptionEditor = ({
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 max-w-5xl mx-auto">
+    <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-4 sm:p-6 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 border-b pb-4">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 border-b pb-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <div className="text-4xl"></div>
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">New Prescription</h2>
-            <p className="text-slate-500 text-sm">{patientName} • {patientId}</p>
+            <h2 className="text-xl sm:text-2xl font-semibold text-slate-900">
+              New Prescription
+            </h2>
+            <p className="text-slate-500 text-xs sm:text-sm">
+              {patientName} • {patientId}
+            </p>
           </div>
         </div>
         <button className="text-slate-400 hover:text-slate-600">
@@ -100,7 +104,7 @@ const PrescriptionEditor = ({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="hidden sm:block overflow-x-auto">
         <table className="min-w-full">
           <thead>
             <tr className="bg-slate-100 text-slate-600 uppercase text-xs tracking-widest">
@@ -174,26 +178,98 @@ const PrescriptionEditor = ({
         </table>
       </div>
 
+      {/* Mobile Cards */}
+      <div className="sm:hidden space-y-4">
+        {medicines.map((med) => (
+          <div
+            key={med.id}
+            className="rounded-2xl border border-slate-200 p-4 shadow-sm"
+          >
+            <div className="grid grid-cols-1 gap-3">
+              <label className="text-xs font-semibold text-slate-500">
+                Medicine Name
+                <input
+                  type="text"
+                  value={med.name}
+                  onChange={(e) => handleChange(med.id, "name", e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  placeholder="Medicine name"
+                />
+              </label>
+              <label className="text-xs font-semibold text-slate-500">
+                Dosage
+                <input
+                  type="text"
+                  value={med.dosage}
+                  onChange={(e) => handleChange(med.id, "dosage", e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  placeholder="e.g. 500mg"
+                />
+              </label>
+              <label className="text-xs font-semibold text-slate-500">
+                Frequency
+                <input
+                  type="text"
+                  value={med.frequency}
+                  onChange={(e) => handleChange(med.id, "frequency", e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  placeholder="e.g. Twice a day"
+                />
+              </label>
+              <label className="text-xs font-semibold text-slate-500">
+                Duration
+                <input
+                  type="text"
+                  value={med.duration}
+                  onChange={(e) => handleChange(med.id, "duration", e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  placeholder="e.g. 5 days"
+                />
+              </label>
+              <label className="text-xs font-semibold text-slate-500">
+                Notes
+                <input
+                  type="text"
+                  value={med.notes}
+                  onChange={(e) => handleChange(med.id, "notes", e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  placeholder="Special instructions"
+                />
+              </label>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => deleteMedicine(med.id)}
+                className="text-sm font-medium text-red-600"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Action Buttons */}
-      <div className="flex items-center justify-between mt-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-8">
         <button
           onClick={addMedicine}
-          className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium transition-all active:scale-95"
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium transition-all active:scale-95"
         >
            Add Medicine
         </button>
 
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={cancel}
-            className="px-8 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-2xl font-medium transition-all"
+            className="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-2xl font-medium transition-all"
           >
             Cancel
           </button>
           <button
             onClick={savePrescription}
             disabled={saving}
-            className="flex items-center gap-2 px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-medium transition-all active:scale-95"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-medium transition-all active:scale-95"
           >
              {saving ? "Saving..." : "Save Prescription"}
           </button>
