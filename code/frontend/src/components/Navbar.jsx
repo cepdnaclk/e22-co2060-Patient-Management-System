@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext.jsx";
 
 const Navbar = () => {
-  //  Destructure the auth states and logout function
+  // Destructure the auth states and logout function
   const { isLoggedIn, user, logout, isDoctor, isPatient } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,10 +24,20 @@ const Navbar = () => {
   const closeMenu = () => setIsMenuOpen(false);
   const toggleMenu = () => setIsMenuOpen((open) => !open);
 
+  // --- FIX: Dynamic Logo Link ---
+  const getHomeLink = () => {
+    if (isLoggedIn) {
+      if (isPatient) return "/dashboard/patient";
+      if (isDoctor) return "/dashboard/doctor";
+    }
+    return "/";
+  };
+
   return (
     <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-17.5 tracking-wide relative z-50">
       <div className="flex flex-wrap items-center justify-between gap-5 w-full">
-        <NavLink to="/" className="flex items-center gap-2">
+        {/* --- FIX: Applied getHomeLink() here --- */}
+        <NavLink to={getHomeLink()} className="flex items-center gap-2">
           <img src="/navbarlogo.png" alt="logo" className="w-10 h-10" />
           <span className="text-sm font-semibold text-slate-800 sm:hidden">
             PMS
