@@ -78,7 +78,7 @@ const FAQ = () => {
             return (
               <article
                 key={item.question}
-                className="rounded-lg border border-slate-200 bg-white shadow-sm"
+                className="rounded-2xl glass-card"
               >
                 <button
                   type="button"
@@ -86,7 +86,7 @@ const FAQ = () => {
                   className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
                 >
                   <span className="font-medium text-slate-800">{item.question}</span>
-                  <span className="text-indigo-600 text-xl leading-none">
+                  <span className="text-blue-600 text-xl leading-none">
                     {isOpen ? "−" : "+"}
                   </span>
                 </button>
@@ -99,7 +99,7 @@ const FAQ = () => {
           })}
         </div>
 
-        <section className="mt-10 rounded-lg border border-indigo-100 bg-indigo-50 p-5 md:p-6">
+        <section className="mt-10 rounded-2xl glass-panel p-5 md:p-6">
           <h2 className="text-lg md:text-xl font-semibold text-slate-800">
             Still need help?
           </h2>

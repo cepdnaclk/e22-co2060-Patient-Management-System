@@ -32,13 +32,11 @@ export default function SignupPage() {
     e.preventDefault();
     setError("");
 
-    // Client-side password match check
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
-    // Basic mobile number format check
     const mobileRegex = /^\+?[0-9]{10,15}$/;
     if (!mobileRegex.test(mobileNumber)) {
       setError("Enter a valid mobile number (e.g. +94771234567).");
@@ -55,15 +53,11 @@ export default function SignupPage() {
         mobileNumber,
       );
 
-      // Save token + user — this logs them in immediately
       saveLogin(data.token, data.user);
 
-      // Redirect to the right dashboard based on role
-      // Signup always creates PATIENT — so goes to /dashboard/patient
       const redirectPath = ROLE_ROUTES[data.user.role] || "/dashboard";
       navigate(redirectPath);
     } catch (err) {
-      // Shows backend message e.g. "This email is already registered."
       setError(
         err.response?.data?.message || "Signup failed. Please try again.",
       );
@@ -72,72 +66,49 @@ export default function SignupPage() {
     }
   };
 
-  // Reusable input class
   const inputClass =
-    "bg-slate-100 focus:bg-transparent w-full text-sm text-slate-900 " +
-    "px-4 py-2.5 rounded-sm border border-gray-200 " +
+    "bg-white/80 focus:bg-white w-full text-sm text-slate-900 " +
+    "px-4 py-2.5 rounded-sm border border-slate-200 " +
     "focus:border-blue-600 outline-0 transition-all";
 
   return (
     <div>
-      {/* Header */}
-      <div
-        className="text-center bg-linear-to-r from-blue-800 to-blue-400
-                            min-h-44 sm:p-6 p-4 flex flex-col items-center justify-center"
-      >
-        <h1 className="sm:text-3xl text-2xl text-white font-medium mt-3">
+      <div className="text-center min-h-44 sm:p-6 p-4 flex flex-col items-center justify-center">
+        <h1 className="sm:text-3xl text-2xl text-slate-900 font-medium mt-3">
           Create your free account
         </h1>
-        <p className="text-white text-sm mt-2 mb-10">
+        <p className="text-slate-600 text-sm mt-2 mb-10">
           Already have an account?
-          <NavLink to="/login" className="underline font-semibold">
+          <NavLink to="/login" className="underline font-semibold text-blue-600">
             Sign in
           </NavLink>
         </p>
       </div>
 
-      {/* Form Card */}
       <div className="mx-4 sm:mx-6 mb-8 -mt-16">
         <form
           onSubmit={handleSubmit}
-          className="max-w-4xl max-md:max-w-xl mx-auto bg-white
-                               shadow-[0_2px_13px_-6px_rgba(0,0,0,0.4)]
-                               sm:p-8 p-4 rounded-md"
+          className="max-w-4xl max-md:max-w-xl mx-auto sm:p-8 p-4 rounded-2xl bg-white/40 backdrop-blur-2xl border border-white/60 p-8 sm:p-10 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 transition-all"
         >
-          {/* Error Banner */}
           {error && (
-            <div
-              className="bg-red-50 border border-red-200 text-red-600
-                                        px-4 py-3 rounded-md mb-6 text-sm"
-            >
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-6 text-sm">
               {error}
             </div>
           )}
 
-          {/* Google Button */}
           <button
             type="button"
-            className="w-full px-4 py-2.5 flex items-center justify-center
-                                   rounded-md text-slate-900 text-sm font-medium
-                                   cursor-pointer bg-slate-100 hover:bg-slate-200
-                                   transition-all"
+            className="w-full px-4 py-2.5 flex items-center justify-center rounded-md text-slate-900 text-sm font-medium cursor-pointer bg-slate-100 hover:bg-slate-200 transition-all"
           >
             <img src="/google-48.png" alt="Google" className="w-6 h-6 mr-2" />
             Continue with Google
           </button>
 
-          {/* Divider */}
-          <div
-            className="my-6 flex items-center
-                                    before:flex-1 before:border-t before:border-neutral-300
-                                    after:flex-1  after:border-t  after:border-neutral-300"
-          >
+          <div className="my-6 flex items-center before:flex-1 before:border-t before:border-neutral-300 after:flex-1 after:border-t after:border-neutral-300">
             <p className="mx-4 text-center text-slate-500 text-sm">Or</p>
           </div>
 
-          {/* Fields Grid */}
           <div className="grid md:grid-cols-2 gap-6">
-            {/* First Name */}
             <div>
               <label className="text-slate-900 text-sm font-medium mb-2 block">
                 First Name
@@ -152,7 +123,6 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Last Name */}
             <div>
               <label className="text-slate-900 text-sm font-medium mb-2 block">
                 Last Name
@@ -167,7 +137,6 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Email */}
             <div>
               <label className="text-slate-900 text-sm font-medium mb-2 block">
                 Email Address
@@ -182,7 +151,6 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Mobile */}
             <div>
               <label className="text-slate-900 text-sm font-medium mb-2 block">
                 Mobile Number
@@ -197,7 +165,6 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="text-slate-900 text-sm font-medium mb-2 block">
                 Password
@@ -212,7 +179,6 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Confirm Password */}
             <div>
               <label className="text-slate-900 text-sm font-medium mb-2 block">
                 Confirm Password
@@ -228,15 +194,11 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {/* Submit */}
           <div className="mt-8">
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-5 text-sm font-medium rounded-sm
-                                       cursor-pointer text-white bg-blue-600
-                                       hover:bg-blue-700 disabled:opacity-50
-                                       disabled:cursor-not-allowed transition-all"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-full shadow-lg shadow-blue-200 active:scale-[0.98] transition-all disabled:opacity-50 uppercase tracking-widest text-xs flex items-center justify-center gap-2"
             >
               {loading ? "Creating account..." : "Sign up"}
             </button>

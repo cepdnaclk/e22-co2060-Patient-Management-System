@@ -3,9 +3,8 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext.jsx";
 
 const Navbar = () => {
-  // 1. EXTRACT THE NEW ROLES HERE
-  const { isLoggedIn, user, logout, isDoctor, isPatient, isNurse, isAdmin } =
-    useAuth();
+  //  Destructure the auth states and logout function
+  const { isLoggedIn, user, logout, isDoctor, isPatient } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -16,36 +15,25 @@ const Navbar = () => {
     };
   }, [isMenuOpen]);
 
+  // Handle the logout button click
   const handleLogout = () => {
-    logout();
-    navigate("/login");
+    logout(); // Clears session and user state
+    navigate("/login"); // Redirects to login page
   };
 
   const closeMenu = () => setIsMenuOpen(false);
   const toggleMenu = () => setIsMenuOpen((open) => !open);
 
-  const navLinkStyles = ({ isActive }) =>
+  const navLinkStyles = ({ isActive }) => 
     `relative px-1 py-2 text-sm font-semibold transition-all duration-300 hover:text-blue-600 ${
-      isActive
-        ? "text-blue-600 after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-600"
-        : "text-slate-600"
+      isActive ? "text-blue-600 after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-600" : "text-slate-600"
     }`;
 
-  // --- FIX: Dynamic Logo Link ---
-  const getHomeLink = () => {
-    if (isLoggedIn) {
-      if (isAdmin) return "/dashboard/admin";
-      if (isNurse) return "/dashboard/nurse";
-      if (isDoctor) return "/dashboard/doctor";
-      if (isPatient) return "/dashboard/patient";
-    }
-    return "/";
-  };
-
   return (
-    <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-17.5 tracking-wide relative z-50 ">
+    <header className="flex shadow-md py-4 px-4 sm:px-10 min-h-17.5 tracking-wide relative z-50 py-5 bg-transparent">
+      
       <div className="flex flex-wrap items-center justify-between gap-5 w-full">
-        <NavLink to={getHomeLink()} className="flex items-center gap-2">
+        <NavLink to="/" className="flex items-center gap-2">
           <img src="/navbarlogo.png" alt="logo" className="w-10 h-10" />
           <span className="text-sm font-semibold text-slate-800 sm:hidden">
             PMS
@@ -100,8 +88,6 @@ const Navbar = () => {
                 </NavLink>
               </li>
             )}
-
-            {/* --- ROLE BASED NAVIGATION LINKS --- */}
             {isLoggedIn && isPatient && (
               <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
                 <NavLink
@@ -113,7 +99,6 @@ const Navbar = () => {
                 </NavLink>
               </li>
             )}
-
             {isLoggedIn && isDoctor && (
               <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
                 <NavLink
@@ -121,36 +106,10 @@ const Navbar = () => {
                   onClick={closeMenu}
                   className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
                 >
-                  Doctor Dashboard
+                  Dashboard
                 </NavLink>
               </li>
             )}
-
-            {isLoggedIn && isNurse && (
-              <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
-                <NavLink
-                  to="/dashboard/nurse"
-                  onClick={closeMenu}
-                  className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-                >
-                  Nurse Dashboard
-                </NavLink>
-              </li>
-            )}
-
-            {isLoggedIn && isAdmin && (
-              <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
-                <NavLink
-                  to="/dashboard/admin"
-                  onClick={closeMenu}
-                  className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-                >
-                  Admin Panel
-                </NavLink>
-              </li>
-            )}
-            {/* ----------------------------------- */}
-
             <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
               <NavLink
                 to="/about"
@@ -184,6 +143,7 @@ const Navbar = () => {
         <div className="flex max-lg:ml-auto space-x-4">
           {!isLoggedIn ? (
             <>
+              {/* Show if logged out  */}
               <NavLink
                 to="/login"
                 className="px-4 py-2 text-sm rounded-full font-medium cursor-pointer tracking-wide text-slate-900 border border-gray-400 bg-transparent hover:bg-gray-50 transition-all"
@@ -199,6 +159,7 @@ const Navbar = () => {
             </>
           ) : (
             <>
+              {/* Show if logged in  */}
               <div className="px-0.5 py-2 hidden sm:block text-sm font-medium text-slate-600">
                 Welcome, {user?.firstName}
               </div>
@@ -237,3 +198,72 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+
+// import React, { useEffect, useState } from "react";
+// import { NavLink, useNavigate } from "react-router-dom";
+// import { useAuth } from "../features/auth/AuthContext.jsx";
+// import { Menu, X, LogOut } from "lucide-react";
+
+// const Navbar = () => {
+//   const { isLoggedIn, user, logout, isDoctor, isPatient } = useAuth();
+//   const navigate = useNavigate();
+//   const [isMenuOpen, setIsMenuOpen] = useState(false);
+//   const [scrolled, setScrolled] = useState(false);
+
+//   useEffect(() => {
+//     const handleScroll = () => setScrolled(window.scrollY > 20);
+//     window.addEventListener("scroll", handleScroll);
+//     return () => window.removeEventListener("scroll", handleScroll);
+//   }, []);
+
+//   const handleLogout = () => {
+//     logout();
+//     navigate("/login");
+//   };
+
+//   const navLinkStyles = ({ isActive }) => 
+//     `text-sm font-semibold transition-colors hover:text-blue-600 ${isActive ? "text-blue-600" : "text-slate-600"}`;
+
+//   return (
+//     <header className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 ${
+//       scrolled ? "py-3 bg-white/70 backdrop-blur-md shadow-sm" : "py-5 bg-transparent"
+//     }`}>
+//       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+//         <NavLink to="/" className="flex items-center gap-2">
+//           <div className="p-1.5 bg-blue-600 rounded-lg">
+//             <img src="/navbarlogo.png" alt="logo" className="w-6 h-6 brightness-0 invert" />
+//           </div>
+//           <span className="text-xl font-bold tracking-tight text-slate-900">PATIENT<span className="text-blue-600">MS</span></span>
+//         </NavLink>
+
+//         <nav className="hidden lg:flex items-center gap-8">
+//           <NavLink to="/" className={navLinkStyles}>Home</NavLink>
+//           {isLoggedIn && (isPatient ? 
+//             <NavLink to="/dashboard/patient" className={navLinkStyles}>My Profile</NavLink> : 
+//             <NavLink to="/dashboard/doctor" className={navLinkStyles}>Dashboard</NavLink>
+//           )}
+//           <NavLink to="/about" className={navLinkStyles}>About</NavLink>
+//           <NavLink to="/contact" className={navLinkStyles}>Contact</NavLink>
+//         </nav>
+
+//         <div className="flex items-center gap-4">
+//           {!isLoggedIn ? (
+//             <NavLink to="/signup" className="px-5 py-2 text-sm font-bold text-white bg-slate-900 rounded-full hover:bg-blue-600 transition-all">
+//               Sign Up
+//             </NavLink>
+//           ) : (
+//             <button onClick={handleLogout} className="p-2 text-slate-600 hover:text-red-600 transition-colors">
+//               <LogOut size={20} />
+//             </button>
+//           )}
+//           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden text-slate-900">
+//             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+//           </button>
+//         </div>
+//       </div>
+//     </header>
+//   );
+// };
+
+// export default Navbar;

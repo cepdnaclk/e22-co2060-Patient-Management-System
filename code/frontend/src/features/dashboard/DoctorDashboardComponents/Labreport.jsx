@@ -112,7 +112,7 @@ const LabReports = () => {
   return (
     <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-50">
       {/* Patient Header (same as before) */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-3xl shadow-2xl p-8 mb-10 flex items-center gap-8">
+      <div className="bg-gradient-to-r from-blue-600 to-sky-600 text-white rounded-3xl shadow-2xl p-8 mb-10 flex items-center gap-8">
         <img src="https://i.pravatar.cc/160?u=rajeshkumar" alt="Rajesh Kumar" className="w-40 h-40 rounded-3xl object-cover ring-8 ring-white/30" />
         <div className="flex-1">
           <div className="flex items-center gap-4">

@@ -40,6 +40,13 @@ const DoctorDashboard = () => {
     setIsSidebarOpen(false);
   };
 
+  const getMenuItemClass = (active) =>
+    `menu-item flex items-center gap-3 rounded-full px-3 py-2.5 text-sm font-medium transition ${
+      active
+        ? "bg-white/90 text-slate-900 shadow-sm border border-white/70"
+        : "text-slate-600 hover:text-slate-900 hover:bg-white/70"
+    }`;
+
   useEffect(() => {
     let isMounted = true;
 
@@ -136,8 +143,8 @@ const DoctorDashboard = () => {
             />
           )}
           <nav
-          className={`fixed inset-y-0 left-0 z-40 w-72 bg-white shadow-lg overflow-auto transition-transform duration-300 
-            lg:static lg:translate-x-0 lg:w-64 lg:min-h-screen ${ // Added lg:min-h-screen
+          className={`fixed inset-y-4 left-4 z-40 w-[85%] max-w-xs bg-white/75 backdrop-blur border border-white/60 shadow-2xl rounded-3xl overflow-auto transition-transform duration-300 pt-12 
+            lg:translate-x-0 lg:w-64 lg:max-w-none h-[calc(100vh-2rem)] ${ // Added lg:min-h-screen
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -172,7 +179,7 @@ const DoctorDashboard = () => {
                         e.preventDefault();
                         handleSectionChange("dashboard");
                       }}
-                      className="menu-item text-green-800 text-[15px] font-medium flex items-center cursor-pointer bg-[#F0F8FF] hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                      className={getMenuItemClass(section === "dashboard")}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -199,7 +206,7 @@ const DoctorDashboard = () => {
                         e.preventDefault();
                         handleSectionChange("profile");
                       }}
-                      className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                      className={getMenuItemClass(section === "profile")}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -240,7 +247,7 @@ const DoctorDashboard = () => {
                         e.preventDefault();
                         handleSectionChange("records");
                       }}
-                      className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                      className={getMenuItemClass(section === "records")}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -392,7 +399,7 @@ const DoctorDashboard = () => {
                         <li key={i}>
                           <a
                             href="#"
-                            className="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                            className={getMenuItemClass(false)}
                           >
                             <span>{m}</span>
                           </a>
@@ -447,11 +454,11 @@ const DoctorDashboard = () => {
             type="button"
             aria-label="Open sidebar"
             onClick={() => setIsSidebarOpen(true)}
-            className="lg:hidden w-8 h-8 z-[100] fixed top-[24px] left-[10px] cursor-pointer bg-[#007bff] flex items-center justify-center rounded-full outline-0 transition-all duration-500"
+            className="lg:hidden w-9 h-9 z-[100] fixed top-[20px] left-[12px] cursor-pointer bg-white/90 border border-white/70 text-blue-600 shadow-lg flex items-center justify-center rounded-full outline-0 transition-all duration-300"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              fill="#fff"
+              fill="currentColor"
               className="w-3 h-3"
               viewBox="0 0 55.752 55.752"
             >
@@ -462,7 +469,7 @@ const DoctorDashboard = () => {
             </svg>
           </button>
 
-          <section className="main-content w-full px-4 sm:px-6 lg:px-8">
+          <section className="main-content w-full px-4 sm:px-6 lg:px-8 lg:pl-[19rem]">
             
             {section === "dashboard" && (
               <Dashboard

@@ -499,7 +499,7 @@ const AllTables = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
+    <div className="p-4 sm:p-6 bg-transparent min-h-screen">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-slate-800">All Tables</h1>
@@ -522,7 +522,7 @@ const AllTables = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+      <div className="glass-card rounded-2xl p-4 mb-6">
         <input
           type="text"
           value={query}
@@ -533,13 +533,13 @@ const AllTables = () => {
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-xl shadow-sm p-6 text-sm text-slate-500">
+        <div className="glass-card rounded-2xl p-6 text-sm text-slate-500">
           Loading all tables...
         </div>
       ) : (
         <div className="space-y-6">
           {tableViews.map((table) => (
-            <div key={table.key} className="bg-white rounded-xl shadow-sm">
+            <div key={table.key} className="glass-card rounded-2xl">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b px-4 py-4">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-800">{table.label}</h2>

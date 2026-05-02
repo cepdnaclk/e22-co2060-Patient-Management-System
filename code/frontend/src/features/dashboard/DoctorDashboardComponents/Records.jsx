@@ -384,6 +384,45 @@ const PatientProfile = () => {
         </div>
       ) : (
         <>
+
+      {/* Patient Header Banner - Same as before */}
+      <div className="bg-gradient-to-r from-blue-600 to-sky-600 text-white rounded-3xl shadow-2xl p-5 sm:p-8 mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
+        <img 
+          src={selectedPatient.avatar}
+          alt={selectedPatient.name}
+          className="w-24 h-24 sm:w-40 sm:h-40 rounded-3xl object-cover ring-4 sm:ring-8 ring-white/30"
+        />
+        
+        <div className="flex-1">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <h1 className="text-2xl sm:text-5xl font-bold">{selectedPatient.name}</h1>
+            <span className="bg-emerald-400 text-emerald-900 px-4 sm:px-6 py-1.5 rounded-3xl text-xs sm:text-sm font-semibold flex items-center gap-2">
+              <div className="w-2.5 h-2.5 bg-emerald-900 rounded-full animate-pulse" />
+              Active
+            </span>
+          </div>
+          <p className="text-sm sm:text-2xl mt-2 opacity-90">
+            {selectedPatient.displayId} • {selectedPatient.age} years • {selectedPatient.gender} • {selectedPatient.bloodGroup}
+          </p>
+          <p className="mt-2 sm:mt-3 text-sm sm:text-lg opacity-75">
+            Admitted: {selectedPatient.admittedDate} • Primary Doctor: {selectedPatient.primaryDoctor}
+          </p>
+        </div>
+
+        <div className="hidden lg:grid grid-cols-2 gap-8 text-sm">
+          <div className="text-right">
+            <div className="text-4xl font-semibold">{selectedPatient.height ?? "N/A"}</div>
+            <div className="opacity-75 text-xs">cm Height</div>
+          </div>
+          <div>
+            <div className="text-4xl font-semibold">{selectedPatient.weight ?? "N/A"}</div>
+            <div className="opacity-75 text-xs">kg Weight</div>
+          </div>
+          <div className="text-right col-span-2">
+            <div className="inline-flex items-center gap-3 bg-white/20 backdrop-blur px-6 py-3 rounded-3xl">
+              <span>Allergies:</span>
+              <span className="font-bold text-red-200">{selectedPatient.allergies || "None"}</span>
+
           {/* Patient Header Banner */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-3xl shadow-2xl p-5 sm:p-8 mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
             {/* AVATAR FIX APPLIED HERE */}
@@ -736,6 +775,15 @@ const PatientProfile = () => {
               </div>
             </div>
 
+          {/* Next Appointment & Insurance (same) */}
+          <div className="bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-3xl p-5 sm:p-8 shadow">
+            <p className="text-blue-200 text-sm mb-1">NEXT APPOINTMENT</p>
+            <p className="text-3xl font-bold">Tomorrow<br />10:30 AM</p>
+            <div className="mt-8 flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/30 rounded-2xl flex items-center justify-center text-3xl">🩺</div>
+              <div>
+                <p className="font-medium">Dr. A. Perera</p>
+                <p className="text-blue-100 text-sm">Diabetes Review</p>
             {/* Right Sidebar - Quick Actions */}
             <div className="lg:col-span-4 space-y-8 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-2">
               <div className="bg-white rounded-3xl shadow p-5 sm:p-8">
