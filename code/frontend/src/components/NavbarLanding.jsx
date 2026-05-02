@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext.jsx";
 
 const Navbar = () => {
-  // Destructure the auth states and logout function
+  //  Destructure the auth states and logout function
   const { isLoggedIn, user, logout, isDoctor, isPatient } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,27 +24,16 @@ const Navbar = () => {
   const closeMenu = () => setIsMenuOpen(false);
   const toggleMenu = () => setIsMenuOpen((open) => !open);
 
-
   const navLinkStyles = ({ isActive }) => 
     `relative px-1 py-2 text-sm font-semibold transition-all duration-300 hover:text-blue-600 ${
       isActive ? "text-blue-600 after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-600" : "text-slate-600"
     }`;
 
-  // --- FIX: Dynamic Logo Link ---
-  const getHomeLink = () => {
-    if (isLoggedIn) {
-      if (isPatient) return "/dashboard/patient";
-      if (isDoctor) return "/dashboard/doctor";
-    }
-    return "/";
-  };
-
   return (
-    <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-17.5 tracking-wide relative z-50 ">
+    <header className="flex shadow-md py-4 px-4 sm:px-10 min-h-17.5 tracking-wide relative z-50 py-5 bg-transparent">
       
       <div className="flex flex-wrap items-center justify-between gap-5 w-full">
-        {/* --- FIX: Applied getHomeLink() here --- */}
-        <NavLink to={getHomeLink()} className="flex items-center gap-2">
+        <NavLink to="/" className="flex items-center gap-2">
           <img src="/navbarlogo.png" alt="logo" className="w-10 h-10" />
           <span className="text-sm font-semibold text-slate-800 sm:hidden">
             PMS
@@ -209,3 +198,72 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+
+// import React, { useEffect, useState } from "react";
+// import { NavLink, useNavigate } from "react-router-dom";
+// import { useAuth } from "../features/auth/AuthContext.jsx";
+// import { Menu, X, LogOut } from "lucide-react";
+
+// const Navbar = () => {
+//   const { isLoggedIn, user, logout, isDoctor, isPatient } = useAuth();
+//   const navigate = useNavigate();
+//   const [isMenuOpen, setIsMenuOpen] = useState(false);
+//   const [scrolled, setScrolled] = useState(false);
+
+//   useEffect(() => {
+//     const handleScroll = () => setScrolled(window.scrollY > 20);
+//     window.addEventListener("scroll", handleScroll);
+//     return () => window.removeEventListener("scroll", handleScroll);
+//   }, []);
+
+//   const handleLogout = () => {
+//     logout();
+//     navigate("/login");
+//   };
+
+//   const navLinkStyles = ({ isActive }) => 
+//     `text-sm font-semibold transition-colors hover:text-blue-600 ${isActive ? "text-blue-600" : "text-slate-600"}`;
+
+//   return (
+//     <header className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 ${
+//       scrolled ? "py-3 bg-white/70 backdrop-blur-md shadow-sm" : "py-5 bg-transparent"
+//     }`}>
+//       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+//         <NavLink to="/" className="flex items-center gap-2">
+//           <div className="p-1.5 bg-blue-600 rounded-lg">
+//             <img src="/navbarlogo.png" alt="logo" className="w-6 h-6 brightness-0 invert" />
+//           </div>
+//           <span className="text-xl font-bold tracking-tight text-slate-900">PATIENT<span className="text-blue-600">MS</span></span>
+//         </NavLink>
+
+//         <nav className="hidden lg:flex items-center gap-8">
+//           <NavLink to="/" className={navLinkStyles}>Home</NavLink>
+//           {isLoggedIn && (isPatient ? 
+//             <NavLink to="/dashboard/patient" className={navLinkStyles}>My Profile</NavLink> : 
+//             <NavLink to="/dashboard/doctor" className={navLinkStyles}>Dashboard</NavLink>
+//           )}
+//           <NavLink to="/about" className={navLinkStyles}>About</NavLink>
+//           <NavLink to="/contact" className={navLinkStyles}>Contact</NavLink>
+//         </nav>
+
+//         <div className="flex items-center gap-4">
+//           {!isLoggedIn ? (
+//             <NavLink to="/signup" className="px-5 py-2 text-sm font-bold text-white bg-slate-900 rounded-full hover:bg-blue-600 transition-all">
+//               Sign Up
+//             </NavLink>
+//           ) : (
+//             <button onClick={handleLogout} className="p-2 text-slate-600 hover:text-red-600 transition-colors">
+//               <LogOut size={20} />
+//             </button>
+//           )}
+//           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden text-slate-900">
+//             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+//           </button>
+//         </div>
+//       </div>
+//     </header>
+//   );
+// };
+
+// export default Navbar;

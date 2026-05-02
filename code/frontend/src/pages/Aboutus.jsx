@@ -35,7 +35,7 @@ const Aboutus = () => {
 				{values.map((value) => (
 					<article
 						key={value.title}
-						className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+						className="rounded-2xl glass-card p-6 lift-hover"
 					>
 						<h2 className="text-lg font-semibold text-slate-800">{value.title}</h2>
 						<p className="mt-2 text-sm text-gray-600">{value.description}</p>
@@ -43,7 +43,7 @@ const Aboutus = () => {
 				))}
 			</section>
 
-			<section className="max-w-5xl mx-auto mt-10 rounded-lg border border-indigo-100 bg-indigo-50 p-6 md:p-8">
+			<section className="max-w-5xl mx-auto mt-10 rounded-2xl glass-panel p-6 md:p-8">
 				<h2 className="text-2xl font-semibold text-slate-800">What We Support</h2>
 				<ul className="mt-4 grid gap-3 text-gray-700 sm:grid-cols-2">
 					<li>• Patient registration and profile management</li>
