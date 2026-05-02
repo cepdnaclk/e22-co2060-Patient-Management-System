@@ -132,7 +132,7 @@ const DoctorDashboard = () => {
 
   return (
     <div>
-      <div className="relative bg-transparent h-full min-h-screen">
+      <div className="relative bg-[#f7f6f9] h-full min-h-screen">
         <div className="flex items-start">
           {isSidebarOpen && (
             <button
