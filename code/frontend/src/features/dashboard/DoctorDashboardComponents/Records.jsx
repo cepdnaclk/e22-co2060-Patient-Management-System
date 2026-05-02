@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { patientRecordService } from "../../../services/patientRecordService";
 import New_Prescription from "./Pharmacy.jsx";
-import { useAuth } from "../../auth/AuthContext"; // Adjusted path to match your folder structure
+import { useAuth } from "../../auth/AuthContext";
 
 const PatientProfile = () => {
-  // --- AUTH INTEGRATION ---
   const { user } = useAuth();
   const doctorName = user ? `Dr. ${user.firstName} ${user.lastName}` : "System";
   const doctorId = user?.id || null;
@@ -31,11 +30,10 @@ const PatientProfile = () => {
     },
   ]);
 
-  // --- DTO ALIGNED STATE ---
   const [newRecord, setNewRecord] = useState({
     date: new Date().toISOString().slice(0, 10),
     recordType: "Note",
-    title: "", // Keeping title for the UI input, but mapping it in submit if needed
+    title: "",
     description: "",
     diagnosis: "",
     treatment: "",
@@ -56,7 +54,6 @@ const PatientProfile = () => {
 
     setSavingRecord(true);
     try {
-      // Build payload aligning frontend fields with backend DTO
       const payload = {
         ...newRecord,
         doctor: doctorName,
@@ -72,7 +69,6 @@ const PatientProfile = () => {
         ...previousRecords,
       ]);
 
-      // Reset form
       setNewRecord({
         date: new Date().toISOString().slice(0, 10),
         recordType: "Note",
@@ -96,7 +92,6 @@ const PatientProfile = () => {
 
   const searchPatient = () => {
     const query = searchText.trim().toLowerCase();
-
     if (!query) {
       setSearchError("Please enter patient ID or name.");
       setSelectedPatient(null);
@@ -254,7 +249,6 @@ const PatientProfile = () => {
 
   useEffect(() => {
     let isMounted = true;
-
     const loadPatients = async () => {
       setLoadingPatients(true);
       try {
@@ -272,9 +266,7 @@ const PatientProfile = () => {
         }
       }
     };
-
     loadPatients();
-
     return () => {
       isMounted = false;
     };
@@ -292,23 +284,16 @@ const PatientProfile = () => {
       normalizedType.includes("prescription") ||
       normalizedTitle.includes("prescription");
 
-    if (activeRecordsTab === "all") {
-      return !isPrescriptionRecord;
-    }
-
-    if (activeRecordsTab === "clinical") {
+    if (activeRecordsTab === "all") return !isPrescriptionRecord;
+    if (activeRecordsTab === "clinical")
       return !isLabRecord && !isPrescriptionRecord;
-    }
-
-    if (activeRecordsTab === "lab") {
-      return isLabRecord;
-    }
-
+    if (activeRecordsTab === "lab") return isLabRecord;
     return isPrescriptionRecord;
   });
 
   return (
     <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-50">
+      {/* Search Section */}
       <div className="bg-white rounded-2xl shadow p-5 mb-6">
         <p className="text-sm font-medium text-slate-700 mb-3">
           Search patient first to view profile and records
@@ -318,9 +303,7 @@ const PatientProfile = () => {
             type="text"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") searchPatient();
-            }}
+            onKeyDown={(e) => e.key === "Enter" && searchPatient()}
             placeholder="Enter Patient ID (e.g. PMS-00001) or Name"
             className="md:col-span-3 bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm"
           />
@@ -384,48 +367,8 @@ const PatientProfile = () => {
         </div>
       ) : (
         <>
-
-      {/* Patient Header Banner - Same as before */}
-      <div className="bg-gradient-to-r from-blue-600 to-sky-600 text-white rounded-3xl shadow-2xl p-5 sm:p-8 mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
-        <img 
-          src={selectedPatient.avatar}
-          alt={selectedPatient.name}
-          className="w-24 h-24 sm:w-40 sm:h-40 rounded-3xl object-cover ring-4 sm:ring-8 ring-white/30"
-        />
-        
-        <div className="flex-1">
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <h1 className="text-2xl sm:text-5xl font-bold">{selectedPatient.name}</h1>
-            <span className="bg-emerald-400 text-emerald-900 px-4 sm:px-6 py-1.5 rounded-3xl text-xs sm:text-sm font-semibold flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-emerald-900 rounded-full animate-pulse" />
-              Active
-            </span>
-          </div>
-          <p className="text-sm sm:text-2xl mt-2 opacity-90">
-            {selectedPatient.displayId} • {selectedPatient.age} years • {selectedPatient.gender} • {selectedPatient.bloodGroup}
-          </p>
-          <p className="mt-2 sm:mt-3 text-sm sm:text-lg opacity-75">
-            Admitted: {selectedPatient.admittedDate} • Primary Doctor: {selectedPatient.primaryDoctor}
-          </p>
-        </div>
-
-        <div className="hidden lg:grid grid-cols-2 gap-8 text-sm">
-          <div className="text-right">
-            <div className="text-4xl font-semibold">{selectedPatient.height ?? "N/A"}</div>
-            <div className="opacity-75 text-xs">cm Height</div>
-          </div>
-          <div>
-            <div className="text-4xl font-semibold">{selectedPatient.weight ?? "N/A"}</div>
-            <div className="opacity-75 text-xs">kg Weight</div>
-          </div>
-          <div className="text-right col-span-2">
-            <div className="inline-flex items-center gap-3 bg-white/20 backdrop-blur px-6 py-3 rounded-3xl">
-              <span>Allergies:</span>
-              <span className="font-bold text-red-200">{selectedPatient.allergies || "None"}</span>
-
           {/* Patient Header Banner */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-3xl shadow-2xl p-5 sm:p-8 mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
-            {/* AVATAR FIX APPLIED HERE */}
             {selectedPatient.avatar ? (
               <img
                 src={selectedPatient.avatar}
@@ -483,8 +426,8 @@ const PatientProfile = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Left Column */}
             <div className="lg:col-span-8 space-y-8">
+              {/* Vitals */}
               <div className="bg-white rounded-3xl shadow p-5 sm:p-8">
                 <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3">
                   Current Vitals
@@ -527,244 +470,134 @@ const PatientProfile = () => {
                 </div>
               </div>
 
+              {/* Records Tabs */}
               <div className="bg-white rounded-2xl shadow p-4">
                 <div className="w-full overflow-x-auto">
                   <div className="flex gap-2 min-w-max">
                     <button
                       type="button"
                       onClick={() => setActiveRecordsTab("all")}
-                      className={`text-[15px] whitespace-nowrap text-center py-2.5 px-4 sm:px-5 border-b-2 cursor-pointer transition-all ${
-                        activeRecordsTab === "all"
-                          ? "text-blue-700 font-semibold border-blue-700"
-                          : "text-slate-600 font-medium border-transparent hover:text-blue-700"
-                      }`}
+                      className={`text-[15px] whitespace-nowrap text-center py-2.5 px-4 sm:px-5 border-b-2 cursor-pointer transition-all ${activeRecordsTab === "all" ? "text-blue-700 font-semibold border-blue-700" : "text-slate-600 font-medium border-transparent hover:text-blue-700"}`}
                     >
                       All Records
                     </button>
                     <button
                       type="button"
                       onClick={() => setActiveRecordsTab("clinical")}
-                      className={`text-[15px] whitespace-nowrap text-center py-2.5 px-4 sm:px-5 border-b-2 cursor-pointer transition-all ${
-                        activeRecordsTab === "clinical"
-                          ? "text-blue-700 font-semibold border-blue-700"
-                          : "text-slate-600 font-medium border-transparent hover:text-blue-700"
-                      }`}
+                      className={`text-[15px] whitespace-nowrap text-center py-2.5 px-4 sm:px-5 border-b-2 cursor-pointer transition-all ${activeRecordsTab === "clinical" ? "text-blue-700 font-semibold border-blue-700" : "text-slate-600 font-medium border-transparent hover:text-blue-700"}`}
                     >
                       Clinical Notes
                     </button>
                     <button
                       type="button"
                       onClick={() => setActiveRecordsTab("lab")}
-                      className={`text-[15px] whitespace-nowrap text-center py-2.5 px-4 sm:px-5 border-b-2 cursor-pointer transition-all ${
-                        activeRecordsTab === "lab"
-                          ? "text-blue-700 font-semibold border-blue-700"
-                          : "text-slate-600 font-medium border-transparent hover:text-blue-700"
-                      }`}
+                      className={`text-[15px] whitespace-nowrap text-center py-2.5 px-4 sm:px-5 border-b-2 cursor-pointer transition-all ${activeRecordsTab === "lab" ? "text-blue-700 font-semibold border-blue-700" : "text-slate-600 font-medium border-transparent hover:text-blue-700"}`}
                     >
                       Lab Results
                     </button>
                     <button
                       type="button"
                       onClick={() => setActiveRecordsTab("prescription")}
-                      className={`text-[15px] whitespace-nowrap text-center py-2.5 px-4 sm:px-5 border-b-2 cursor-pointer transition-all ${
-                        activeRecordsTab === "prescription"
-                          ? "text-blue-700 font-semibold border-blue-700"
-                          : "text-slate-600 font-medium border-transparent hover:text-blue-700"
-                      }`}
+                      className={`text-[15px] whitespace-nowrap text-center py-2.5 px-4 sm:px-5 border-b-2 cursor-pointer transition-all ${activeRecordsTab === "prescription" ? "text-blue-700 font-semibold border-blue-700" : "text-slate-600 font-medium border-transparent hover:text-blue-700"}`}
                     >
                       Prescription History
                     </button>
                   </div>
                 </div>
-
-                <p className="text-sm text-slate-600 mt-4">
-                  {activeRecordsTab === "all" &&
-                    "Showing all medical history entries."}
-                  {activeRecordsTab === "clinical" &&
-                    "Showing diagnosis, notes, and non-lab clinical records."}
-                  {activeRecordsTab === "lab" &&
-                    "Showing only records with lab result type."}
-                  {activeRecordsTab === "prescription" &&
-                    "Showing only prescription history entries."}
-                </p>
               </div>
 
-              {activeRecordsTab === "prescription" ? (
-                <>
-                  <div className="bg-white rounded-3xl shadow p-5 sm:p-8">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-2xl font-semibold flex items-center gap-3">
-                        Prescription History
-                      </h2>
-                      <span className="text-xs bg-slate-100 px-3 py-1 rounded-full">
-                        {filteredHistoryRecords.length} entries
-                      </span>
-                    </div>
-
-                    <div className="max-h-[320px] overflow-y-auto pr-2 custom-scroll space-y-4">
-                      {loadingRecords && (
-                        <p className="text-sm text-slate-500">
-                          Loading prescriptions...
-                        </p>
-                      )}
-                      {!loadingRecords &&
-                        filteredHistoryRecords.map((record) => (
-                          <div
-                            key={record.id}
-                            className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-blue-200 transition group"
-                          >
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <div className="flex items-center gap-3">
-                                  <span className="text-xs font-mono bg-slate-100 px-3 py-1 rounded-full">
-                                    {record.date}
-                                  </span>
-                                  <span className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full">
-                                    {record.recordType || record.type}
-                                  </span>
-                                </div>
-                                <p className="font-semibold text-lg mt-2">
-                                  {record.title}
-                                </p>
-                              </div>
-                            </div>
-                            <p className="text-slate-600 mt-3 leading-relaxed whitespace-pre-line">
-                              {record.description}
-                            </p>
-                            <p className="text-xs text-slate-400 mt-4">
-                              Added by {record.doctor}
-                            </p>
-                          </div>
-                        ))}
-                    </div>
-
-                    {!loadingRecords && filteredHistoryRecords.length === 0 && (
-                      <p className="text-center text-slate-400 py-8">
-                        No prescription history found for this patient.
-                      </p>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <div className="bg-white rounded-3xl shadow p-5 sm:p-8">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-semibold flex items-center gap-3">
-                      Medical History & Records
-                    </h2>
-                    <span className="text-xs bg-slate-100 px-3 py-1 rounded-full">
-                      {filteredHistoryRecords.length} / {historyRecords.length}{" "}
-                      entries
-                    </span>
-                  </div>
-
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 mb-6">
-                    <p className="text-sm font-medium mb-3 text-slate-600">
-                      Add New Record
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <input
-                        type="date"
-                        value={newRecord.date}
-                        onChange={(e) =>
-                          setNewRecord({ ...newRecord, date: e.target.value })
-                        }
-                        className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm"
-                      />
-                      <select
-                        value={newRecord.recordType}
-                        onChange={(e) =>
-                          setNewRecord({
-                            ...newRecord,
-                            recordType: e.target.value,
-                          })
-                        }
-                        className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm"
-                      >
-                        <option value="Diagnosis">Diagnosis</option>
-                        <option value="Note">Clinical Note</option>
-                        <option value="Lab Result">Lab Result</option>
-                        <option value="Prescription">Prescription</option>
-                        <option value="Procedure">Procedure</option>
-                        <option value="Allergy">Allergy Update</option>
-                      </select>
-                      <input
-                        type="text"
-                        placeholder="Title (e.g. Hypertension)"
-                        value={newRecord.title}
-                        onChange={(e) =>
-                          setNewRecord({ ...newRecord, title: e.target.value })
-                        }
-                        className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm"
-                      />
-                      <button
-                        onClick={addNewRecord}
-                        disabled={
-                          !selectedPatient || loadingRecords || savingRecord
-                        }
-                        className="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium flex items-center justify-center gap-2 active:scale-95 transition px-4 py-3"
-                      >
-                        {savingRecord ? "Saving..." : "Add Record"}
-                      </button>
-                    </div>
-                    <textarea
-                      placeholder="Detailed description / notes..."
-                      value={newRecord.description}
+              <div className="bg-white rounded-3xl shadow p-5 sm:p-8">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 mb-6">
+                  <p className="text-sm font-medium mb-3 text-slate-600">
+                    Add New Record
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input
+                      type="date"
+                      value={newRecord.date}
+                      onChange={(e) =>
+                        setNewRecord({ ...newRecord, date: e.target.value })
+                      }
+                      className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm"
+                    />
+                    <select
+                      value={newRecord.recordType}
                       onChange={(e) =>
                         setNewRecord({
                           ...newRecord,
-                          description: e.target.value,
+                          recordType: e.target.value,
                         })
                       }
-                      className="mt-4 w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 text-sm h-20 resize-y min-h-[60px]"
+                      className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm"
+                    >
+                      <option value="Diagnosis">Diagnosis</option>
+                      <option value="Note">Clinical Note</option>
+                      <option value="Lab Result">Lab Result</option>
+                      <option value="Prescription">Prescription</option>
+                      <option value="Procedure">Procedure</option>
+                      <option value="Allergy">Allergy Update</option>
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Title"
+                      value={newRecord.title}
+                      onChange={(e) =>
+                        setNewRecord({ ...newRecord, title: e.target.value })
+                      }
+                      className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm"
                     />
+                    <button
+                      onClick={addNewRecord}
+                      disabled={
+                        !selectedPatient || loadingRecords || savingRecord
+                      }
+                      className="bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium px-4 py-3"
+                    >
+                      {savingRecord ? "Saving..." : "Add Record"}
+                    </button>
                   </div>
-
-                  <div className="max-h-[460px] overflow-y-auto pr-2 custom-scroll space-y-4">
-                    {loadingRecords && (
-                      <p className="text-sm text-slate-500">
-                        Loading records...
-                      </p>
-                    )}
-                    {!loadingRecords &&
-                      filteredHistoryRecords.map((record) => (
-                        <div
-                          key={record.id}
-                          className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-blue-200 transition group"
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <div className="flex items-center gap-3">
-                                <span className="text-xs font-mono bg-slate-100 px-3 py-1 rounded-full">
-                                  {record.date}
-                                </span>
-                                <span className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full">
-                                  {record.recordType || record.type}
-                                </span>
-                              </div>
-                              <p className="font-semibold text-lg mt-2">
-                                {record.title}
-                              </p>
-                            </div>
-                          </div>
-                          <p className="text-slate-600 mt-3 leading-relaxed">
-                            {record.description}
-                          </p>
-                          <p className="text-xs text-slate-400 mt-4">
-                            Added by {record.doctor}
-                          </p>
-                        </div>
-                      ))}
-                  </div>
-
-                  {filteredHistoryRecords.length === 0 && (
-                    <p className="text-center text-slate-400 py-12">
-                      No records in this tab. Add one above.
-                    </p>
-                  )}
+                  <textarea
+                    placeholder="Detailed description..."
+                    value={newRecord.description}
+                    onChange={(e) =>
+                      setNewRecord({
+                        ...newRecord,
+                        description: e.target.value,
+                      })
+                    }
+                    className="mt-4 w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 text-sm h-20 resize-y"
+                  />
                 </div>
-              )}
 
-              {/* COMPONENT ANCHOR ADDED HERE */}
+                <div className="max-h-[460px] overflow-y-auto space-y-4">
+                  {!loadingRecords &&
+                    filteredHistoryRecords.map((record) => (
+                      <div
+                        key={record.id}
+                        className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-blue-200 transition"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-mono bg-slate-100 px-3 py-1 rounded-full">
+                            {record.date}
+                          </span>
+                          <span className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full">
+                            {record.recordType || record.type}
+                          </span>
+                        </div>
+                        <p className="font-semibold text-lg mt-2">
+                          {record.title}
+                        </p>
+                        <p className="text-slate-600 mt-3 leading-relaxed">
+                          {record.description}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-4">
+                          Added by {record.doctor}
+                        </p>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
               <div id="prescription-section">
                 <New_Prescription
                   patientName={selectedPatient.name}
@@ -775,21 +608,9 @@ const PatientProfile = () => {
               </div>
             </div>
 
-          {/* Next Appointment & Insurance (same) */}
-          <div className="bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-3xl p-5 sm:p-8 shadow">
-            <p className="text-blue-200 text-sm mb-1">NEXT APPOINTMENT</p>
-            <p className="text-3xl font-bold">Tomorrow<br />10:30 AM</p>
-            <div className="mt-8 flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/30 rounded-2xl flex items-center justify-center text-3xl">🩺</div>
-              <div>
-                <p className="font-medium">Dr. A. Perera</p>
-                <p className="text-blue-100 text-sm">Diabetes Review</p>
-            {/* Right Sidebar - Quick Actions */}
-            <div className="lg:col-span-4 space-y-8 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-2">
+            <div className="lg:col-span-4 space-y-8 lg:sticky lg:top-6">
               <div className="bg-white rounded-3xl shadow p-5 sm:p-8">
                 <h2 className="text-xl font-semibold mb-6">Quick Actions</h2>
-
-                {/* --- FULL SIDEBAR BUTTON CODE FIX HERE --- */}
                 <div className="grid grid-cols-2 gap-4">
                   <button
                     onClick={() =>
@@ -797,13 +618,12 @@ const PatientProfile = () => {
                         .getElementById("prescription-section")
                         ?.scrollIntoView({ behavior: "smooth" })
                     }
-                    className="flex flex-col items-center justify-center gap-3 py-7 bg-blue-50 hover:bg-blue-100 rounded-3xl transition-all active:scale-95 cursor-pointer"
+                    className="flex flex-col items-center justify-center gap-3 py-7 bg-blue-50 hover:bg-blue-100 rounded-3xl transition-all"
                   >
                     <span className="font-medium text-sm text-blue-800">
                       New Prescription
                     </span>
                   </button>
-
                   <button
                     disabled
                     title="Coming Soon"
@@ -813,7 +633,6 @@ const PatientProfile = () => {
                       Book Appointment
                     </span>
                   </button>
-
                   <button
                     disabled
                     title="Coming Soon"
@@ -823,7 +642,6 @@ const PatientProfile = () => {
                       Order Lab Test
                     </span>
                   </button>
-
                   <button
                     disabled
                     title="Coming Soon"
@@ -836,9 +654,8 @@ const PatientProfile = () => {
                 </div>
               </div>
 
-              {/* Next Appointment */}
               <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-3xl p-5 sm:p-8 shadow relative overflow-hidden">
-                <span className="absolute top-4 right-4 text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
+                <span className="absolute top-4 right-4 text-[10px] bg-white/20 px-2 py-0.5 rounded-full uppercase">
                   Coming Soon
                 </span>
                 <p className="text-blue-200 text-sm mb-1">NEXT APPOINTMENT</p>
@@ -858,11 +675,10 @@ const PatientProfile = () => {
                 </div>
               </div>
 
-              {/* Insurance */}
               <div className="bg-white rounded-3xl shadow p-5 sm:p-8 text-sm relative">
                 <h2 className="font-semibold text-xl mb-6 flex items-center gap-2">
-                  Insurance &amp; Billing
-                  <span className="text-[10px] bg-slate-200 text-slate-500 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Insurance & Billing
+                  <span className="text-[10px] bg-slate-200 text-slate-500 px-2 py-0.5 rounded-full uppercase">
                     Coming Soon
                   </span>
                 </h2>
