@@ -1,6 +1,41 @@
-import React from "react";
-import { NavLink } from "react-router";
+import React, { useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom"; // Updated to react-router-dom
+import { useAuth } from "../features/auth/AuthContext.jsx"; // Adjust path if your Home.jsx is in a different folder
+
 const Home = () => {
+  // 1. Pull in the auth context and navigation hook
+  const { user, isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+
+  // 2. Redirect logged-in users to their specific dashboards
+  useEffect(() => {
+    if (isLoggedIn && user?.role) {
+      switch (user.role) {
+        case "SUPER_ADMIN":
+          navigate("/dashboard/super-admin");
+          break;
+        case "ADMIN":
+          navigate("/dashboard/admin");
+          break;
+        case "DOCTOR":
+          navigate("/dashboard/doctor");
+          break;
+        case "NURSE":
+          navigate("/dashboard/nurse");
+          break;
+        case "PATIENT":
+          navigate("/dashboard/patient");
+          break;
+        default:
+          navigate("/"); // Fallback
+      }
+    }
+  }, [isLoggedIn, user, navigate]);
+
+  // 3. Prevent the page from flashing the "Login" buttons before redirecting
+  if (isLoggedIn) return null;
+
+  // 4. Standard public Home page for logged-out users
   return (
     <section className="flex flex-col items-center px-4">
       <h1 className="pt-16 sm:pt-20 text-center text-slate-800 text-3xl sm:text-4xl md:text-5xl/16 font-semibold max-w-3xl leading-tight bg-clip-text my-2.5">

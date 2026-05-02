@@ -3,8 +3,9 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext.jsx";
 
 const Navbar = () => {
-  // Destructure the auth states and logout function
-  const { isLoggedIn, user, logout, isDoctor, isPatient } = useAuth();
+  // 1. EXTRACT THE NEW ROLES HERE
+  const { isLoggedIn, user, logout, isDoctor, isPatient, isNurse, isAdmin } =
+    useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -15,20 +16,21 @@ const Navbar = () => {
     };
   }, [isMenuOpen]);
 
-  // Handle the logout button click
   const handleLogout = () => {
-    logout(); // Clears session and user state
-    navigate("/login"); // Redirects to login page
+    logout();
+    navigate("/login");
   };
 
   const closeMenu = () => setIsMenuOpen(false);
   const toggleMenu = () => setIsMenuOpen((open) => !open);
 
-  // --- FIX: Dynamic Logo Link ---
+  // 2. UPDATE LOGO ROUTING FOR NEW ROLES
   const getHomeLink = () => {
     if (isLoggedIn) {
-      if (isPatient) return "/dashboard/patient";
+      if (isAdmin) return "/dashboard/admin";
+      if (isNurse) return "/dashboard/nurse";
       if (isDoctor) return "/dashboard/doctor";
+      if (isPatient) return "/dashboard/patient";
     }
     return "/";
   };
@@ -36,7 +38,6 @@ const Navbar = () => {
   return (
     <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-17.5 tracking-wide relative z-50">
       <div className="flex flex-wrap items-center justify-between gap-5 w-full">
-        {/* --- FIX: Applied getHomeLink() here --- */}
         <NavLink to={getHomeLink()} className="flex items-center gap-2">
           <img src="/navbarlogo.png" alt="logo" className="w-10 h-10" />
           <span className="text-sm font-semibold text-slate-800 sm:hidden">
@@ -92,6 +93,8 @@ const Navbar = () => {
                 </NavLink>
               </li>
             )}
+
+            {/* --- ROLE BASED NAVIGATION LINKS --- */}
             {isLoggedIn && isPatient && (
               <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
                 <NavLink
@@ -103,6 +106,7 @@ const Navbar = () => {
                 </NavLink>
               </li>
             )}
+
             {isLoggedIn && isDoctor && (
               <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
                 <NavLink
@@ -110,10 +114,36 @@ const Navbar = () => {
                   onClick={closeMenu}
                   className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
                 >
-                  Dashboard
+                  Doctor Dashboard
                 </NavLink>
               </li>
             )}
+
+            {isLoggedIn && isNurse && (
+              <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
+                <NavLink
+                  to="/dashboard/nurse"
+                  onClick={closeMenu}
+                  className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
+                >
+                  Nurse Dashboard
+                </NavLink>
+              </li>
+            )}
+
+            {isLoggedIn && isAdmin && (
+              <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
+                <NavLink
+                  to="/dashboard/admin"
+                  onClick={closeMenu}
+                  className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
+                >
+                  Admin Panel
+                </NavLink>
+              </li>
+            )}
+            {/* ----------------------------------- */}
+
             <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
               <NavLink
                 to="/about"
@@ -147,7 +177,6 @@ const Navbar = () => {
         <div className="flex max-lg:ml-auto space-x-4">
           {!isLoggedIn ? (
             <>
-              {/* Show if logged out  */}
               <NavLink
                 to="/login"
                 className="px-4 py-2 text-sm rounded-full font-medium cursor-pointer tracking-wide text-slate-900 border border-gray-400 bg-transparent hover:bg-gray-50 transition-all"
@@ -163,7 +192,6 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              {/* Show if logged in  */}
               <div className="px-0.5 py-2 hidden sm:block text-sm font-medium text-slate-600">
                 Welcome, {user?.firstName}
               </div>
