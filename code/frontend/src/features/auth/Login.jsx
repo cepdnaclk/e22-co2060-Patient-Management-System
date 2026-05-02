@@ -51,19 +51,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-linear-to-r from-blue-800 to-blue-400 min-h-screen">
+    <div className="bg-transparent min-h-screen">
       <div className="min-h-screen flex flex-col items-center justify-center p-6 sm:p-8">
         <div className="grid md:grid-cols-2 items-center gap-10 max-w-6xl w-full">
           {/* Left Side — Branding */}
-          <div className="max-w-lg max-md:mx-auto max-md:text-center">
-            <h1 className="text-3xl sm:text-4xl font-semibold leading-tight text-white">
+          <div className="max-w-lg max-md:mx-auto max-md:text-center glass-panel p-6 sm:p-8 rounded-2xl">
+            <h1 className="text-3xl sm:text-4xl font-semibold leading-tight text-slate-900">
               Secure Your Health
             </h1>
-            <p className="text-sm mt-6 text-white">
+            <p className="text-sm mt-6 text-slate-600">
               Don't have an account?{" "}
               <NavLink
                 to="/signup"
-                className="text-white underline font-semibold ml-1"
+                className="text-blue-600 underline font-semibold ml-1"
               >
                 Register here
               </NavLink>
@@ -73,8 +73,8 @@ export default function LoginPage() {
           {/* Right Side — Form */}
           <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-xl px-6 py-10 sm:px-8 sm:py-12 max-w-md md:ml-auto
-                                   max-md:mx-auto w-full shadow-2xl"
+            className="glass-card rounded-2xl px-6 py-10 sm:px-8 sm:py-12 max-w-md md:ml-auto
+                                   max-md:mx-auto w-full"
           >
             <h2 className="text-slate-900 text-3xl font-bold mb-8">Sign in</h2>
 
@@ -103,7 +103,7 @@ export default function LoginPage() {
                   onChange={(e) => {
                     setEmail(e.target.value);
                   }}
-                  className="bg-gray-100 focus:bg-transparent w-full text-sm
+                  className="bg-white/80 focus:bg-white w-full text-sm
                                                px-4 py-3 rounded-md outline-blue-600 transition-all"
                 />
               </div>
@@ -122,7 +122,7 @@ export default function LoginPage() {
                   onChange={(e) => {
                     setPassword(e.target.value);
                   }}
-                  className="bg-gray-100 focus:bg-transparent w-full text-sm
+                  className="bg-white/80 focus:bg-white w-full text-sm
                                                px-4 py-3 rounded-md outline-blue-600 transition-all"
                 />
               </div>
@@ -144,7 +144,7 @@ export default function LoginPage() {
                 type="submit"
                 disabled={loading}
                 className="w-full py-2.5 px-6 text-sm font-medium rounded-md
-                                           text-white bg-slate-800 hover:bg-slate-900
+                                           text-white bg-blue-600 hover:bg-blue-700
                                            disabled:opacity-50 disabled:cursor-not-allowed
                                            transition-all cursor-pointer"
               >

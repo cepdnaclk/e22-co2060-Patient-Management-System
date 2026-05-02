@@ -25,7 +25,7 @@ const Navbar = () => {
   const toggleMenu = () => setIsMenuOpen((open) => !open);
 
   return (
-    <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-17.5 tracking-wide relative z-50">
+    <header className="flex py-4 px-4 sm:px-10 bg-white/70 backdrop-blur border-b border-white/60 min-h-17.5 tracking-wide relative z-50">
       <div className="flex flex-wrap items-center justify-between gap-5 w-full">
         <NavLink to="/" className="flex items-center gap-2">
           <img src="/navbarlogo.png" alt="logo" className="w-10 h-10" />
@@ -159,7 +159,7 @@ const Navbar = () => {
               </div>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm rounded-full font-medium cursor-pointer tracking-wide text-white border border-purple-600 bg-purple-600 hover:bg-blue-700 transition-all"
+                className="px-4 py-2 text-sm rounded-full font-medium cursor-pointer tracking-wide text-white border border-blue-600 bg-blue-600 hover:bg-blue-700 transition-all"
               >
                 Logout
               </button>

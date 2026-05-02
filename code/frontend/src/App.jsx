@@ -11,56 +11,62 @@ import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute.jsx";
 import Navbar from "./components/Navbar.jsx";
 import AdminDashboard from "./features/dashboard/AdminDashboard.jsx";
+import AmbientOrbs from "./components/AmbientOrbs.jsx";
 
 function App() {
   return (
-    <>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<Aboutus />} />
-        <Route path="/contact" element={<ContactUs />} />
-        <Route path="/faq" element={<FAQ />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
+    <div className="app-shell">
+      <AmbientOrbs />
+      <div className="app-surface">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<Aboutus />} />
+          <Route path="/contact" element={<ContactUs />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
 
-        <Route
-          path="/dashboard/doctor"
-          element={
-            <ProtectedRoute
-              allowedRoles={["DOCTOR", "NURSE", "ADMIN", "SUPER_ADMIN"]}
-            >
-              <DoctorDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/patient"
-          element={
-            <ProtectedRoute allowedRoles={["PATIENT"]}>
-              <PatientDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/admin"
-          element={
-             <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
-              <AdminDashboard />
-             </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/unauthorized"
-          element={
-            <div className="text-center p-16">
-              <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>
-              <p>You do not have permission to view this page.</p>
-            </div>
-          }
-        />
-      </Routes>
-    </>
+          <Route
+            path="/dashboard/doctor"
+            element={
+              <ProtectedRoute
+                allowedRoles={["DOCTOR", "NURSE", "ADMIN", "SUPER_ADMIN"]}
+              >
+                <DoctorDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/patient"
+            element={
+              <ProtectedRoute allowedRoles={["PATIENT"]}>
+                <PatientDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/admin"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/unauthorized"
+            element={
+              <div className="text-center p-16">
+                <h1 className="text-2xl font-bold text-red-600">
+                  Access Denied
+                </h1>
+                <p>You do not have permission to view this page.</p>
+              </div>
+            }
+          />
+        </Routes>
+      </div>
+    </div>
   );
 }
 

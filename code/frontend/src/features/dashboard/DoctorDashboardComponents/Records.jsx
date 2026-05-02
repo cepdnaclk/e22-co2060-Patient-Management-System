@@ -339,7 +339,7 @@ const PatientProfile = () => {
       ) : (
         <>
       {/* Patient Header Banner - Same as before */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-3xl shadow-2xl p-5 sm:p-8 mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
+      <div className="bg-gradient-to-r from-blue-600 to-sky-600 text-white rounded-3xl shadow-2xl p-5 sm:p-8 mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
         <img 
           src={selectedPatient.avatar}
           alt={selectedPatient.name}
@@ -631,7 +631,7 @@ const PatientProfile = () => {
           </div>
 
           {/* Next Appointment & Insurance (same) */}
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-3xl p-5 sm:p-8 shadow">
+          <div className="bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-3xl p-5 sm:p-8 shadow">
             <p className="text-blue-200 text-sm mb-1">NEXT APPOINTMENT</p>
             <p className="text-3xl font-bold">Tomorrow<br />10:30 AM</p>
             <div className="mt-8 flex items-center gap-4">
