@@ -1,7 +1,9 @@
 import React from "react";
 import { NavLink } from "react-router";
+import Navbar from "../components/Navbar";
 const Home = () => {
   return (
+    
     <section className="flex flex-col items-center px-4">
       <h1 className="pt-16 sm:pt-20 text-center text-slate-800 text-3xl sm:text-4xl md:text-5xl/16 font-semibold max-w-3xl leading-tight tracking-tight bg-clip-text my-2.5">
         Patient{" "}

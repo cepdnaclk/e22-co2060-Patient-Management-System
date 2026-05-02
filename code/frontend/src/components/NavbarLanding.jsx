@@ -1,113 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import { NavLink, useNavigate } from "react-router-dom";
-// import { useAuth } from "../features/auth/AuthContext.jsx";
-// // Using Lucide icons for a more professional, consistent look
-// import { Menu, X, LogOut, HeartPulse } from "lucide-react";
-
-// const Navbar = () => {
-//   const { isLoggedIn, user, logout, isDoctor, isPatient } = useAuth();
-//   const navigate = useNavigate();
-//   const [isMenuOpen, setIsMenuOpen] = useState(false);
-//   const [scrolled, setScrolled] = useState(false);
-
-//   // Effect to handle glassmorphism intensity on scroll
-//   useEffect(() => {
-//     const handleScroll = () => setScrolled(window.scrollY > 20);
-//     window.addEventListener("scroll", handleScroll);
-//     return () => window.removeEventListener("scroll", handleScroll);
-//   }, []);
-
-//   useEffect(() => {
-//     document.body.style.overflow = isMenuOpen ? "hidden" : "";
-//     return () => { document.body.style.overflow = ""; };
-//   }, [isMenuOpen]);
-
-//   const handleLogout = () => {
-//     logout();
-//     navigate("/login");
-//   };
-
-//   const closeMenu = () => setIsMenuOpen(false);
-//   const toggleMenu = () => setIsMenuOpen((open) => !open);
-
-//   const navLinkStyles = ({ isActive }) => 
-//     `relative px-1 py-2 text-sm font-semibold transition-all duration-300 hover:text-blue-600 ${
-//       isActive ? "text-blue-600 after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-600" : "text-slate-600"
-//     }`;
-
-//   return (
-//     <header className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 ${
-//       scrolled ? "py-3 bg-white/70 backdrop-blur-xl shadow-sm border-b border-white/20" : "py-5 bg-transparent"
-//     }`}>
-//       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        
-//         {/* Brand/Logo Section */}
-//         <NavLink to="/" onClick={closeMenu} className="flex items-center gap-2 group">
-//           <div className="p-2 bg-blue-600 rounded-xl group-hover:rotate-12 transition-transform shadow-lg shadow-blue-600/20">
-//             <HeartPulse className="text-white w-6 h-6" />
-//           </div>
-//           <span className="text-xl font-black tracking-tighter text-slate-900 uppercase">
-//             Patient<span className="text-blue-600">MS</span>
-//           </span>
-//         </NavLink>
-
-//         {/* Desktop Navigation Links */}
-//         <nav className="hidden lg:flex items-center gap-8">
-//           {!isLoggedIn && <NavLink to="/" className={navLinkStyles}>Home</NavLink>}
-//           {isLoggedIn && isPatient && <NavLink to="/dashboard/patient" className={navLinkStyles}>My Profile</NavLink>}
-//           {isLoggedIn && isDoctor && <NavLink to="/dashboard/doctor" className={navLinkStyles}>Dashboard</NavLink>}
-//           <NavLink to="/about" className={navLinkStyles}>About</NavLink>
-//           <NavLink to="/contact" className={navLinkStyles}>Contact</NavLink>
-//           <NavLink to="/faq" className={navLinkStyles}>FAQ</NavLink>
-//         </nav>
-
-//         {/* Action Buttons & Profile */}
-//         <div className="flex items-center gap-4">
-//           {!isLoggedIn ? (
-//             <div className="flex items-center gap-2">
-//               <NavLink to="/login" className="hidden sm:block px-5 py-2 text-sm font-bold text-slate-700 hover:text-blue-600 transition-colors">
-//                 Login
-//               </NavLink>
-//               <NavLink to="/signup" className="px-6 py-2.5 text-sm font-bold text-white bg-slate-900 rounded-full hover:bg-blue-600 transition-all shadow-lg shadow-slate-900/10 active:scale-95">
-//                 Join Now
-//               </NavLink>
-//             </div>
-//           ) : (
-//             <div className="flex items-center gap-4 bg-slate-100/50 p-1 pr-4 rounded-full border border-slate-200">
-//               <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs">
-//                 {user?.firstName?.[0]}
-//               </div>
-//               <span className="hidden md:block text-sm font-bold text-slate-900">Hi, {user?.firstName}</span>
-//               <button onClick={handleLogout} className="text-slate-500 hover:text-red-600 transition-colors" title="Logout">
-//                 <LogOut size={18} />
-//               </button>
-//             </div>
-//           )}
-
-//           {/* Mobile Burger Menu */}
-//           <button onClick={toggleMenu} className="lg:hidden p-2 text-slate-900 hover:bg-slate-100 rounded-xl transition-colors">
-//             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-//           </button>
-//         </div>
-//       </div>
-
-//       {/* Mobile Full-Screen Sidebar */}
-//       <div className={`fixed inset-0 top-[70px] bg-white/95 backdrop-blur-2xl z-[-1] lg:hidden transition-all duration-500 flex flex-col p-8 gap-6 ${
-//         isMenuOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
-//       }`}>
-//         <NavLink to="/" onClick={closeMenu} className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2">Home</NavLink>
-//         <NavLink to="/about" onClick={closeMenu} className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2">About</NavLink>
-//         <NavLink to="/contact" onClick={closeMenu} className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2">Contact</NavLink>
-//         <NavLink to="/faq" onClick={closeMenu} className="text-2xl font-bold text-slate-900 border-b border-slate-100 pb-2">FAQ</NavLink>
-//         {!isLoggedIn && (
-//           <NavLink to="/login" onClick={closeMenu} className="mt-auto py-4 bg-blue-600 text-white rounded-2xl text-center font-bold">Sign In</NavLink>
-//         )}
-//       </div>
-//     </header>
-//   );
-// };
-
-// export default Navbar;
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext.jsx";
@@ -140,7 +30,7 @@ const Navbar = () => {
     }`;
 
   return (
-    <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-17.5 tracking-wide relative z-50 ">
+    <header className="flex shadow-md py-4 px-4 sm:px-10 min-h-17.5 tracking-wide relative z-50 py-5 bg-transparent">
       
       <div className="flex flex-wrap items-center justify-between gap-5 w-full">
         <NavLink to="/" className="flex items-center gap-2">
@@ -308,3 +198,72 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+
+// import React, { useEffect, useState } from "react";
+// import { NavLink, useNavigate } from "react-router-dom";
+// import { useAuth } from "../features/auth/AuthContext.jsx";
+// import { Menu, X, LogOut } from "lucide-react";
+
+// const Navbar = () => {
+//   const { isLoggedIn, user, logout, isDoctor, isPatient } = useAuth();
+//   const navigate = useNavigate();
+//   const [isMenuOpen, setIsMenuOpen] = useState(false);
+//   const [scrolled, setScrolled] = useState(false);
+
+//   useEffect(() => {
+//     const handleScroll = () => setScrolled(window.scrollY > 20);
+//     window.addEventListener("scroll", handleScroll);
+//     return () => window.removeEventListener("scroll", handleScroll);
+//   }, []);
+
+//   const handleLogout = () => {
+//     logout();
+//     navigate("/login");
+//   };
+
+//   const navLinkStyles = ({ isActive }) => 
+//     `text-sm font-semibold transition-colors hover:text-blue-600 ${isActive ? "text-blue-600" : "text-slate-600"}`;
+
+//   return (
+//     <header className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 ${
+//       scrolled ? "py-3 bg-white/70 backdrop-blur-md shadow-sm" : "py-5 bg-transparent"
+//     }`}>
+//       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+//         <NavLink to="/" className="flex items-center gap-2">
+//           <div className="p-1.5 bg-blue-600 rounded-lg">
+//             <img src="/navbarlogo.png" alt="logo" className="w-6 h-6 brightness-0 invert" />
+//           </div>
+//           <span className="text-xl font-bold tracking-tight text-slate-900">PATIENT<span className="text-blue-600">MS</span></span>
+//         </NavLink>
+
+//         <nav className="hidden lg:flex items-center gap-8">
+//           <NavLink to="/" className={navLinkStyles}>Home</NavLink>
+//           {isLoggedIn && (isPatient ? 
+//             <NavLink to="/dashboard/patient" className={navLinkStyles}>My Profile</NavLink> : 
+//             <NavLink to="/dashboard/doctor" className={navLinkStyles}>Dashboard</NavLink>
+//           )}
+//           <NavLink to="/about" className={navLinkStyles}>About</NavLink>
+//           <NavLink to="/contact" className={navLinkStyles}>Contact</NavLink>
+//         </nav>
+
+//         <div className="flex items-center gap-4">
+//           {!isLoggedIn ? (
+//             <NavLink to="/signup" className="px-5 py-2 text-sm font-bold text-white bg-slate-900 rounded-full hover:bg-blue-600 transition-all">
+//               Sign Up
+//             </NavLink>
+//           ) : (
+//             <button onClick={handleLogout} className="p-2 text-slate-600 hover:text-red-600 transition-colors">
+//               <LogOut size={20} />
+//             </button>
+//           )}
+//           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden text-slate-900">
+//             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+//           </button>
+//         </div>
+//       </div>
+//     </header>
+//   );
+// };
+
+// export default Navbar;

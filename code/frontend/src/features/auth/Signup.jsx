@@ -88,7 +88,7 @@ export default function SignupPage() {
       <div className="mx-4 sm:mx-6 mb-8 -mt-16">
         <form
           onSubmit={handleSubmit}
-          className="max-w-4xl max-md:max-w-xl mx-auto glass-card sm:p-8 p-4 rounded-2xl"
+          className="max-w-4xl max-md:max-w-xl mx-auto sm:p-8 p-4 rounded-2xl bg-white/40 backdrop-blur-2xl border border-white/60 p-8 sm:p-10 rounded-[2.5rem] shadow-2xl shadow-blue-900/5 transition-all"
         >
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md mb-6 text-sm">
@@ -198,7 +198,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-5 text-sm font-medium rounded-md cursor-pointer text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-full shadow-lg shadow-blue-200 active:scale-[0.98] transition-all disabled:opacity-50 uppercase tracking-widest text-xs flex items-center justify-center gap-2"
             >
               {loading ? "Creating account..." : "Sign up"}
             </button>

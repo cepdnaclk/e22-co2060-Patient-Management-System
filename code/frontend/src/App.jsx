@@ -7,18 +7,27 @@ import ContactUs from "./pages/ContactUs.jsx";
 import FAQ from "./pages/FAQ.jsx";
 import DoctorDashboard from "./features/dashboard/DoctorDashboard.jsx";
 import PatientDashboard from "./features/dashboard/PatientDashboard.jsx";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute.jsx";
 import Navbar from "./components/Navbar.jsx";
 import AdminDashboard from "./features/dashboard/AdminDashboard.jsx";
 import AmbientOrbs from "./components/AmbientOrbs.jsx";
+import NavbarLanding from "./components/NavbarLanding.jsx";
 
 function App() {
+  const location = useLocation();
+
+  // Define the paths where you want the Landing Navbar
+  const landingPaths = ["/", "/signup", "/login","/about","/contact","/faq"];
+  const isLandingPage = landingPaths.includes(location.pathname);
+
   return (
     <div className="app-shell">
       <AmbientOrbs />
       <div className="app-surface">
-        <Navbar />
+        {/* Conditional Navbar Rendering */}
+        {isLandingPage ? <NavbarLanding /> : <Navbar />}
+
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<Aboutus />} />
@@ -27,6 +36,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
 
+          {/* Dashboards and Protected Routes */}
           <Route
             path="/dashboard/doctor"
             element={
