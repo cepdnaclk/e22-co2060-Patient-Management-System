@@ -68,15 +68,8 @@ const PatientDashboard = () => {
     { id: "records", label: "Medical Records" },
   ];
 
-  const getMenuItemClass = (active) =>
-    `w-full text-left flex items-center gap-2 rounded-full px-3 py-2.5 text-sm font-medium transition ${
-      active
-        ? "bg-white/90 text-slate-900 shadow-sm border border-white/70"
-        : "text-slate-600 hover:text-slate-900 hover:bg-white/70"
-    }`;
-
   const renderDashboardSection = () => (
-    <div className="p-4 sm:p-6 bg-transparent min-h-screen">
+    <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-slate-800">Patient Dashboard</h1>
         <p className="text-sm text-gray-600">Overview of your account and health data</p>
@@ -89,25 +82,25 @@ const PatientDashboard = () => {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="glass-card p-4 rounded-2xl">
+        <div className="bg-white p-4 rounded shadow [box-shadow:0_4px_12px_-5px_rgba(0,0,0,0.4)]">
           <p className="text-sm text-gray-500">Patient ID</p>
           <p className="text-xl font-bold text-slate-800 mt-1">
             {loading ? "..." : patient?.patientId || "N/A"}
           </p>
         </div>
-        <div className="glass-card p-4 rounded-2xl">
+        <div className="bg-white p-4 rounded shadow [box-shadow:0_4px_12px_-5px_rgba(0,0,0,0.4)]">
           <p className="text-sm text-gray-500">Medical Records</p>
           <p className="text-xl font-bold text-slate-800 mt-1">
             {loading ? "..." : stats.totalRecords}
           </p>
         </div>
-        <div className="glass-card p-4 rounded-2xl">
+        <div className="bg-white p-4 rounded shadow [box-shadow:0_4px_12px_-5px_rgba(0,0,0,0.4)]">
           <p className="text-sm text-gray-500">Current Medications</p>
           <p className="text-xl font-bold text-slate-800 mt-1">
             {loading ? "..." : stats.activeMedications}
           </p>
         </div>
-        <div className="glass-card p-4 rounded-2xl">
+        <div className="bg-white p-4 rounded shadow [box-shadow:0_4px_12px_-5px_rgba(0,0,0,0.4)]">
           <p className="text-sm text-gray-500">Profile Status</p>
           <p className="text-xl font-bold text-slate-800 mt-1">
             {loading ? "..." : stats.profileStatus}
@@ -116,7 +109,7 @@ const PatientDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-card p-4 rounded-2xl">
+        <div className="bg-white p-4 rounded shadow [box-shadow:0_4px_12px_-5px_rgba(0,0,0,0.4)]">
           <h2 className="text-lg font-medium mb-3">Profile Summary</h2>
           <div className="space-y-2 text-sm text-gray-700">
             <p>
@@ -138,7 +131,7 @@ const PatientDashboard = () => {
           </div>
         </div>
 
-        <div className="glass-card p-4 rounded-2xl">
+        <div className="bg-white p-4 rounded shadow [box-shadow:0_4px_12px_-5px_rgba(0,0,0,0.4)]">
           <h2 className="text-lg font-medium mb-3">Recent Medical Records</h2>
           <div className="space-y-3">
             {loading ? (
@@ -162,8 +155,8 @@ const PatientDashboard = () => {
   );
 
   const renderDetailsSection = () => (
-    <div className="p-4 sm:p-6 bg-transparent min-h-screen">
-      <div className="glass-card rounded-2xl p-6">
+    <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
+      <div className="bg-white rounded-xl shadow p-6 [box-shadow:0_4px_12px_-5px_rgba(0,0,0,0.4)]">
         <h1 className="text-2xl font-semibold text-slate-800">My Details</h1>
         <p className="text-sm text-gray-600 mt-1">Patient profile and contact information</p>
 
@@ -194,7 +187,7 @@ const PatientDashboard = () => {
 
       {!loading && (
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="glass-card rounded-2xl p-6">
+          <div className="bg-white rounded-xl shadow p-6 [box-shadow:0_4px_12px_-5px_rgba(0,0,0,0.4)]">
             <h2 className="text-lg font-medium text-slate-800">Emergency Contact</h2>
             <div className="mt-3 space-y-2 text-sm text-gray-700">
               <p><span className="font-medium text-slate-800">Name:</span> {patient?.emergencyContactName || "N/A"}</p>
@@ -203,7 +196,7 @@ const PatientDashboard = () => {
             </div>
           </div>
 
-          <div className="glass-card rounded-2xl p-6">
+          <div className="bg-white rounded-xl shadow p-6 [box-shadow:0_4px_12px_-5px_rgba(0,0,0,0.4)]">
             <h2 className="text-lg font-medium text-slate-800">Health Summary</h2>
             <div className="mt-3 space-y-2 text-sm text-gray-700">
               <p><span className="font-medium text-slate-800">Allergies:</span> {patient?.allergies || "None listed"}</p>
@@ -217,8 +210,8 @@ const PatientDashboard = () => {
   );
 
   const renderRecordsSection = () => (
-    <div className="p-4 sm:p-6 bg-transparent min-h-screen">
-      <div className="glass-card rounded-2xl p-6">
+    <div className="p-4 sm:p-6 bg-slate-50 min-h-screen">
+      <div className="bg-white rounded-xl shadow p-6 [box-shadow:0_4px_12px_-5px_rgba(0,0,0,0.4)]">
         <h1 className="text-2xl font-semibold text-slate-800">Medical Records</h1>
         <p className="text-sm text-gray-600 mt-1">Your recent clinical history and notes</p>
 
@@ -268,16 +261,14 @@ const PatientDashboard = () => {
       )}
       <div className="flex items-start">
         <aside
-          className={`fixed inset-y-4 left-4 z-40 w-[85%] max-w-xs bg-white/75 backdrop-blur border border-white/60 shadow-2xl rounded-3xl p-6 pt-12 transition-transform duration-300 lg:translate-x-0 lg:w-[250px] lg:max-w-none h-[calc(100vh-2rem)] ${
+          className={`fixed inset-y-0 left-0 z-40 w-full min-h-screen bg-white shadow-lg p-6 transition-transform duration-300 lg:static lg:translate-x-0 lg:w-[250px] lg:min-h-screen ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <div className="hidden lg:block">
-            <h2 className="text-lg font-semibold text-slate-800">Patient Panel</h2>
-            <p className="text-xs text-gray-500 mt-1 break-all">{user?.email || ""}</p>
-          </div>
+          <h2 className="text-lg font-semibold text-slate-800">Patient Panel</h2>
+          <p className="text-xs text-gray-500 mt-1 break-all">{user?.email || ""}</p>
 
-          <nav className="mt-10 space-y-2">
+          <nav className="mt-6 space-y-2">
             {menuItems.map((item) => {
               const active = section === item.id;
 
@@ -289,7 +280,11 @@ const PatientDashboard = () => {
                     setSection(item.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={getMenuItemClass(active)}
+                  className={`w-full text-left rounded-md px-3 py-2.5 text-sm font-medium transition-all ${
+                    active
+                      ? "bg-[#F0F8FF] text-green-800"
+                      : "text-slate-800 hover:bg-[#F0F8FF]"
+                  }`}
                 >
                   {item.label}
                 </button>
@@ -298,8 +293,8 @@ const PatientDashboard = () => {
           </nav>
         </aside>
 
-        <section className="w-full lg:pl-[18rem]">
-          <div className="lg:hidden sticky top-0 z-20 bg-white/85 backdrop-blur border-b border-white/70 px-4 py-3 flex items-center gap-3">
+        <section className="w-full">
+          <div className="lg:hidden sticky top-0 z-20 bg-white border-b px-4 py-3 flex items-center gap-3">
             <button
               type="button"
               aria-label="Open sidebar"
