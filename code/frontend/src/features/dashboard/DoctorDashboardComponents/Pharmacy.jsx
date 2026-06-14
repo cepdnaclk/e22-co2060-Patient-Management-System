@@ -1,36 +1,29 @@
 import React, { useState } from 'react';
+import { Card, CardHeader, CardContent } from "../../../components/ui/Card.jsx";
+import { Button } from "../../../components/ui/Button.jsx";
+import { Plus, Trash2, Save, X, Pill } from "lucide-react";
+
+// Common Sri Lankan Drugs Database for Autocomplete
+const COMMON_DRUGS = [
+  "Paracetamol (Panadol) 500mg", "Amoxicillin 250mg", "Amoxicillin 500mg", "Augmentin 625mg", 
+  "Ibuprofen 400mg", "Metformin 500mg", "Atorvastatin 20mg", "Losartan 50mg", 
+  "Omeprazole 20mg", "Pantoprazole 40mg", "Salbutamol 4mg", "Cetirizine 10mg", 
+  "Chlorpheniramine (Piriton) 4mg", "Ciprofloxacin 500mg", "Azithromycin 500mg", 
+  "Diclofenac Sodium 50mg", "Vitamin C 500mg", "Folic Acid 5mg", "Domperidone 10mg"
+];
+
+const COMMON_DOSAGES = ["1 Tablet", "2 Tablets", "5ml Syrup", "10ml Syrup", "1 Capsule"];
+const COMMON_FREQUENCIES = ["Twice a day (bd)", "Three times a day (tds)", "Once a day (od)", "At night (nocte)", "When required (prn)"];
+const COMMON_DURATIONS = ["3 days", "5 days", "1 week", "2 weeks", "1 month"];
 
 const PrescriptionEditor = ({
-  patientName = "Rajesh Kumar",
-  patientId = "PMS-00421",
+  patientName = "Unknown Patient",
+  patientId = "",
   onSavePrescription,
   saving = false,
 }) => {
   const [medicines, setMedicines] = useState([
-    {
-      id: 1,
-      name: "Paracetamol",
-      dosage: "500mg",
-      frequency: "Twice a day",
-      duration: "5 days",
-      notes: "Take after meals"
-    },
-    {
-      id: 2,
-      name: "Amoxicillin",
-      dosage: "250mg",
-      frequency: "Three times a day",
-      duration: "7 days",
-      notes: "Finish the course"
-    },
-    {
-      id: 3,
-      name: "Ibuprofen",
-      dosage: "400mg",
-      frequency: "Once a day",
-      duration: "3 days",
-      notes: "Take with water"
-    }
+    { id: 1, name: "", dosage: "", frequency: "", duration: "", notes: "" }
   ]);
 
   const handleChange = (id, field, value) => {
@@ -43,24 +36,19 @@ const PrescriptionEditor = ({
     const newId = Math.max(0, ...medicines.map(m => m.id)) + 1;
     setMedicines([
       ...medicines,
-      {
-        id: newId,
-        name: "",
-        dosage: "",
-        frequency: "",
-        duration: "",
-        notes: ""
-      }
+      { id: newId, name: "", dosage: "", frequency: "", duration: "", notes: "" }
     ]);
   };
 
   const deleteMedicine = (id) => {
-    setMedicines(medicines.filter(med => med.id !== id));
+    if (medicines.length > 1) {
+      setMedicines(medicines.filter(med => med.id !== id));
+    }
   };
 
   const savePrescription = async () => {
     const validMedicines = medicines.filter(
-      (med) => med.name.trim() || med.dosage.trim() || med.frequency.trim() || med.duration.trim() || med.notes.trim(),
+      (med) => med.name.trim() || med.dosage.trim() || med.frequency.trim() || med.duration.trim() || med.notes.trim()
     );
 
     if (validMedicines.length === 0) {
@@ -70,212 +58,154 @@ const PrescriptionEditor = ({
 
     if (onSavePrescription) {
       await onSavePrescription(validMedicines);
+      // Reset after save
+      setMedicines([{ id: 1, name: "", dosage: "", frequency: "", duration: "", notes: "" }]);
       return;
     }
 
-    console.log("Prescription Saved:", validMedicines);
-    alert("Prescription saved successfully for " + patientName + "!");
+    alert(`Prescription saved successfully for ${patientName}!`);
   };
 
   const cancel = () => {
     if (confirm("Discard this prescription?")) {
-      // reset or close modal
-      alert("Prescription cancelled.");
+      setMedicines([{ id: 1, name: "", dosage: "", frequency: "", duration: "", notes: "" }]);
     }
   };
 
+  const inputClass = "w-full bg-slate-50 focus:bg-white border border-slate-200 focus:border-blue-500 rounded-lg px-3 py-2 text-sm outline-none transition-all shadow-sm";
+
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-4 sm:p-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 border-b pb-4">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="text-4xl"></div>
-          <div>
-            <h2 className="text-xl sm:text-2xl font-semibold text-slate-900">
-              New Prescription
-            </h2>
-            <p className="text-slate-500 text-xs sm:text-sm">
-              {patientName} • {patientId}
-            </p>
+    <Card className="border-none shadow-xl shadow-blue-900/5">
+      <CardHeader 
+        title={
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
+              <Pill className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">New Prescription</h2>
+              <p className="text-sm text-slate-500 font-normal mt-0.5">{patientName} {patientId ? `• ${patientId}` : ''}</p>
+            </div>
           </div>
-        </div>
-        <button className="text-slate-400 hover:text-slate-600">
-        </button>
-      </div>
+        }
+      />
+      
+      {/* Datalists for autocomplete */}
+      <datalist id="drug-names">
+        {COMMON_DRUGS.map((drug, i) => <option key={i} value={drug} />)}
+      </datalist>
+      <datalist id="dosages">
+        {COMMON_DOSAGES.map((dosage, i) => <option key={i} value={dosage} />)}
+      </datalist>
+      <datalist id="frequencies">
+        {COMMON_FREQUENCIES.map((freq, i) => <option key={i} value={freq} />)}
+      </datalist>
+      <datalist id="durations">
+        {COMMON_DURATIONS.map((dur, i) => <option key={i} value={dur} />)}
+      </datalist>
 
-      {/* Table */}
-      <div className="hidden sm:block overflow-x-auto">
-        <table className="min-w-full">
-          <thead>
-            <tr className="bg-slate-100 text-slate-600 uppercase text-xs tracking-widest">
-              <th className="py-4 px-6 text-left font-medium">Medicine Name</th>
-              <th className="py-4 px-6 text-left font-medium">Dosage</th>
-              <th className="py-4 px-6 text-left font-medium">Frequency</th>
-              <th className="py-4 px-6 text-left font-medium">Duration</th>
-              <th className="py-4 px-6 text-left font-medium">Notes</th>
-              <th className="w-12"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y text-slate-700 text-sm">
-            {medicines.map((med) => (
-              <tr key={med.id} className="hover:bg-slate-50 transition-colors">
-                <td className="py-4 px-6">
-                  <input
-                    type="text"
-                    value={med.name}
-                    onChange={(e) => handleChange(med.id, "name", e.target.value)}
-                    className="w-full bg-transparent focus:outline-none border-b border-transparent focus:border-blue-400 px-1 py-1 rounded"
-                    placeholder="Medicine name"
-                  />
-                </td>
-                <td className="py-4 px-6">
-                  <input
-                    type="text"
-                    value={med.dosage}
-                    onChange={(e) => handleChange(med.id, "dosage", e.target.value)}
-                    className="w-full bg-transparent focus:outline-none border-b border-transparent focus:border-blue-400 px-1 py-1 rounded"
-                    placeholder="e.g. 500mg"
-                  />
-                </td>
-                <td className="py-4 px-6">
-                  <input
-                    type="text"
-                    value={med.frequency}
-                    onChange={(e) => handleChange(med.id, "frequency", e.target.value)}
-                    className="w-full bg-transparent focus:outline-none border-b border-transparent focus:border-blue-400 px-1 py-1 rounded"
-                    placeholder="e.g. Twice a day"
-                  />
-                </td>
-                <td className="py-4 px-6">
-                  <input
-                    type="text"
-                    value={med.duration}
-                    onChange={(e) => handleChange(med.id, "duration", e.target.value)}
-                    className="w-full bg-transparent focus:outline-none border-b border-transparent focus:border-blue-400 px-1 py-1 rounded"
-                    placeholder="e.g. 5 days"
-                  />
-                </td>
-                <td className="py-4 px-6">
-                  <input
-                    type="text"
-                    value={med.notes}
-                    onChange={(e) => handleChange(med.id, "notes", e.target.value)}
-                    className="w-full bg-transparent focus:outline-none border-b border-transparent focus:border-blue-400 px-1 py-1 rounded"
-                    placeholder="Special instructions"
-                  />
-                </td>
-                <td className="py-4 px-6 text-center">
-                  <button
-                    onClick={() => deleteMedicine(med.id)}
-                    className="text-red-500 hover:text-red-700 transition-colors"
-                  >
-                    
-                  </button>
-                </td>
+      <CardContent className="p-6">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                <th className="pb-3 px-2">Medicine (SL DB)</th>
+                <th className="pb-3 px-2">Dosage</th>
+                <th className="pb-3 px-2">Frequency</th>
+                <th className="pb-3 px-2">Duration</th>
+                <th className="pb-3 px-2">Instructions</th>
+                <th className="pb-3 px-2 text-center w-12">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile Cards */}
-      <div className="sm:hidden space-y-4">
-        {medicines.map((med) => (
-          <div
-            key={med.id}
-            className="rounded-2xl border border-slate-200 p-4 shadow-sm"
-          >
-            <div className="grid grid-cols-1 gap-3">
-              <label className="text-xs font-semibold text-slate-500">
-                Medicine Name
-                <input
-                  type="text"
-                  value={med.name}
-                  onChange={(e) => handleChange(med.id, "name", e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                  placeholder="Medicine name"
-                />
-              </label>
-              <label className="text-xs font-semibold text-slate-500">
-                Dosage
-                <input
-                  type="text"
-                  value={med.dosage}
-                  onChange={(e) => handleChange(med.id, "dosage", e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                  placeholder="e.g. 500mg"
-                />
-              </label>
-              <label className="text-xs font-semibold text-slate-500">
-                Frequency
-                <input
-                  type="text"
-                  value={med.frequency}
-                  onChange={(e) => handleChange(med.id, "frequency", e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                  placeholder="e.g. Twice a day"
-                />
-              </label>
-              <label className="text-xs font-semibold text-slate-500">
-                Duration
-                <input
-                  type="text"
-                  value={med.duration}
-                  onChange={(e) => handleChange(med.id, "duration", e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                  placeholder="e.g. 5 days"
-                />
-              </label>
-              <label className="text-xs font-semibold text-slate-500">
-                Notes
-                <input
-                  type="text"
-                  value={med.notes}
-                  onChange={(e) => handleChange(med.id, "notes", e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                  placeholder="Special instructions"
-                />
-              </label>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <button
-                type="button"
-                onClick={() => deleteMedicine(med.id)}
-                className="text-sm font-medium text-red-600"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-8">
-        <button
-          onClick={addMedicine}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium transition-all active:scale-95"
-        >
-           Add Medicine
-        </button>
-
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={cancel}
-            className="px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-2xl font-medium transition-all"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={savePrescription}
-            disabled={saving}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-medium transition-all active:scale-95"
-          >
-             {saving ? "Saving..." : "Save Prescription"}
-          </button>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {medicines.map((med) => (
+                <tr key={med.id} className="group hover:bg-slate-50/50 transition-colors">
+                  <td className="py-3 px-2 min-w-[200px]">
+                    <input
+                      type="text"
+                      list="drug-names"
+                      value={med.name}
+                      onChange={(e) => handleChange(med.id, "name", e.target.value)}
+                      className={inputClass}
+                      placeholder="e.g. Paracetamol"
+                    />
+                  </td>
+                  <td className="py-3 px-2 min-w-[120px]">
+                    <input
+                      type="text"
+                      list="dosages"
+                      value={med.dosage}
+                      onChange={(e) => handleChange(med.id, "dosage", e.target.value)}
+                      className={inputClass}
+                      placeholder="e.g. 500mg"
+                    />
+                  </td>
+                  <td className="py-3 px-2 min-w-[150px]">
+                    <input
+                      type="text"
+                      list="frequencies"
+                      value={med.frequency}
+                      onChange={(e) => handleChange(med.id, "frequency", e.target.value)}
+                      className={inputClass}
+                      placeholder="e.g. bd"
+                    />
+                  </td>
+                  <td className="py-3 px-2 min-w-[120px]">
+                    <input
+                      type="text"
+                      list="durations"
+                      value={med.duration}
+                      onChange={(e) => handleChange(med.id, "duration", e.target.value)}
+                      className={inputClass}
+                      placeholder="e.g. 5 days"
+                    />
+                  </td>
+                  <td className="py-3 px-2 min-w-[180px]">
+                    <input
+                      type="text"
+                      value={med.notes}
+                      onChange={(e) => handleChange(med.id, "notes", e.target.value)}
+                      className={inputClass}
+                      placeholder="Take after meals"
+                    />
+                  </td>
+                  <td className="py-3 px-2 text-center">
+                    <button
+                      onClick={() => deleteMedicine(med.id)}
+                      disabled={medicines.length === 1}
+                      className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-300"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
-    </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-slate-100">
+          <Button variant="soft" onClick={addMedicine} icon={Plus} className="w-full sm:w-auto">
+            Add Another Medicine
+          </Button>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <Button variant="ghost" onClick={cancel} icon={X} className="w-full sm:w-auto">
+              Clear
+            </Button>
+            <Button 
+              variant="primary" 
+              onClick={savePrescription} 
+              disabled={saving} 
+              icon={Save}
+              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20 focus:ring-emerald-500"
+            >
+              {saving ? "Saving..." : "Save Prescription"}
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -28,8 +28,9 @@ public class MedicalRecordService {
 
         Doctor doctor = null;
         if (medicalRecordDto.getDoctorId() != null) {
-            doctor = doctorRepository.findById(medicalRecordDto.getDoctorId())
-                    .orElseThrow(() -> new AppException("Doctor not found", HttpStatus.NOT_FOUND));
+            doctor = doctorRepository.findByUserId(medicalRecordDto.getDoctorId())
+                    .orElseGet(() -> doctorRepository.findById(medicalRecordDto.getDoctorId())
+                    .orElseThrow(() -> new AppException("Doctor not found", HttpStatus.NOT_FOUND)));
         }
 
         MedicalRecord medicalRecord = MedicalRecord.builder()
@@ -42,6 +43,7 @@ public class MedicalRecordService {
                 .testName(medicalRecordDto.getTestName())
                 .testResult(medicalRecordDto.getTestResult())
                 .attachmentUrl(medicalRecordDto.getAttachmentUrl())
+                .isFulfilled(false)
                 .build();
 
         MedicalRecord savedRecord = medicalRecordRepository.save(medicalRecord);
@@ -114,6 +116,19 @@ public class MedicalRecordService {
         medicalRecordRepository.delete(medicalRecord);
     }
 
+    public MedicalRecordDto fulfillPrescription(Long id) {
+        MedicalRecord medicalRecord = medicalRecordRepository.findById(id)
+                .orElseThrow(() -> new AppException("Medical record not found", HttpStatus.NOT_FOUND));
+
+        if (!"PRESCRIPTION".equalsIgnoreCase(medicalRecord.getRecordType())) {
+            throw new AppException("Only prescriptions can be fulfilled", HttpStatus.BAD_REQUEST);
+        }
+
+        medicalRecord.setIsFulfilled(true);
+        MedicalRecord updatedRecord = medicalRecordRepository.save(medicalRecord);
+        return convertToDto(updatedRecord);
+    }
+
     private MedicalRecordDto convertToDto(MedicalRecord medicalRecord) {
         return MedicalRecordDto.builder()
                 .id(medicalRecord.getId())
@@ -128,6 +143,7 @@ public class MedicalRecordService {
                 .testName(medicalRecord.getTestName())
                 .testResult(medicalRecord.getTestResult())
                 .attachmentUrl(medicalRecord.getAttachmentUrl())
+                .isFulfilled(medicalRecord.getIsFulfilled())
                 .createdAt(medicalRecord.getCreatedAt())
                 .updatedAt(medicalRecord.getUpdatedAt())
                 .build();

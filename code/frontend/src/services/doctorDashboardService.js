@@ -39,8 +39,12 @@ export const doctorDashboardService = {
       isToday(appointment.appointmentDateTime),
     );
 
-    const activeAlerts = appointments.filter((appointment) =>
+    const activeAppointments = appointments.filter((appointment) =>
       isActiveStatus(appointment.status),
+    );
+
+    const criticalAlerts = patients.filter((patient) => 
+      patient.criticalStatus === true
     );
 
     return {
@@ -48,10 +52,16 @@ export const doctorDashboardService = {
       stats: {
         patients: patients.length,
         appointmentsToday: todaysAppointments.length,
-        criticalAlerts: activeAlerts.length,
+        activeAppointments: activeAppointments.length,
+        criticalAlerts: criticalAlerts.length,
         records: records.length,
       },
       appointments: todaysAppointments,
     };
   },
+
+  async updateAppointmentStatus(appointmentId, status) {
+    const { data } = await api.put(`/api/appointments/${appointmentId}`, { status });
+    return data;
+  }
 };

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import Dashboard from "./DoctorDashboardComponents/Dashboard.jsx";
+import DoctorOverview from "./doctor/DoctorOverview.jsx";
 import Pharmacy from "./DoctorDashboardComponents/Pharmacy.jsx";
-import ReportAndAnalytics from "./DoctorDashboardComponents/ReportAndAnlytics.jsx";
+import ReportAndAnalytics from "./DoctorDashboardComponents/ReportAndAnalytics.jsx";
 import Profile from "./DoctorDashboardComponents/Profile.jsx";
-import Records from "./DoctorDashboardComponents/Records.jsx";
+import PatientProfile from "./doctor/PatientProfile.jsx";
 import LabReports from "./DoctorDashboardComponents/Labreport.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { doctorDashboardService } from "../../services/doctorDashboardService";
@@ -47,46 +47,40 @@ const DoctorDashboard = () => {
         : "text-slate-600 hover:text-slate-900 hover:bg-white/70"
     }`;
 
+  const loadDashboardData = async () => {
+    if (!user?.id) {
+      setLoadingDashboard(false);
+      setDashboardError("Unable to identify logged in doctor.");
+      return;
+    }
+    setLoadingDashboard(true);
+    setDashboardError("");
+    try {
+      const data = await doctorDashboardService.getDashboardData(user.id);
+      setDoctor(data.doctor);
+      setStats(data.stats);
+      setAppointments(data.appointments);
+    } catch (error) {
+      setDashboardError(error.response?.data?.message || "Failed to load doctor dashboard data.");
+    } finally {
+      setLoadingDashboard(false);
+    }
+  };
+
   useEffect(() => {
-    let isMounted = true;
-
-    const loadDashboardData = async () => {
-      if (!user?.id) {
-        setLoadingDashboard(false);
-        setDashboardError("Unable to identify logged in doctor.");
-        return;
-      }
-
-      setLoadingDashboard(true);
-      setDashboardError("");
-
-      try {
-        const data = await doctorDashboardService.getDashboardData(user.id);
-        if (!isMounted) return;
-
-        setDoctor(data.doctor);
-        setStats(data.stats);
-        setAppointments(data.appointments);
-      } catch (error) {
-        if (!isMounted) return;
-
-        setDashboardError(
-          error.response?.data?.message ||
-            "Failed to load doctor dashboard data.",
-        );
-      } finally {
-        if (isMounted) {
-          setLoadingDashboard(false);
-        }
-      }
-    };
-
     loadDashboardData();
-
-    return () => {
-      isMounted = false;
-    };
   }, [user?.id]);
+
+  const handleUpdateAppointmentStatus = async (id, status) => {
+    try {
+      await doctorDashboardService.updateAppointmentStatus(id, status);
+      // Reload after update
+      loadDashboardData();
+    } catch (err) {
+      console.error("Failed to update appointment", err);
+      alert("Failed to update appointment status: " + (err.response?.data?.message || err.message));
+    }
+  };
 
   useEffect(() => {
     const dropdownToggle = document.getElementById("dropdownToggle");
@@ -283,14 +277,14 @@ const DoctorDashboard = () => {
                       <span>Patient</span>
                     </a>
                   </li>
-                  {/* <li>
+                  <li>
                     <a
                       href="javascript:void(0)"
                       onClick={(e) => {
                         e.preventDefault();
-                        setSection("labreports");
+                        handleSectionChange("labreports");
                       }}
-                      class="menu-item text-slate-800 text-[15px] font-medium flex items-center cursor-pointer hover:bg-[#F0F8FF] rounded-md px-3 py-3 transition-all duration-300"
+                      className={getMenuItemClass(section === "labreports")}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -311,7 +305,7 @@ const DoctorDashboard = () => {
                       </svg>
                       <span>Lab Reports</span>
                     </a>
-                  </li> */}
+                  </li>
                   
                   {/* <li>
                     <a
@@ -472,11 +466,12 @@ const DoctorDashboard = () => {
           <section className="main-content w-full px-4 sm:px-6 lg:px-8 lg:pl-[19rem]">
             
             {section === "dashboard" && (
-              <Dashboard
+              <DoctorOverview
                 stats={stats}
                 appointments={appointments}
                 loading={loadingDashboard}
                 error={dashboardError}
+                onUpdateStatus={handleUpdateAppointmentStatus}
               />
             )}
             
@@ -489,7 +484,7 @@ const DoctorDashboard = () => {
                 error={dashboardError}
               />
             )}
-            {section === "records" && <Records />}
+            {section === "records" && <PatientProfile onUpdate={loadDashboardData} />}
             {section === "labreports" && <LabReports />}
           </section>
         </div>

@@ -1,7 +1,8 @@
 package com.pms.backend.config;
 
-import java.util.List;
-
+import com.pms.backend.auth.service.JwtAuthFilter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,13 +15,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.pms.backend.auth.service.JwtAuthFilter;
-
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -30,52 +30,71 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    @Value("${FRONTEND_URL:https://e22-2yp-co2060-pms-frontend.vercel.app}")
+    private String frontendUrl;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                // Disable CSRF: we use JWT, not browser session cookies.
-                // CSRF attacks exploit session cookies — irrelevant here.
 
                 .cors(cors -> cors.configurationSource(corsSource()))
-                // Apply our CORS config (defined below).
-                // Without this, browser blocks React (5173) calling Spring (8080).
 
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> 
+                            response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+                        )
                 )
-                // STATELESS: Spring will NOT create HTTP sessions.
-                // Every request must carry a JWT — server stores nothing between requests.
+
+                // ── Security Headers ───────────────────────────────────────
+                .headers(headers -> headers
+                    .frameOptions(frame -> frame.deny())
+                    // Prevent clickjacking
+                    .contentTypeOptions(ct -> {})
+                    // Prevent MIME sniffing
+                    .referrerPolicy(ref ->
+                        ref.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                    .httpStrictTransportSecurity(hsts -> hsts
+                        .includeSubDomains(true)
+                        .maxAgeInSeconds(31536000))
+                    // HSTS: force HTTPS for 1 year
+                )
 
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/api/auth/**").permitAll()
-                                // /api/auth/signup and /api/auth/login are PUBLIC.
-                                // No login needed to reach these endpoints.
+                    // Public endpoints
+                    .requestMatchers(
+                        "/api/auth/signup",
+                        "/api/auth/login",
+                        "/api/auth/refresh"
+                    ).permitAll()
 
-                                .anyRequest().authenticated()
-                        // ALL other endpoints: must be logged in (have a valid JWT).
+                    // Admin-only endpoints
+                    .requestMatchers("/api/audit/**")
+                        .hasAnyRole("ADMIN", "SUPER_ADMIN")
+
+                    .requestMatchers("/api/users/**")
+                        .hasAnyRole("ADMIN", "SUPER_ADMIN", "DOCTOR")
+
+                    // All other endpoints require authentication
+                    .anyRequest().authenticated()
                 )
 
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                // Run our JwtAuthFilter BEFORE Spring's default auth filter.
-                // This ensures JWT is checked on every request first.
 
                 .build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(10);
-        // 10 = work factor (number of hashing rounds = 2^10 = 1024)
-        // Higher = more secure but slower. 10 is the industry standard.
+        return new BCryptPasswordEncoder(12); // Increased from 10 to 12 for better security
     }
 
     @Bean
-    public AuthenticationManager authManager(AuthenticationConfiguration cfg)
-            throws Exception {
+    public AuthenticationManager authManager(AuthenticationConfiguration cfg) throws Exception {
         return cfg.getAuthenticationManager();
-        // Spring needs this bean internally. Must be declared explicitly
-        // when using JWT (because we disabled form login).
     }
 
     @Bean
@@ -83,13 +102,16 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowedOrigins(List.of(
-                "http://localhost:5173",      // Vite dev server
-                "http://localhost:3000",      // Create React App (if used)
-                "https://e22-2yp-co2060-pms-frontend.vercel.app" 
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://localhost:3000",
+                frontendUrl
         ));
-        config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        // Allow all headers including Authorization
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        config.setExposedHeaders(List.of("Authorization"));
+        config.setAllowCredentials(false);
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);

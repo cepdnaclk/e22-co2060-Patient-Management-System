@@ -11,6 +11,8 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute.jsx";
 import Navbar from "./components/Navbar.jsx";
 import AdminDashboard from "./features/dashboard/AdminDashboard.jsx";
+import ReceptionistDashboard from "./features/dashboard/ReceptionistDashboard.jsx";
+import PharmacistDashboard from "./features/dashboard/PharmacistDashboard.jsx";
 import AmbientOrbs from "./components/AmbientOrbs.jsx";
 import NavbarLanding from "./components/NavbarLanding.jsx";
 
@@ -60,6 +62,22 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/receptionist"
+            element={
+              <ProtectedRoute allowedRoles={["RECEPTIONIST", "ADMIN", "SUPER_ADMIN"]}>
+                <ReceptionistDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/pharmacist"
+            element={
+              <ProtectedRoute allowedRoles={["PHARMACIST", "ADMIN", "SUPER_ADMIN"]}>
+                <PharmacistDashboard />
               </ProtectedRoute>
             }
           />

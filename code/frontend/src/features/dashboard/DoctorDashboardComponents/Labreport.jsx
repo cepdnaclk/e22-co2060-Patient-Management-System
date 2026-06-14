@@ -1,300 +1,132 @@
-import React, { useState } from 'react';
-// import { 
-//   FaUser, FaPhone, FaEnvelope, FaCalendarAlt, 
-//   FaPrescriptionBottleMedical, FaFlask, FaEdit, 
-//   FaHeartbeat, FaPlus, FaTrash, FaFilePdf 
-// } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import PatientSearch from "../doctor/PatientSearch.jsx";
+import { Card, CardHeader, CardContent } from "../../../components/ui/Card.jsx";
+import { Button } from "../../../components/ui/Button.jsx";
+import { Badge } from "../../../components/ui/Badge.jsx";
+import { FileText, FlaskConical, CheckCircle2, FileSearch } from "lucide-react";
+import { patientRecordService } from "../../../services/patientRecordService";
 
-const LabReports = () => {
-  const [activeLabTab, setActiveLabTab] = useState("all");
-  // ==================== MEDICAL HISTORY RECORDS ====================
-  const [historyRecords, setHistoryRecords] = useState([
-    {
-      id: 1,
-      date: "23 Feb 2026",
-      type: "Diagnosis",
-      title: "Type 2 Diabetes Mellitus",
-      description: "HbA1c 6.8% (improved from 7.9%). Stable on current medication.",
-      doctor: "Dr. A. Perera"
-    },
-    {
-      id: 2,
-      date: "20 Feb 2026",
-      type: "Admission Note",
-      title: "Routine Follow-up",
-      description: "Admitted for annual diabetes review. No acute complaints.",
-      doctor: "Dr. A. Perera"
-    }
-  ]);
+export default function LabReports() {
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [labRecords, setLabRecords] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // ==================== LAB REPORTS ====================
-  const [labReports, setLabReports] = useState([
-    {
-      id: 101,
-      date: "23 Feb 2026",
-      test: "HbA1c",
-      result: "6.8%",
-      normalRange: "< 6.5%",
-      status: "Borderline",
-      file: "HbA1c_23Feb.pdf"
-    },
-    {
-      id: 102,
-      date: "20 Feb 2026",
-      test: "Complete Blood Count",
-      result: "WBC 7.2 ×10^9/L",
-      normalRange: "4.0 - 11.0",
-      status: "Normal",
-      file: "CBC_20Feb.pdf"
-    },
-    {
-      id: 103,
-      date: "15 Feb 2026",
-      test: "Fasting Blood Sugar",
-      result: "112 mg/dL",
-      normalRange: "70 - 99",
-      status: "High",
-      file: "FBS_15Feb.pdf"
-    }
-  ]);
-
-  const [newHistory, setNewHistory] = useState({
-    date: new Date().toISOString().slice(0,10),
-    type: "Note",
-    title: "",
-    description: "",
-    doctor: "Dr. A. Perera"
-  });
-
-  const [newLab, setNewLab] = useState({
-    date: new Date().toISOString().slice(0,10),
-    test: "",
-    result: "",
-    normalRange: "",
-    status: "Normal"
-  });
-
-  const addHistoryRecord = () => {
-    if (!newHistory.title || !newHistory.description) return alert("Title & Description required");
-    const record = {
-      id: Date.now(),
-      ...newHistory,
-      date: new Date(newHistory.date).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+  useEffect(() => {
+    if (!selectedPatient) return;
+    const fetchLabs = async () => {
+      setLoading(true);
+      try {
+        const records = await patientRecordService.getPatientRecords(selectedPatient.id);
+        const labs = records.filter(r => r.type === "LAB_TEST");
+        setLabRecords(labs);
+      } catch (err) {
+        console.error("Failed to load lab records");
+      } finally {
+        setLoading(false);
+      }
     };
-    setHistoryRecords([record, ...historyRecords]);
-    setNewHistory({ date: new Date().toISOString().slice(0,10), type: "Note", title: "", description: "", doctor: "Dr. A. Perera" });
+    fetchLabs();
+  }, [selectedPatient]);
+
+  const handleSelectPatient = (patient) => {
+    setSelectedPatient(patient);
   };
 
-  const addLabReport = () => {
-    if (!newLab.test || !newLab.result) return alert("Test name & Result required");
-    const report = {
-      id: Date.now(),
-      ...newLab,
-      date: new Date(newLab.date).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
-    };
-    setLabReports([report, ...labReports]);
-    setNewLab({ date: new Date().toISOString().slice(0,10), test: "", result: "", normalRange: "", status: "Normal" });
-  };
-
-  const deleteItem = (type, id) => {
-    if (confirm(`Delete this ${type}?`)) {
-      if (type === 'history') setHistoryRecords(prev => prev.filter(r => r.id !== id));
-      if (type === 'lab') setLabReports(prev => prev.filter(r => r.id !== id));
+  const handleApprove = async (recordId) => {
+    try {
+      const record = labRecords.find(r => r.id === recordId);
+      if (!record) return;
+      
+      await patientRecordService.updateMedicalRecord(recordId, {
+        ...record,
+        isFulfilled: true
+      });
+      
+      setLabRecords(prev => prev.map(r => r.id === recordId ? { ...r, isFulfilled: true } : r));
+      alert("Lab report approved successfully.");
+    } catch (err) {
+      alert("Failed to approve lab report.");
     }
   };
-
-  const filteredLabReports = labReports.filter((report) => {
-    if (activeLabTab === "all") return true;
-    if (activeLabTab === "normal") return report.status === "Normal";
-    return report.status !== "Normal";
-  });
 
   return (
-    <div className="flex-1 overflow-auto p-4 sm:p-6 bg-slate-50">
-      {/* Patient Header (same as before) */}
-      <div className="bg-gradient-to-r from-blue-600 to-sky-600 text-white rounded-3xl shadow-2xl p-8 mb-10 flex items-center gap-8">
-        <img src="https://i.pravatar.cc/160?u=rajeshkumar" alt="Rajesh Kumar" className="w-40 h-40 rounded-3xl object-cover ring-8 ring-white/30" />
-        <div className="flex-1">
-          <div className="flex items-center gap-4">
-            <h1 className="text-5xl font-bold">Rajesh Kumar</h1>
-            <span className="bg-emerald-400 text-emerald-900 px-6 py-1.5 rounded-3xl text-sm font-semibold flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-emerald-900 rounded-full animate-pulse" /> Active
-            </span>
-          </div>
-          <p className="text-2xl mt-2 opacity-90">PMS-00421 • 52 years • Male • B+</p>
-          <p className="mt-3 text-lg opacity-75">Admitted: 20 February 2026 • Primary Doctor: Dr. A. Perera</p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Lab Reports Review</h1>
+        <p className="text-sm text-slate-500 mt-1">Review and approve pending laboratory results for your patients.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* LEFT COLUMN */}
-        <div className="lg:col-span-8 space-y-8">
+      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center">
+        <h3 className="text-lg font-semibold text-slate-800 mb-4 text-center">Find Patient</h3>
+        <PatientSearch onSelectPatient={handleSelectPatient} />
+      </div>
 
-          {/* Personal Info + Vitals (unchanged) */}
-          {/* ... (same as previous version) ... */}
-
-          {/* MEDICAL HISTORY - scrollable */}
-         
-
-          {/* ==================== NEW LAB REPORTS SECTION ==================== */}
-          <div className="bg-white rounded-3xl shadow p-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold flex items-center gap-3">
-                🧪 Lab Reports
-              </h2>
-              <span className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
-                {filteredLabReports.length} / {labReports.length} reports
-              </span>
-            </div>
-
-            <div className="mb-6 w-max flex gap-2 border-b border-slate-200">
-              <button
-                type="button"
-                onClick={() => setActiveLabTab("all")}
-                className={`text-[15px] text-center py-2.5 px-5 border-b-2 transition-all ${
-                  activeLabTab === "all"
-                    ? "text-purple-700 font-semibold border-purple-700"
-                    : "text-slate-600 font-medium border-transparent hover:text-purple-700"
-                }`}
-              >
-                All Reports
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveLabTab("normal")}
-                className={`text-[15px] text-center py-2.5 px-5 border-b-2 transition-all ${
-                  activeLabTab === "normal"
-                    ? "text-purple-700 font-semibold border-purple-700"
-                    : "text-slate-600 font-medium border-transparent hover:text-purple-700"
-                }`}
-              >
-                Normal
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveLabTab("abnormal")}
-                className={`text-[15px] text-center py-2.5 px-5 border-b-2 transition-all ${
-                  activeLabTab === "abnormal"
-                    ? "text-purple-700 font-semibold border-purple-700"
-                    : "text-slate-600 font-medium border-transparent hover:text-purple-700"
-                }`}
-              >
-                Abnormal
-              </button>
-            </div>
-
-            {/* Add New Lab Report Form */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-6">
-              <p className="text-sm font-medium mb-3 text-slate-600">Upload / Add New Lab Report</p>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <input 
-                  type="date" 
-                  value={newLab.date}
-                  onChange={e => setNewLab({...newLab, date: e.target.value})}
-                  className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm"
-                />
-                <input 
-                  type="text" 
-                  placeholder="Test Name (e.g. HbA1c)"
-                  value={newLab.test}
-                  onChange={e => setNewLab({...newLab, test: e.target.value})}
-                  className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm col-span-2"
-                />
-                <input 
-                  type="text" 
-                  placeholder="Result (e.g. 6.8%)"
-                  value={newLab.result}
-                  onChange={e => setNewLab({...newLab, result: e.target.value})}
-                  className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm"
-                />
-                <button 
-                  onClick={addLabReport}
-                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-medium flex items-center justify-center gap-2 active:scale-95 transition"
-                >
-                  {/* <FaPlus /> */} Add Report
-                </button>
+      {selectedPatient && (
+        <div className="animate-in slide-in-from-bottom-4 fade-in duration-500">
+          <Card className="border-none shadow-md shadow-slate-200/50 max-w-4xl mx-auto">
+            <CardHeader className="pb-0 border-b border-slate-100 mb-4">
+              <div className="flex items-center justify-between pb-4">
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <FlaskConical className="w-6 h-6 text-purple-600" />
+                  Lab Orders for {selectedPatient.name}
+                </h3>
+                <Badge variant="purple">{labRecords.length} Total</Badge>
               </div>
-              <div className="flex gap-4 mt-4">
-                <input 
-                  type="text" 
-                  placeholder="Normal Range (optional)"
-                  value={newLab.normalRange}
-                  onChange={e => setNewLab({...newLab, normalRange: e.target.value})}
-                  className="flex-1 bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm"
-                />
-                <select 
-                  value={newLab.status}
-                  onChange={e => setNewLab({...newLab, status: e.target.value})}
-                  className="bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm w-40"
-                >
-                  <option value="Normal">Normal</option>
-                  <option value="High">High</option>
-                  <option value="Low">Low</option>
-                  <option value="Borderline">Borderline</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Scrollable Lab Reports List */}
-            <div className="max-h-[460px] overflow-y-auto pr-2 space-y-4 custom-scroll">
-              {filteredLabReports.map(report => (
-                <div key={report.id} className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-purple-200 transition group">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-mono bg-slate-100 px-3 py-1 rounded-full">{report.date}</span>
-                      <span className="font-semibold text-lg">{report.test}</span>
-                    </div>
-                    <button 
-                      onClick={() => deleteItem('lab', report.id)}
-                      className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition"
-                    >
-                      {/* <FaTrash /> */} delete
-                    </button>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-slate-400">Result</p>
-                      <p className="font-semibold">{report.result}</p>
-                    </div>
-                    <div>
-                      <p className="text-slate-400">Normal Range</p>
-                      <p className="font-medium text-slate-600">{report.normalRange || '—'}</p>
-                    </div>
-                    <div>
-                      <p className="text-slate-400">Status</p>
-                      <span className={`inline-block px-4 py-1 rounded-3xl text-xs font-medium
-                        ${report.status === 'Normal' ? 'bg-emerald-100 text-emerald-700' : 
-                          report.status === 'High' || report.status === 'Low' ? 'bg-red-100 text-red-700' : 
-                          'bg-amber-100 text-amber-700'}`}>
-                        {report.status}
-                      </span>
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={() => alert(`📄 Opening ${report.file} ...`)}
-                    className="mt-5 flex items-center gap-2 text-purple-600 hover:text-purple-700 text-sm font-medium"
-                  >
-                    {/* <FaFilePdf /> */} View / Download PDF Report
-                  </button>
+            </CardHeader>
+            
+            <CardContent className="p-6">
+              {loading ? (
+                <div className="text-center py-12 text-slate-500">Loading lab orders...</div>
+              ) : labRecords.length === 0 ? (
+                <div className="text-center py-12 flex flex-col items-center text-slate-400">
+                  <FileSearch className="w-12 h-12 mb-4 opacity-30" />
+                  <p className="font-medium text-slate-600 text-lg">No lab orders found</p>
+                  <p className="text-sm mt-1 text-slate-500">This patient does not have any pending or completed lab tests.</p>
                 </div>
-              ))}
-              {filteredLabReports.length === 0 && (
-                <p className="text-center text-slate-400 py-12">
-                  No lab reports in this tab.
-                </p>
+              ) : (
+                <div className="space-y-4">
+                  {labRecords.map(report => (
+                    <div key={report.id} className={`bg-white border rounded-2xl p-5 transition-all ${report.isFulfilled ? "border-emerald-200 bg-emerald-50/30" : "border-slate-200 hover:border-purple-300 shadow-sm"}`}>
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1 rounded-full">{new Date(report.createdAt).toLocaleDateString()}</span>
+                          <span className="font-bold text-lg text-slate-800">{report.title}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {report.isFulfilled ? (
+                            <Badge variant="success" className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Approved</Badge>
+                          ) : (
+                            <Badge variant="warning">Pending Review</Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="bg-slate-50 p-4 rounded-xl text-sm text-slate-700">
+                        <span className="font-semibold text-slate-900 block mb-1">Clinical Notes / Instructions:</span>
+                        {report.description}
+                      </div>
+
+                      {!report.isFulfilled && (
+                        <div className="flex justify-end mt-4 pt-4 border-t border-slate-100">
+                          <Button 
+                            variant="primary" 
+                            size="sm" 
+                            icon={CheckCircle2} 
+                            onClick={() => handleApprove(report.id)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white border-none"
+                          >
+                            Mark as Approved
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               )}
-            </div>
-          </div>
-
+            </CardContent>
+          </Card>
         </div>
-
-        {/* RIGHT SIDEBAR - Quick Actions (unchanged) */}
-        {/* ... same as previous ... */}
-      </div>
+      )}
     </div>
   );
-};
-
-export default LabReports;
+}

@@ -11,27 +11,39 @@ export const authService = {
       lastName,
       email,
       password,
-      mobileNumber, // <-- Now this gets sent to Spring Boot!
+      mobileNumber,
     });
-    return data; // { token, user }
-  },
-  login: async (email, password) => {
-    const { data } = await api.post("/api/auth/login", {
-      email,
-      password,
-    });
-    return data; // { token, user }
+    return data; // { accessToken, refreshToken, user }
   },
 
-  // Save to localStorage after successful login/signup
-  saveSession: (token, user) => {
-    localStorage.setItem("pms_token", token);
-    localStorage.setItem("pms_user", JSON.stringify(user));
+  login: async (email, password) => {
+    const { data } = await api.post("/api/auth/login", { email, password });
+    return data; // { accessToken, refreshToken, user }
+  },
+
+  logout: async () => {
+    const refreshToken = localStorage.getItem("pms_refresh_token");
+    if (refreshToken) {
+      try {
+        await api.post("/api/auth/logout", { refreshToken });
+      } catch {
+        // Silently ignore — we always clear local storage on logout
+      }
+    }
+    authService.clearSession();
+  },
+
+  // Save both tokens + user profile to localStorage after login/signup
+  saveSession: (accessToken, refreshToken, user) => {
+    localStorage.setItem("pms_token",         accessToken);
+    localStorage.setItem("pms_refresh_token", refreshToken);
+    localStorage.setItem("pms_user",          JSON.stringify(user));
   },
 
   // Remove everything on logout
   clearSession: () => {
     localStorage.removeItem("pms_token");
+    localStorage.removeItem("pms_refresh_token");
     localStorage.removeItem("pms_user");
   },
 
@@ -42,17 +54,17 @@ export const authService = {
   },
 
   isLoggedIn: () => !!localStorage.getItem("pms_token"),
+
+  // Check if access token is expired by reading its payload
   isTokenExpired: () => {
     const token = localStorage.getItem("pms_token");
     if (!token) return true;
-
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       const nowInSeconds = Math.floor(Date.now() / 1000);
       return payload.exp < nowInSeconds;
-    } catch (e) {
-      // Token is malformed — treat as expired
-      return true;
+    } catch {
+      return true; // Malformed token → treat as expired
     }
   },
 };

@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import jakarta.persistence.Column;
 
 @Entity
 // @Entity tells JPA: "This class maps to a database table"
@@ -71,7 +72,23 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean isActive = true;
 
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    @Builder.Default
+    private int failedLoginAttempts = 0;
+
+    @Column
+    private LocalDateTime lockedUntil;
+
+    @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column
+    private LocalDateTime updatedAt;
+
+    /** Returns true if the account is currently locked due to too many failed attempts. */
+    public boolean isCurrentlyLocked() {
+        return lockedUntil != null && LocalDateTime.now().isBefore(lockedUntil);
+    }
 
     // ──── Spring Security required methods ──────────────────────────
     // Spring calls these to understand this user's permissions and status.

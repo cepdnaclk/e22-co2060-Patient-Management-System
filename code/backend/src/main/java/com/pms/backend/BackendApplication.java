@@ -11,7 +11,12 @@ import com.pms.backend.role.entity.Role;
 import com.pms.backend.user.entity.User;
 import com.pms.backend.user.repository.UserRepository;
 
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 @SpringBootApplication
+@EnableAsync        // Enables @Async on AuditLogService
+@EnableScheduling   // Enables scheduled token cleanup tasks
 public class BackendApplication {
 
 	public static void main(String[] args) {

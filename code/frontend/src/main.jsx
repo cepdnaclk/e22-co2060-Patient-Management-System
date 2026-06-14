@@ -6,12 +6,16 @@ import { BrowserRouter } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import { AuthProvider } from "./features/auth/AuthContext.jsx";
 
+import { ToastProvider } from "./components/ui/ToastContext.jsx";
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   </StrictMode>,
 );

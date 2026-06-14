@@ -76,6 +76,7 @@ const formatPatient = (patient) => ({
   height: patient.height ?? null,
   weight: patient.weight ?? null,
   lastVitalsUpdate: patient.lastVitalsUpdate || null,
+  criticalStatus: !!patient.criticalStatus,
 });
 
 const formatRecord = (record) => ({
@@ -127,5 +128,15 @@ export const patientRecordService = {
 
     const { data } = await api.post("/api/medical-records", payload);
     return formatRecord(data);
+  },
+
+  async toggleCriticalStatus(patientId, criticalStatus) {
+    if (!patientId) return null;
+    const { data: rawPatient } = await api.get(`/api/patients/${patientId}`);
+    const { data: updatedPatient } = await api.put(`/api/patients/${patientId}`, {
+      ...rawPatient,
+      criticalStatus,
+    });
+    return formatPatient(updatedPatient);
   },
 };

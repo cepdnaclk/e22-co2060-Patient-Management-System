@@ -53,7 +53,7 @@ export default function SignupPage() {
         mobileNumber,
       );
 
-      saveLogin(data.token, data.user);
+      saveLogin(data.accessToken, data.refreshToken, data.user);
 
       const redirectPath = ROLE_ROUTES[data.user.role] || "/dashboard";
       navigate(redirectPath);

@@ -1,6 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { patientDashboardService } from "../../services/patientDashboardService";
+import { Card, CardContent, CardHeader } from "../../components/ui/Card.jsx";
+import { Badge } from "../../components/ui/Badge.jsx";
+import { Button } from "../../components/ui/Button.jsx";
+import { 
+  LayoutDashboard, UserCircle, FileText, Pill, 
+  Menu, X, Activity, Droplet, Ruler, Weight, Calendar, Clock, ChevronRight,
+  CreditCard, CheckCircle2, AlertCircle, Receipt
+} from "lucide-react";
 
 const PatientDashboard = () => {
   const { user } = useAuth();
@@ -8,11 +16,15 @@ const PatientDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [patient, setPatient] = useState(null);
   const [records, setRecords] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [invoices, setInvoices] = useState([]);
   const [stats, setStats] = useState({
     totalRecords: 0,
     activeMedications: 0,
     allergiesCount: 0,
     profileStatus: "Incomplete",
+    upcomingAppointments: 0,
+    unpaidBills: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -37,15 +49,12 @@ const PatientDashboard = () => {
 
         setPatient(data.patient);
         setRecords(data.records);
+        setAppointments(data.appointments || []);
+        setInvoices(data.invoices || []);
         setStats(data.stats);
       } catch (loadError) {
         if (!isMounted) return;
-
-        setError(
-          loadError.response?.data?.message ||
-            loadError.message ||
-            "Failed to load patient dashboard data.",
-        );
+        setError(loadError.response?.data?.message || loadError.message || "Failed to load patient dashboard data.");
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -54,280 +63,647 @@ const PatientDashboard = () => {
     };
 
     loadDashboard();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [user?.id]);
 
   const latestRecords = useMemo(() => records.slice(0, 5), [records]);
+  const upcomingAppointments = useMemo(() => {
+    return appointments
+      .filter(app => new Date(app.appointmentDate) >= new Date() && app.status !== "CANCELLED")
+      .sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate));
+  }, [appointments]);
+
+  const nextAppointment = upcomingAppointments[0] || null;
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  };
 
   const menuItems = [
-    { id: "dashboard", label: "Dashboard" },
-    { id: "details", label: "My Details" },
-    { id: "records", label: "Medical Records" },
+    { id: "dashboard", label: "Overview", icon: LayoutDashboard },
+    { id: "details", label: "My Profile", icon: UserCircle },
+    { id: "records", label: "Medical History", icon: FileText },
+    { id: "appointments", label: "Appointments", icon: Calendar },
+    { id: "billing", label: "My Bills", icon: Receipt },
   ];
 
-  const getMenuItemClass = (active) =>
-    `w-full text-left flex items-center gap-2 rounded-full px-3 py-2.5 text-sm font-medium transition ${
-      active
-        ? "bg-white/90 text-slate-900 shadow-sm border border-white/70"
-        : "text-slate-600 hover:text-slate-900 hover:bg-white/70"
-    }`;
-
   const renderDashboardSection = () => (
-    <div className="p-4 sm:p-6 bg-transparent min-h-screen">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-800">Patient Dashboard</h1>
-        <p className="text-sm text-gray-600">Overview of your account and health data</p>
+    <div className="space-y-6 animate-in slide-in-from-bottom-4 fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Welcome, {patient?.fullName?.split(' ')[0] || user?.firstName || 'Patient'}!</h1>
+          <p className="text-sm text-slate-500 mt-1">Here is the latest update on your health profile.</p>
+        </div>
       </div>
 
       {error && (
-        <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">
           {error}
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="glass-card p-4 rounded-2xl">
-          <p className="text-sm text-gray-500">Patient ID</p>
-          <p className="text-xl font-bold text-slate-800 mt-1">
-            {loading ? "..." : patient?.patientId || "N/A"}
-          </p>
-        </div>
-        <div className="glass-card p-4 rounded-2xl">
-          <p className="text-sm text-gray-500">Medical Records</p>
-          <p className="text-xl font-bold text-slate-800 mt-1">
-            {loading ? "..." : stats.totalRecords}
-          </p>
-        </div>
-        <div className="glass-card p-4 rounded-2xl">
-          <p className="text-sm text-gray-500">Current Medications</p>
-          <p className="text-xl font-bold text-slate-800 mt-1">
-            {loading ? "..." : stats.activeMedications}
-          </p>
-        </div>
-        <div className="glass-card p-4 rounded-2xl">
-          <p className="text-sm text-gray-500">Profile Status</p>
-          <p className="text-xl font-bold text-slate-800 mt-1">
-            {loading ? "..." : stats.profileStatus}
-          </p>
-        </div>
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-none shadow-md shadow-blue-900/5 hover:-translate-y-1 transition-transform duration-300 cursor-pointer" onClick={() => setSection("appointments")}>
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <Calendar className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Upcoming Visits</p>
+              <p className="text-xl font-bold text-slate-900">{loading ? "..." : stats.upcomingAppointments}</p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-none shadow-md shadow-purple-900/5 hover:-translate-y-1 transition-transform duration-300 cursor-pointer" onClick={() => setSection("records")}>
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+              <FileText className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Medical Records</p>
+              <p className="text-xl font-bold text-slate-900">{loading ? "..." : stats.totalRecords}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-md shadow-emerald-900/5 hover:-translate-y-1 transition-transform duration-300">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <Pill className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Active Meds</p>
+              <p className="text-xl font-bold text-slate-900">{loading ? "..." : stats.activeMedications}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-none shadow-md shadow-amber-900/5 hover:-translate-y-1 transition-transform duration-300 cursor-pointer" onClick={() => setSection("billing")}>
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+              <Receipt className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Unpaid Bills</p>
+              <p className="text-xl font-bold text-slate-900">{loading ? "..." : stats.unpaidBills}</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-card p-4 rounded-2xl">
-          <h2 className="text-lg font-medium mb-3">Profile Summary</h2>
-          <div className="space-y-2 text-sm text-gray-700">
-            <p>
-              <span className="font-medium text-slate-800">Name:</span>{" "}
-              {loading ? "Loading..." : patient?.fullName || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium text-slate-800">Email:</span>{" "}
-              {loading ? "Loading..." : patient?.email || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium text-slate-800">Primary Doctor:</span>{" "}
-              {loading ? "Loading..." : patient?.primaryDoctor || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium text-slate-800">Blood Type:</span>{" "}
-              {loading ? "Loading..." : patient?.bloodType || "N/A"}
-            </p>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Vitals & Upcoming */}
+        <div className="lg:col-span-1 space-y-6">
+          <Card className="border-none shadow-md shadow-slate-200/50 bg-gradient-to-br from-indigo-600 to-blue-700 text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3" />
+            <CardContent className="p-6">
+              <h3 className="font-semibold text-blue-100 mb-4">Vital Signs</h3>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10">
+                  <div className="flex items-center gap-2"><Droplet className="w-4 h-4 text-red-300"/> Blood Type</div>
+                  <span className="font-bold">{loading ? "..." : patient?.bloodType || "N/A"}</span>
+                </div>
+                <div className="flex justify-between items-center bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10">
+                  <div className="flex items-center gap-2"><Ruler className="w-4 h-4 text-blue-200"/> Height</div>
+                  <span className="font-bold">{loading ? "..." : patient?.height ? `${patient.height} cm` : "N/A"}</span>
+                </div>
+                <div className="flex justify-between items-center bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10">
+                  <div className="flex items-center gap-2"><Weight className="w-4 h-4 text-emerald-200"/> Weight</div>
+                  <span className="font-bold">{loading ? "..." : patient?.weight ? `${patient.weight} kg` : "N/A"}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md shadow-slate-200/50">
+            <CardHeader title="Next Appointment" />
+            <CardContent className="p-6 pt-0">
+              {nextAppointment ? (
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex items-start gap-4">
+                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex flex-col items-center justify-center shrink-0">
+                    <span className="text-xs font-bold uppercase tracking-wider">
+                      {new Date(nextAppointment.appointmentDate).toLocaleString('default', { month: 'short' })}
+                    </span>
+                    <span className="text-lg font-bold leading-none">
+                      {new Date(nextAppointment.appointmentDate).getDate()}
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-slate-800">{nextAppointment.reason || "Checkup"}</h4>
+                    <p className="text-sm text-slate-500 mt-1 flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> 
+                      {new Date(nextAppointment.appointmentDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
+                      &nbsp;with Dr. {nextAppointment.doctorName || "Unknown"}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <Calendar className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <p className="text-slate-500 text-sm font-medium">No upcoming appointments</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="glass-card p-4 rounded-2xl">
-          <h2 className="text-lg font-medium mb-3">Recent Medical Records</h2>
-          <div className="space-y-3">
-            {loading ? (
-              <p className="text-sm text-gray-500">Loading records...</p>
-            ) : latestRecords.length ? (
-              latestRecords.map((record) => (
-                <div key={record.id} className="rounded-md bg-slate-50 p-3">
-                  <p className="text-sm font-medium text-slate-800">{record.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {record.type} • {record.date}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-gray-500">No records available.</p>
-            )}
-          </div>
+        {/* Right Column - Recent Records */}
+        <div className="lg:col-span-2">
+          <Card className="h-full border-none shadow-md shadow-slate-200/50 flex flex-col">
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <h3 className="font-bold text-slate-900 text-lg">Recent Medical Records</h3>
+              <Button variant="ghost" size="sm" className="text-blue-600 font-medium" onClick={() => setSection("records")}>
+                View All <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </CardHeader>
+            <CardContent className="p-0 flex-1">
+              <div className="divide-y divide-slate-100">
+                {loading ? (
+                  <div className="p-8 text-center text-slate-400">Loading records...</div>
+                ) : latestRecords.length > 0 ? (
+                  latestRecords.map((record) => (
+                    <div key={record.id} className="p-5 hover:bg-slate-50 transition-colors flex gap-4">
+                      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                        <FileText className="w-5 h-5 text-slate-500" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-semibold text-slate-800">{record.title}</h4>
+                          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">{record.date}</span>
+                        </div>
+                        <p className="text-sm text-slate-600 mt-1 line-clamp-2">{record.description}</p>
+                        <div className="flex items-center gap-3 mt-3">
+                          <Badge variant="blue" className="bg-blue-50 text-blue-700">{record.type}</Badge>
+                          <span className="text-xs text-slate-500 font-medium flex items-center gap-1">
+                            <UserCircle className="w-3.5 h-3.5" /> {record.doctorName || "Doctor"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-12 text-center flex flex-col items-center">
+                    <FileText className="w-12 h-12 text-slate-200 mb-3" />
+                    <p className="text-slate-500 font-medium">No medical records found.</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
   );
 
   const renderDetailsSection = () => (
-    <div className="p-4 sm:p-6 bg-transparent min-h-screen">
-      <div className="glass-card rounded-2xl p-6">
-        <h1 className="text-2xl font-semibold text-slate-800">My Details</h1>
-        <p className="text-sm text-gray-600 mt-1">Patient profile and contact information</p>
-
-        {loading ? (
-          <p className="mt-6 text-sm text-gray-500">Loading details...</p>
-        ) : (
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            <div className="space-y-2">
-              <p><span className="font-medium text-slate-800">Full Name:</span> {patient?.fullName || "N/A"}</p>
-              <p><span className="font-medium text-slate-800">Patient ID:</span> {patient?.patientId || "N/A"}</p>
-              <p><span className="font-medium text-slate-800">Date of Birth:</span> {patient?.dateOfBirth || "N/A"}</p>
-              <p><span className="font-medium text-slate-800">Age:</span> {patient?.age || "N/A"}</p>
-              <p><span className="font-medium text-slate-800">Gender:</span> {patient?.gender || "N/A"}</p>
-              <p><span className="font-medium text-slate-800">Blood Type:</span> {patient?.bloodType || "N/A"}</p>
-            </div>
-
-            <div className="space-y-2">
-              <p><span className="font-medium text-slate-800">Email:</span> {patient?.email || "N/A"}</p>
-              <p><span className="font-medium text-slate-800">Mobile:</span> {patient?.mobileNumber || "N/A"}</p>
-              <p><span className="font-medium text-slate-800">Address:</span> {patient?.address || "N/A"}</p>
-              <p><span className="font-medium text-slate-800">Primary Doctor:</span> {patient?.primaryDoctor || "N/A"}</p>
-              <p><span className="font-medium text-slate-800">Admission Status:</span> {patient?.admissionStatus || "N/A"}</p>
-              <p><span className="font-medium text-slate-800">Last Updated:</span> {patient?.updatedAt || "N/A"}</p>
-            </div>
-          </div>
-        )}
+    <div className="space-y-6 animate-in slide-in-from-bottom-4 fade-in duration-500">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">My Profile</h1>
+        <p className="text-sm text-slate-500 mt-1">Manage your personal and emergency contact information.</p>
       </div>
 
-      {!loading && (
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="glass-card rounded-2xl p-6">
-            <h2 className="text-lg font-medium text-slate-800">Emergency Contact</h2>
-            <div className="mt-3 space-y-2 text-sm text-gray-700">
-              <p><span className="font-medium text-slate-800">Name:</span> {patient?.emergencyContactName || "N/A"}</p>
-              <p><span className="font-medium text-slate-800">Phone:</span> {patient?.emergencyContactPhone || "N/A"}</p>
-              <p><span className="font-medium text-slate-800">Relation:</span> {patient?.emergencyContactRelation || "N/A"}</p>
-            </div>
+      <Card className="border-none shadow-md shadow-slate-200/50 overflow-hidden">
+        <div className="h-32 bg-gradient-to-r from-blue-600 to-sky-500"></div>
+        <div className="px-6 pb-6 relative">
+          <div className="w-24 h-24 bg-white rounded-2xl shadow-lg border-4 border-white flex items-center justify-center text-4xl font-bold text-blue-600 absolute -top-12">
+            {patient?.fullName?.charAt(0).toUpperCase() || "P"}
           </div>
-
-          <div className="glass-card rounded-2xl p-6">
-            <h2 className="text-lg font-medium text-slate-800">Health Summary</h2>
-            <div className="mt-3 space-y-2 text-sm text-gray-700">
-              <p><span className="font-medium text-slate-800">Allergies:</span> {patient?.allergies || "None listed"}</p>
-              <p><span className="font-medium text-slate-800">Current Medications:</span> {patient?.currentMedications || "None listed"}</p>
-              <p><span className="font-medium text-slate-800">Medical History:</span> {patient?.medicalHistory || "No medical history provided."}</p>
+          <div className="pt-16 flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">{patient?.fullName || "N/A"}</h2>
+              <div className="flex gap-2 mt-2">
+                <Badge variant="gray">{patient?.patientId || "ID: N/A"}</Badge>
+                {patient?.admissionStatus === "ADMITTED" ? (
+                   <Badge variant="warning">In-Patient</Badge>
+                ) : (
+                   <Badge variant="success">Out-Patient</Badge>
+                )}
+              </div>
             </div>
+            <Button variant="outline" icon={Activity}>Edit Profile</Button>
           </div>
         </div>
-      )}
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="border-none shadow-md shadow-slate-200/50">
+          <CardHeader title="Personal Information" />
+          <CardContent className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-slate-500 font-medium mb-1">Date of Birth</p>
+                <p className="font-semibold text-slate-900">{patient?.dateOfBirth || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-slate-500 font-medium mb-1">Age</p>
+                <p className="font-semibold text-slate-900">{patient?.age || "N/A"} years</p>
+              </div>
+              <div>
+                <p className="text-slate-500 font-medium mb-1">Gender</p>
+                <p className="font-semibold text-slate-900">{patient?.gender || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-slate-500 font-medium mb-1">Blood Type</p>
+                <p className="font-semibold text-slate-900">{patient?.bloodType || "N/A"}</p>
+              </div>
+            </div>
+            <hr className="border-slate-100" />
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="text-slate-500 font-medium mb-1">Email Address</p>
+                <p className="font-semibold text-slate-900">{patient?.email || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-slate-500 font-medium mb-1">Mobile Number</p>
+                <p className="font-semibold text-slate-900">{patient?.mobileNumber || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-slate-500 font-medium mb-1">Home Address</p>
+                <p className="font-semibold text-slate-900">{patient?.address || "N/A"}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-6">
+          <Card className="border-none shadow-md shadow-slate-200/50">
+            <CardHeader title="Emergency Contact" />
+            <CardContent className="p-6">
+              <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+                <p className="text-sm font-semibold text-red-900">{patient?.emergencyContactName || "Not Provided"}</p>
+                <div className="flex gap-4 mt-2 text-sm text-red-800">
+                  <p>📞 {patient?.emergencyContactPhone || "N/A"}</p>
+                  <p>👥 {patient?.emergencyContactRelation || "N/A"}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-md shadow-slate-200/50">
+            <CardHeader title="Hospital Details" />
+            <CardContent className="p-6 space-y-4">
+               <div className="flex justify-between items-center text-sm pb-3 border-b border-slate-100">
+                 <span className="text-slate-500 font-medium">Primary Doctor</span>
+                 <span className="font-semibold text-slate-900">{patient?.primaryDoctor || "N/A"}</span>
+               </div>
+               <div className="flex justify-between items-center text-sm pb-3 border-b border-slate-100">
+                 <span className="text-slate-500 font-medium">Last Updated</span>
+                 <span className="font-semibold text-slate-900">{patient?.updatedAt || "N/A"}</span>
+               </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 
   const renderRecordsSection = () => (
-    <div className="p-4 sm:p-6 bg-transparent min-h-screen">
-      <div className="glass-card rounded-2xl p-6">
-        <h1 className="text-2xl font-semibold text-slate-800">Medical Records</h1>
-        <p className="text-sm text-gray-600 mt-1">Your recent clinical history and notes</p>
+    <div className="space-y-6 animate-in slide-in-from-bottom-4 fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Medical History</h1>
+          <p className="text-sm text-slate-500 mt-1">Complete log of your clinical notes, prescriptions, and lab results.</p>
+        </div>
+      </div>
 
-        {loading ? (
-          <p className="mt-6 text-sm text-gray-500">Loading records...</p>
-        ) : records.length ? (
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-sm text-gray-500 border-b">
-                  <th className="py-2 pr-4">Date</th>
-                  <th className="py-2 pr-4">Type</th>
-                  <th className="py-2 pr-4">Doctor</th>
-                  <th className="py-2 pr-4">Title</th>
-                  <th className="py-2">Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {records.map((record) => (
-                  <tr key={record.id} className="odd:bg-slate-50 align-top">
-                    <td className="py-2 pr-4 text-sm text-gray-700">{record.date}</td>
-                    <td className="py-2 pr-4 text-sm text-gray-700">{record.type}</td>
-                    <td className="py-2 pr-4 text-sm text-gray-700">{record.doctorName}</td>
-                    <td className="py-2 pr-4 text-sm text-slate-800 font-medium">{record.title}</td>
-                    <td className="py-2 text-sm text-gray-700">{record.description}</td>
+      <Card className="border-none shadow-md shadow-slate-200/50">
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="p-12 text-center text-slate-500 font-medium">Loading records...</div>
+          ) : records.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                    <th className="py-4 px-6 whitespace-nowrap">Date</th>
+                    <th className="py-4 px-6">Type</th>
+                    <th className="py-4 px-6">Doctor</th>
+                    <th className="py-4 px-6">Title & Details</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="mt-6 text-sm text-gray-500">No medical records found.</p>
-        )}
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {records.map((record) => (
+                    <tr key={record.id} className="hover:bg-slate-50/80 transition-colors align-top group">
+                      <td className="py-5 px-6 whitespace-nowrap">
+                        <span className="text-sm font-medium text-slate-700 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
+                          {record.date}
+                        </span>
+                      </td>
+                      <td className="py-5 px-6">
+                        <div className="flex flex-col items-start gap-2">
+                          <Badge variant={record.type.toUpperCase() === "PRESCRIPTION" ? "success" : "blue"}>{record.type}</Badge>
+                          {record.type.toUpperCase() === "PRESCRIPTION" && record.isFulfilled !== undefined && (
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                              record.isFulfilled ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                            }`}>
+                              {record.isFulfilled ? "Dispensed" : "Pending Pharmacy"}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-5 px-6">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
+                            {record.doctorName?.charAt(0) || "D"}
+                          </div>
+                          <span className="text-sm font-medium text-slate-700 whitespace-nowrap">{record.doctorName}</span>
+                        </div>
+                      </td>
+                      <td className="py-5 px-6">
+                        <h4 className="text-sm font-bold text-slate-900 mb-1">{record.title}</h4>
+                        <p className="text-sm text-slate-600 whitespace-pre-line">{record.description}</p>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="p-16 text-center flex flex-col items-center">
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                <FileText className="w-8 h-8 text-slate-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-800">No Records Found</h3>
+              <p className="text-slate-500 mt-1 max-w-sm">Your medical history is currently empty. Future clinical notes and prescriptions will appear here.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderAppointmentsSection = () => (
+    <div className="space-y-6 animate-in slide-in-from-bottom-4 fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Appointments</h1>
+          <p className="text-sm text-slate-500 mt-1">Manage and view your upcoming and past doctor visits.</p>
+        </div>
+      </div>
+
+      <Card className="border-none shadow-md shadow-slate-200/50">
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="p-12 text-center text-slate-500 font-medium">Loading appointments...</div>
+          ) : appointments.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                    <th className="py-4 px-6 whitespace-nowrap">Date & Time</th>
+                    <th className="py-4 px-6">Doctor</th>
+                    <th className="py-4 px-6">Reason</th>
+                    <th className="py-4 px-6">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {appointments.sort((a,b) => new Date(b.appointmentDate) - new Date(a.appointmentDate)).map((app) => (
+                    <tr key={app.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-4 px-6 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex flex-col items-center justify-center shrink-0 border border-blue-100">
+                            <span className="text-[10px] font-bold uppercase leading-none">{new Date(app.appointmentDate).toLocaleString('default', { month: 'short' })}</span>
+                            <span className="text-sm font-bold leading-none mt-0.5">{new Date(app.appointmentDate).getDate()}</span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-slate-900">{new Date(app.appointmentDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                            <p className="text-xs text-slate-500">Duration: {app.durationMinutes} mins</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className="text-sm font-medium text-slate-700">Dr. {app.doctorName || "Unknown"}</span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className="text-sm text-slate-700">{app.reason || "Checkup"}</span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <Badge 
+                          variant={
+                            app.status === "COMPLETED" ? "success" : 
+                            app.status === "SCHEDULED" ? "blue" : 
+                            "gray"
+                          }
+                        >
+                          {app.status}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="p-16 text-center flex flex-col items-center">
+              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                <Calendar className="w-8 h-8 text-slate-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-800">No Appointments</h3>
+              <p className="text-slate-500 mt-1 max-w-sm">You do not have any past or upcoming appointments scheduled.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderBillingSection = () => (
+    <div className="space-y-6 animate-in slide-in-from-bottom-4 fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">My Bills</h1>
+          <p className="text-sm text-slate-500 mt-1">Review your hospital invoices and payment history.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <Card className="border-none shadow-md shadow-slate-200/50">
+            <CardHeader title="Invoice History" />
+            <CardContent className="p-0">
+              {loading ? (
+                <div className="p-12 text-center text-slate-500 font-medium">Loading invoices...</div>
+              ) : invoices.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+                        <th className="py-4 px-6 whitespace-nowrap">Invoice #</th>
+                        <th className="py-4 px-6">Date</th>
+                        <th className="py-4 px-6">Amount</th>
+                        <th className="py-4 px-6">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {invoices.map((inv) => (
+                        <tr key={inv.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="py-4 px-6 whitespace-nowrap">
+                            <span className="text-sm font-medium text-slate-700">{inv.invoiceNumber}</span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className="text-sm text-slate-600">{new Date(inv.createdAt).toLocaleDateString()}</span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className="text-sm font-bold text-slate-900">{formatCurrency(inv.totalAmount)}</span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <Badge variant={inv.paymentStatus === "PAID" ? "success" : "warning"}>
+                              {inv.paymentStatus}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-16 text-center flex flex-col items-center">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                    <Receipt className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-800">No Bills Found</h3>
+                  <p className="text-slate-500 mt-1 max-w-sm">You have no invoices on your record.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="md:col-span-1">
+          <Card className="border-none shadow-md shadow-slate-200/50 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+            <CardContent className="p-6">
+              <h3 className="font-semibold text-slate-300 mb-6 flex items-center gap-2">
+                <CreditCard className="w-5 h-5" /> Account Balance
+              </h3>
+              
+              <div className="mb-8">
+                <p className="text-slate-400 text-sm mb-1">Total Outstanding</p>
+                <p className="text-4xl font-bold text-white tracking-tight">
+                  {formatCurrency(invoices.filter(i => i.paymentStatus !== "PAID").reduce((sum, i) => sum + i.totalAmount, 0))}
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/50 border-none">
+                  Pay Now Online
+                </Button>
+                <p className="text-xs text-slate-400 text-center">Secure payments powered by Stripe</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="relative bg-[#f7f6f9] min-h-screen">
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <button
-          type="button"
-          aria-label="Close sidebar"
+        <div 
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
-          className="fixed inset-0 bg-black/40 z-30 lg:hidden"
         />
       )}
-      <div className="flex items-start">
-        <aside
-          className={`fixed inset-y-4 left-4 z-40 w-[85%] max-w-xs bg-white/75 backdrop-blur border border-white/60 shadow-2xl rounded-3xl p-6 pt-12 transition-transform duration-300 lg:translate-x-0 lg:w-[250px] lg:max-w-none h-[calc(100vh-2rem)] ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-        >
-          <div className="hidden lg:block">
-            <h2 className="text-lg font-semibold text-slate-800">Patient Panel</h2>
-            <p className="text-xs text-gray-500 mt-1 break-all">{user?.email || ""}</p>
-          </div>
 
-          <nav className="mt-10 space-y-2">
+      {/* Sidebar Navigation */}
+      <aside className={`
+        fixed lg:sticky top-0 left-0 z-50 h-screen w-[280px] bg-white border-r border-slate-200 
+        transition-transform duration-300 ease-in-out flex flex-col
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/20">
+              <Activity className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold text-xl text-slate-900 tracking-tight">Patient<span className="text-blue-600">Portal</span></span>
+          </div>
+          <button className="lg:hidden text-slate-400 hover:text-slate-600" onClick={() => setIsSidebarOpen(false)}>
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="p-6 flex-1 overflow-y-auto">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-3">Menu</p>
             {menuItems.map((item) => {
               const active = section === item.id;
-
+              const Icon = item.icon;
               return (
                 <button
                   key={item.id}
-                  type="button"
                   onClick={() => {
                     setSection(item.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={getMenuItemClass(active)}
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${
+                    active 
+                      ? "bg-blue-50 text-blue-700" 
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  }`}
                 >
+                  <Icon className={`w-5 h-5 ${active ? "text-blue-600" : "text-slate-400"}`} />
                   {item.label}
+                  
+                  {item.id === "billing" && stats.unpaidBills > 0 && (
+                    <span className="ml-auto bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      {stats.unpaidBills}
+                    </span>
+                  )}
+                  {item.id === "appointments" && stats.upcomingAppointments > 0 && (
+                    <span className="ml-auto bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      {stats.upcomingAppointments}
+                    </span>
+                  )}
                 </button>
               );
             })}
-          </nav>
-        </aside>
+          </div>
+        </div>
 
-        <section className="w-full lg:pl-[18rem]">
-          <div className="lg:hidden sticky top-0 z-20 bg-white/85 backdrop-blur border-b border-white/70 px-4 py-3 flex items-center gap-3">
-            <button
-              type="button"
-              aria-label="Open sidebar"
-              onClick={() => setIsSidebarOpen(true)}
-              className="h-9 w-9 rounded-full border border-gray-200 flex items-center justify-center text-slate-700"
-            >
-              <svg
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-800">Patient Panel</p>
-              <p className="text-xs text-gray-500 truncate">{user?.email || ""}</p>
+        <div className="p-6 border-t border-slate-100">
+          <div className="bg-slate-50 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
+              {user?.email?.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-900 truncate">{patient?.fullName || "Patient"}</p>
+              <p className="text-xs text-slate-500 truncate">{user?.email}</p>
             </div>
           </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+        {/* Mobile Header */}
+        <header className="bg-white border-b border-slate-200 px-4 py-4 flex items-center justify-between sticky top-0 z-30 lg:hidden">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Activity className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold text-lg text-slate-900">Patient<span className="text-blue-600">Portal</span></span>
+          </div>
+          <button 
+            className="p-2 -mr-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            onClick={() => setIsSidebarOpen(true)}
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+        </header>
+
+        {/* Dynamic Content */}
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
           {section === "dashboard" && renderDashboardSection()}
           {section === "details" && renderDetailsSection()}
           {section === "records" && renderRecordsSection()}
-        </section>
-      </div>
+          {section === "appointments" && renderAppointmentsSection()}
+          {section === "billing" && renderBillingSection()}
+        </div>
+      </main>
     </div>
   );
 };

@@ -46,6 +46,7 @@ public class Doctor {
     private String bio;
 
     @Column
+    @Builder.Default
     private Boolean isAvailable = true;
 
     @Column(nullable = false, updatable = false)

@@ -50,6 +50,10 @@ public class MedicalRecord {
     @Column
     private String attachmentUrl;
 
+    @Column
+    @Builder.Default
+    private Boolean isFulfilled = false;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
