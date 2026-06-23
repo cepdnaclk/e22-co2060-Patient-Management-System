@@ -107,6 +107,10 @@ public class Patient {
     @Column(length = 1000)
     private String currentMedications;
 
+    @Column(columnDefinition = "boolean default false")
+    @Builder.Default
+    private Boolean criticalStatus = false;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

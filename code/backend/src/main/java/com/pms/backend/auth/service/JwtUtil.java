@@ -1,7 +1,5 @@
 package com.pms.backend.auth.service;
 
-
-
 import com.pms.backend.user.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -9,62 +7,68 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
-// @Component: Spring creates one instance of this class and manages it.
-// Other classes can inject it with @Autowired or @RequiredArgsConstructor.
 public class JwtUtil {
 
     @Value("${app.jwt.secret}")
-    // @Value reads from application.properties: app.jwt.secret
     private String secret;
 
+    // Access token lifetime: 15 minutes (900,000 ms) — short-lived for security
     @Value("${app.jwt.expiration-ms}")
     private long expirationMs;
 
-    // ── GENERATE TOKEN ─────────────────────────────────────────────
-    // Called after successful login or signup.
-    // Returns a JWT string containing userId, email, role.
+    // ── GENERATE ACCESS TOKEN ───────────────────────────────────────────────
+    // Short-lived token (15 min). Sent in Authorization header for every API call.
     public String generateToken(User user) {
         return Jwts.builder()
                 .subject(user.getId().toString())
-                // subject = who this token is for (user ID)
                 .claim("email",     user.getEmail())
                 .claim("role",      user.getRole().name())
                 .claim("firstName", user.getFirstName())
-                // .claim() adds custom data to the token payload
+                .claim("lastName",  user.getLastName())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSigningKey())
-                // signWith creates the SIGNATURE — proves it came from your server
                 .compact();
-        // .compact() assembles everything into the final "eyJ..." string
     }
 
-    // ── VALIDATE TOKEN ─────────────────────────────────────────────
-    // Returns true if the token is valid and not expired.
-    // Called by JwtAuthFilter on every request.
+    // ── GENERATE REFRESH TOKEN STRING ───────────────────────────────────────
+    // A cryptographically random string (NOT a JWT) stored in the database.
+    // This design allows instant server-side revocation — you can't revoke a JWT
+    // once issued, but you CAN delete it from your DB.
+    public String generateRefreshTokenString() {
+        byte[] randomBytes = new byte[64];
+        new SecureRandom().nextBytes(randomBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+    }
+
+    // ── VALIDATE ACCESS TOKEN ───────────────────────────────────────────────
     public boolean isValid(String token) {
         try {
             Jwts.parser()
                     .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token);
-            return true;  // No exception = token is valid
+            return true;
         } catch (JwtException | IllegalArgumentException e) {
-            // JwtException: expired, tampered, wrong signature
-            // IllegalArgumentException: token is null or empty
             return false;
         }
     }
 
-    // ── EXTRACT DATA FROM TOKEN ─────────────────────────────────────
+    // ── EXTRACT DATA ────────────────────────────────────────────────────────
     public String getEmail(String token) {
         return getClaims(token).get("email", String.class);
     }
 
-    // ── PRIVATE HELPERS ─────────────────────────────────────────────
+    public Long getUserId(String token) {
+        return Long.parseLong(getClaims(token).getSubject());
+    }
+
+    // ── PRIVATE HELPERS ─────────────────────────────────────────────────────
     private Claims getClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -74,7 +78,6 @@ public class JwtUtil {
     }
 
     private SecretKey getSigningKey() {
-        // Converts Base64 secret string into a cryptographic key object
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }

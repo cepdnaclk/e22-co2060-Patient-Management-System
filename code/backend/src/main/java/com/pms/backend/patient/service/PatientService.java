@@ -55,6 +55,7 @@ public class PatientService {
                 .medicalHistory(patientDto.getMedicalHistory())
                 .allergies(patientDto.getAllergies())
                 .currentMedications(patientDto.getCurrentMedications())
+                .criticalStatus(patientDto.getCriticalStatus() != null ? patientDto.getCriticalStatus() : false)
                 .build();
 
         Patient savedPatient = patientRepository.save(patient);
@@ -155,6 +156,9 @@ public class PatientService {
         if (patientDto.getCurrentMedications() != null) {
             patient.setCurrentMedications(patientDto.getCurrentMedications());
         }
+        if (patientDto.getCriticalStatus() != null) {
+            patient.setCriticalStatus(patientDto.getCriticalStatus());
+        }
 
         Patient updatedPatient = patientRepository.save(patient);
         return convertToDto(updatedPatient);
@@ -198,6 +202,7 @@ public class PatientService {
                 .medicalHistory(patient.getMedicalHistory())
                 .allergies(patient.getAllergies())
                 .currentMedications(patient.getCurrentMedications())
+                .criticalStatus(patient.getCriticalStatus())
                 .createdAt(patient.getCreatedAt())
                 .updatedAt(patient.getUpdatedAt())
                 .build();

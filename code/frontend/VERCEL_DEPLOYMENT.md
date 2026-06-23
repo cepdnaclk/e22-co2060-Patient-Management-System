@@ -45,12 +45,12 @@ In Vercel Dashboard → Your Project → Settings → Environment Variables:
 **Add this variable:**
 
 ```
-VITE_API_URL = https://your-backend-url.com:8080
+VITE_API_URL = https://your-backend-url.com:8082
 ```
 
 Replace `https://your-backend-url.com` with your actual backend URL:
 
-- **Local testing:** `http://localhost:8080`
+- **Local testing:** `http://localhost:8082`
 - **Heroku backend:** `https://your-heroku-app.herokuapp.com`
 - **Your server:** Your actual backend domain
 

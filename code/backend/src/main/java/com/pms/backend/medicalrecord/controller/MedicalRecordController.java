@@ -52,10 +52,17 @@ public class MedicalRecordController {
     }
 
     @GetMapping("/type/{recordType}")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('PHARMACIST')")
     public ResponseEntity<List<MedicalRecordDto>> getMedicalRecordsByRecordType(@PathVariable String recordType) {
         List<MedicalRecordDto> records = medicalRecordService.getMedicalRecordsByRecordType(recordType);
         return ResponseEntity.ok(records);
+    }
+
+    @PutMapping("/{id}/fulfill")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('PHARMACIST')")
+    public ResponseEntity<MedicalRecordDto> fulfillPrescription(@PathVariable Long id) {
+        MedicalRecordDto updatedRecord = medicalRecordService.fulfillPrescription(id);
+        return ResponseEntity.ok(updatedRecord);
     }
 
     @PutMapping("/{id}")

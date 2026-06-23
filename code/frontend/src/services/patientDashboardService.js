@@ -173,9 +173,16 @@ export const patientDashboardService = {
 
     const patient = mapPatient(patientData);
 
-    const { data: recordsData } = await api.get(
-      `/api/medical-records/patient/${patient.id}`,
-    );
+    const [recordsRes, appointmentsRes, invoicesRes] = await Promise.allSettled([
+      api.get(`/api/medical-records/patient/${patient.id}`),
+      api.get(`/api/appointments/patient/${patient.id}`),
+      api.get(`/api/invoices/patient/${patient.id}`)
+    ]);
+
+    const recordsData = recordsRes.status === "fulfilled" ? recordsRes.value.data : [];
+    const appointmentsData = appointmentsRes.status === "fulfilled" ? appointmentsRes.value.data : [];
+    // Invoices are paginated, so they are in .data.content
+    const invoicesData = invoicesRes.status === "fulfilled" ? (invoicesRes.value.data.content || []) : [];
 
     const records = (recordsData || []).map(mapRecord);
 
@@ -191,12 +198,17 @@ export const patientDashboardService = {
           : 0,
       profileStatus:
         patient.updatedAt !== "N/A" ? "Updated" : "Incomplete",
+      upcomingAppointments: appointmentsData.filter(app => new Date(app.appointmentDate) >= new Date() && app.status !== "CANCELLED").length,
+      unpaidBills: invoicesData.filter(inv => inv.paymentStatus !== "PAID").length,
     };
 
     return {
       patient,
       records,
+      appointments: appointmentsData,
+      invoices: invoicesData,
       stats,
     };
   },
 };
+

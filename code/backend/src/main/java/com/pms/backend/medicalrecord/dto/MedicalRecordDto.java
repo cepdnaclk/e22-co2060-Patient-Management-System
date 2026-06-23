@@ -24,6 +24,7 @@ public class MedicalRecordDto {
     private String testName;
     private String testResult;
     private String attachmentUrl;
+    private Boolean isFulfilled;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

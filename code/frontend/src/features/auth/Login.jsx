@@ -39,7 +39,8 @@ export default function LoginPage() {
 
     try {
       const data = await authService.login(email, password);
-      saveLogin(data.token, data.user);
+      // data now has: { accessToken, refreshToken, user }
+      saveLogin(data.accessToken, data.refreshToken, data.user);
       const redirectPath = ROLE_ROUTES[data.user.role] || "/dashboard";
       navigate(redirectPath);
     } catch (err) {
@@ -48,6 +49,7 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden px-4 ">

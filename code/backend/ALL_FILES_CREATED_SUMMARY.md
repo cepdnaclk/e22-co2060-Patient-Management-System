@@ -250,7 +250,7 @@ backend/
 
 4. **Verify Application Started**
    - Check logs for: `Started BackendApplication`
-   - Access API at: `http://localhost:8080`
+   - Access API at: `http://localhost:8082`
 
 ## 📦 Database Schema
 

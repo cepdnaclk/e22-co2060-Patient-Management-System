@@ -43,6 +43,7 @@ public class PatientDto {
     private String medicalHistory;
     private String allergies;
     private String currentMedications;
+    private Boolean criticalStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

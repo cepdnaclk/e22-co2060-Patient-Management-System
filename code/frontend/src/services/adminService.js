@@ -21,6 +21,11 @@ export const adminService = {
     return data;
   },
 
+  createDoctorProfile: async (userId, payload) => {
+    const { data } = await api.post(`/api/doctors?userId=${userId}`, payload);
+    return data;
+  },
+
   updateUserRole: async (id, role) => {
     const { data } = await api.patch(`/api/v1/admin/users/${id}/role`, { role });
     return data;

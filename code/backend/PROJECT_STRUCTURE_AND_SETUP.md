@@ -183,7 +183,7 @@ app.jwt.secret=${JWT_SECRET}          # From environment variable
 app.jwt.expiration-ms=86400000        # 24 hours in milliseconds
 
 # Server Configuration
-server.port=8080
+server.port=8082
 ```
 
 ## 🚀 How to Run the Application
@@ -258,7 +258,7 @@ Started BackendApplication in X.XXX seconds
 The application will be accessible at:
 
 ```
-http://localhost:8080
+http://localhost:8082
 ```
 
 ## 📡 API Endpoints
@@ -271,7 +271,7 @@ http://localhost:8080
 ### Example Request (Login):
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST http://localhost:8082/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"user@example.com","password":"password123"}'
 ```
@@ -280,7 +280,7 @@ curl -X POST http://localhost:8080/api/auth/login \
 
 ```bash
 curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  http://localhost:8080/api/patients
+  http://localhost:8082/api/patients
 ```
 
 ## 🐛 Troubleshooting

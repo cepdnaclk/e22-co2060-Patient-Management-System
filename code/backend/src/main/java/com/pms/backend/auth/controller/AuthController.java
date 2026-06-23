@@ -1,55 +1,69 @@
 package com.pms.backend.auth.controller;
 
-
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.pms.backend.auth.dto.AuthResponse;
 import com.pms.backend.auth.dto.LoginRequest;
 import com.pms.backend.auth.dto.SignupRequest;
 import com.pms.backend.auth.service.AuthService;
-
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
-// @RestController = @Controller + @ResponseBody
-// Every method automatically serializes return values to JSON.
-
 @RequestMapping("/api/auth")
-// All routes in this controller start with /api/auth
-
 @RequiredArgsConstructor
-
-@CrossOrigin(origins = "http://localhost:5174")
-
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/signup")
-    // Maps POST http://localhost:8080/api/auth/signup
     public ResponseEntity<AuthResponse> signup(
-            @Valid @RequestBody SignupRequest request) {
-        // @Valid: triggers all @NotBlank, @Email, @Size checks in SignupRequest
-        //         If any fail → GlobalExceptionHandler handles it automatically
-        // @RequestBody: reads the JSON body and maps it to SignupRequest
-        AuthResponse response = authService.signup(request);
+            @Valid @RequestBody SignupRequest request,
+            HttpServletRequest httpRequest) {
+        AuthResponse response = authService.signup(request, getClientIp(httpRequest));
         return ResponseEntity.status(201).body(response);
-        // 201 Created = "resource was successfully created"
     }
 
     @PostMapping("/login")
-    // Maps POST http://localhost:8080/api/auth/login
     public ResponseEntity<AuthResponse> login(
-            @Valid @RequestBody LoginRequest request) {
-        AuthResponse response = authService.login(request);
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest) {
+        AuthResponse response = authService.login(request, getClientIp(httpRequest));
         return ResponseEntity.ok(response);
-        // ResponseEntity.ok() = 200 OK
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(
+            @RequestBody Map<String, String> body,
+            HttpServletRequest httpRequest) {
+        String refreshToken = body.get("refreshToken");
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        AuthResponse response = authService.refreshAccessToken(refreshToken, getClientIp(httpRequest));
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @RequestBody Map<String, String> body,
+            HttpServletRequest httpRequest) {
+        String refreshToken = body.get("refreshToken");
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            authService.logout(refreshToken, getClientIp(httpRequest));
+        }
+        return ResponseEntity.noContent().build();
+    }
+
+    // ── HELPERS ─────────────────────────────────────────────────────────────
+    private String getClientIp(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 }
