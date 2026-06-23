@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { useTheme } from "../theme/ThemeContext.jsx";
 import { 
   LayoutDashboard, UserPlus, Users, Activity, 
-  Settings, Menu, X, ShieldCheck, Database, Table
+  Settings, Menu, X, ShieldCheck, Database, Table, Sun, Moon, LogOut
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import AddNurse from "./AdminDAshboardComponents/AddUser";
 import Stats from "./AdminDAshboardComponents/Stats";
@@ -12,10 +14,26 @@ import UsersList from "./AdminDAshboardComponents/UsersList";
 import PatientsManager from "./AdminDAshboardComponents/PatientsManager";
 import AllTables from "./AdminDAshboardComponents/AllTables";
 
+const sectionLabels = {
+  dashboard: "Overview",
+  addNurse: "Add User",
+  users: "User List",
+  patients: "Patients",
+  allTables: "All Tables",
+  stats: "System Stats",
+};
+
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const [section, setSection] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const menuItems = [
     { id: "dashboard", label: "Overview", icon: LayoutDashboard },
@@ -81,8 +99,9 @@ const AdminDashboard = () => {
           </div>
         </div>
 
+        {/* User Footer */}
         <div className="p-6 border-t border-slate-800 bg-slate-950">
-          <div className="bg-slate-800 rounded-xl p-4 flex items-center gap-3">
+          <div className="bg-slate-800 rounded-xl p-4 flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold border border-indigo-500/30">
               {user?.email?.charAt(0).toUpperCase() || "A"}
             </div>
@@ -91,25 +110,57 @@ const AdminDashboard = () => {
               <p className="text-xs text-slate-400 truncate">{user?.email}</p>
             </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
-        {/* Mobile Header */}
-        <header className="bg-white border-b border-slate-200 px-4 py-4 flex items-center justify-between sticky top-0 z-30 lg:hidden">
+        {/* Top Bar (all screen sizes) */}
+        <header className="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between sticky top-0 z-30">
+          {/* Left: mobile menu + breadcrumb */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-white" />
+            <button
+              className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors lg:hidden"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <div className="flex items-center gap-2 lg:hidden">
+              <div className="w-7 h-7 bg-indigo-600 rounded-md flex items-center justify-center">
+                <ShieldCheck className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-bold text-slate-900">Admin<span className="text-indigo-600">Panel</span></span>
             </div>
-            <span className="font-bold text-lg text-slate-900">Admin<span className="text-indigo-600">Panel</span></span>
+            <div className="hidden lg:block">
+              <span className="font-semibold text-slate-900 text-sm">{sectionLabels[section] || section}</span>
+            </div>
           </div>
-          <button 
-            className="p-2 -mr-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-            onClick={() => setIsSidebarOpen(true)}
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+          {/* Right: theme toggle + user info */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            </button>
+            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
+              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">
+                {user?.email?.charAt(0).toUpperCase() || "A"}
+              </div>
+              <div className="hidden md:block">
+                <p className="text-sm font-semibold text-slate-900 leading-tight">Administrator</p>
+                <p className="text-xs text-slate-500 leading-tight">{user?.email}</p>
+              </div>
+            </div>
+          </div>
         </header>
 
         {/* Dynamic Content */}

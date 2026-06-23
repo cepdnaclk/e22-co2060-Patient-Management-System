@@ -63,10 +63,10 @@ const FAQ = () => {
   return (
     <main className="px-4 sm:px-8 lg:px-12 py-10 sm:py-12">
       <section className="max-w-4xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-semibold text-slate-800 text-center">
+        <h1 className="text-3xl md:text-4xl font-semibold text-slate-800 dark:text-white text-center">
           Frequently Asked Questions
         </h1>
-        <p className="mt-4 text-center text-gray-600 max-w-2xl mx-auto">
+        <p className="mt-4 text-center text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Find detailed answers about accounts, role-based dashboards, records,
           and support in one place.
         </p>
@@ -83,16 +83,16 @@ const FAQ = () => {
                 <button
                   type="button"
                   onClick={() => handleToggle(index)}
-                  className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left"
+                  className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-t-2xl"
                 >
-                  <span className="font-medium text-slate-800">{item.question}</span>
-                  <span className="text-blue-600 text-xl leading-none">
+                  <span className="font-medium text-slate-800 dark:text-white">{item.question}</span>
+                  <span className="text-blue-600 dark:text-blue-400 text-xl leading-none">
                     {isOpen ? "−" : "+"}
                   </span>
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 text-sm text-gray-600">{item.answer}</div>
+                  <div className="px-5 pb-5 text-sm text-gray-600 dark:text-gray-400">{item.answer}</div>
                 )}
               </article>
             );
@@ -100,15 +100,15 @@ const FAQ = () => {
         </div>
 
         <section className="mt-10 rounded-2xl glass-panel p-5 md:p-6">
-          <h2 className="text-lg md:text-xl font-semibold text-slate-800">
+          <h2 className="text-lg md:text-xl font-semibold text-slate-800 dark:text-white">
             Still need help?
           </h2>
-          <p className="mt-2 text-sm text-gray-700">
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
             If your question is not listed here, please use the Contact page and
             include relevant details such as your role, account email, and issue
             description.
           </p>
-          <ul className="mt-3 text-sm text-gray-700 space-y-1">
+          <ul className="mt-3 text-sm text-gray-700 dark:text-gray-300 space-y-1">
             <li>• Email: support@pmscare.com</li>
             <li>• Phone: +94 11 234 5678</li>
             <li>• Support Hours: Monday - Friday, 8:30 AM - 5:30 PM</li>

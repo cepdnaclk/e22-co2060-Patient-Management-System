@@ -1,17 +1,32 @@
 import React, { useState } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { useTheme } from "../theme/ThemeContext.jsx";
 import { 
-  LayoutDashboard, Pill, Activity, Menu, X, CheckCircle2 
+  LayoutDashboard, Pill, Activity, Menu, X, CheckCircle2, Sun, Moon
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import PharmacistOverview from "./pharmacist/PharmacistOverview.jsx";
 import InventoryManager from "./pharmacist/InventoryManager.jsx";
 import PrescriptionQueue from "./pharmacist/PrescriptionQueue.jsx";
 
+const sectionLabels = {
+  dashboard: "Overview",
+  queue: "Prescriptions",
+  inventory: "Inventory",
+};
+
 export default function PharmacistDashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const [section, setSection] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const menuItems = [
     { id: "dashboard", label: "Overview", icon: LayoutDashboard },
@@ -74,8 +89,9 @@ export default function PharmacistDashboard() {
           </div>
         </div>
 
+        {/* User Footer */}
         <div className="p-6 border-t border-slate-800 bg-slate-950">
-          <div className="bg-slate-800 rounded-xl p-4 flex items-center gap-3">
+          <div className="bg-slate-800 rounded-xl p-4 flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold border border-emerald-500/30">
               {user?.email?.charAt(0).toUpperCase() || "P"}
             </div>
@@ -84,25 +100,57 @@ export default function PharmacistDashboard() {
               <p className="text-xs text-slate-400 truncate">{user?.email}</p>
             </div>
           </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors"
+          >
+            <X className="w-4 h-4" />
+            Sign Out
+          </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
-        {/* Mobile Header */}
-        <header className="bg-white border-b border-slate-200 px-4 py-4 flex items-center justify-between sticky top-0 z-30 lg:hidden">
+        {/* Top Bar (all screen sizes) */}
+        <header className="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between sticky top-0 z-30">
+          {/* Left */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-              <Pill className="w-5 h-5 text-white" />
+            <button
+              className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors lg:hidden"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <div className="flex items-center gap-2 lg:hidden">
+              <div className="w-7 h-7 bg-emerald-600 rounded-md flex items-center justify-center">
+                <Pill className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-bold text-slate-900">Pharma<span className="text-emerald-600">Core</span></span>
             </div>
-            <span className="font-bold text-lg text-slate-900">Pharma<span className="text-emerald-600">Core</span></span>
+            <div className="hidden lg:block">
+              <span className="font-semibold text-slate-900 text-sm">{sectionLabels[section] || section}</span>
+            </div>
           </div>
-          <button 
-            className="p-2 -mr-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-            onClick={() => setIsSidebarOpen(true)}
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+          {/* Right */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            </button>
+            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm">
+                {user?.email?.charAt(0).toUpperCase() || "P"}
+              </div>
+              <div className="hidden md:block">
+                <p className="text-sm font-semibold text-slate-900 leading-tight">Pharmacist</p>
+                <p className="text-xs text-slate-500 leading-tight">{user?.email}</p>
+              </div>
+            </div>
+          </div>
         </header>
 
         {/* Dynamic Content */}

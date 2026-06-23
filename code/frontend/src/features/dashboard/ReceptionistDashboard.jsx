@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { useTheme } from "../theme/ThemeContext.jsx";
 import { 
   LayoutDashboard, UserPlus, Calendar, CreditCard, 
-  Menu, X, Building, LogOut
+  Menu, X, Building, LogOut, Sun, Moon
 } from "lucide-react";
 
 import ReceptionistOverview from "./receptionist/ReceptionistOverview.jsx";
@@ -11,8 +12,16 @@ import AppointmentScheduling from "./receptionist/AppointmentScheduling.jsx";
 import BillingOverview from "./receptionist/BillingOverview.jsx";
 import { useNavigate } from "react-router-dom";
 
+const sectionLabels = {
+  overview: "Overview",
+  register: "Patient Registration",
+  appointments: "Scheduling",
+  billing: "Billing",
+};
+
 const ReceptionistDashboard = () => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [section, setSection] = useState("overview");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -106,20 +115,45 @@ const ReceptionistDashboard = () => {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
-        {/* Mobile Header */}
-        <header className="bg-white border-b border-slate-200 px-4 py-4 flex items-center justify-between sticky top-0 z-30 lg:hidden">
+        {/* Top Bar (all screen sizes) */}
+        <header className="bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between sticky top-0 z-30">
+          {/* Left */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-sky-600 rounded-lg flex items-center justify-center">
-              <Building className="w-5 h-5 text-white" />
+            <button
+              className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors lg:hidden"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <div className="flex items-center gap-2 lg:hidden">
+              <div className="w-7 h-7 bg-sky-600 rounded-md flex items-center justify-center">
+                <Building className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-bold text-slate-900">Front<span className="text-sky-600">Desk</span></span>
             </div>
-            <span className="font-bold text-lg text-slate-900">Front<span className="text-sky-600">Desk</span></span>
+            <div className="hidden lg:block">
+              <span className="font-semibold text-slate-900 text-sm">{sectionLabels[section] || section}</span>
+            </div>
           </div>
-          <button 
-            className="p-2 -mr-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-            onClick={() => setIsSidebarOpen(true)}
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+          {/* Right */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            </button>
+            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
+              <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold text-sm">
+                {user?.email?.charAt(0).toUpperCase() || "R"}
+              </div>
+              <div className="hidden md:block">
+                <p className="text-sm font-semibold text-slate-900 leading-tight">Receptionist</p>
+                <p className="text-xs text-slate-500 leading-tight">{user?.email}</p>
+              </div>
+            </div>
+          </div>
         </header>
 
         {/* Dynamic Content */}
