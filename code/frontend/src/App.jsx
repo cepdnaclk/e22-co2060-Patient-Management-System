@@ -20,15 +20,17 @@ function App() {
   const location = useLocation();
 
   // Define the paths where you want the Landing Navbar
-  const landingPaths = ["/", "/signup", "/login","/about","/contact","/faq"];
+  const landingPaths = ["/", "/signup", "/login", "/about", "/contact", "/faq"];
   const isLandingPage = landingPaths.includes(location.pathname);
+  const authPaths = ["/login", "/signup"];
+  const isAuthPage = authPaths.includes(location.pathname);
 
   return (
     <div className="app-shell">
       <AmbientOrbs />
       <div className="app-surface">
         {/* Conditional Navbar Rendering */}
-        {isLandingPage ? <NavbarLanding /> : <Navbar />}
+        {!isAuthPage && (isLandingPage ? <NavbarLanding /> : <Navbar />)}
 
         <Routes>
           <Route path="/" element={<Home />} />

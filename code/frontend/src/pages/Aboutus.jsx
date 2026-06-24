@@ -22,10 +22,10 @@ const Aboutus = () => {
 	return (
 		<main className="px-4 sm:px-8 lg:px-12 py-10 sm:py-12">
 			<section className="max-w-5xl mx-auto">
-				<h1 className="text-3xl md:text-4xl font-semibold text-slate-800 text-center">
+				<h1 className="text-3xl md:text-4xl font-semibold text-slate-800 dark:text-white text-center">
 					About Our Patient Management System
 				</h1>
-				<p className="mt-4 text-center text-gray-600 max-w-3xl mx-auto">
+				<p className="mt-4 text-center text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
 					Our platform helps healthcare teams manage appointments, records,
 					communication, and reporting in one streamlined environment.
 				</p>
@@ -37,15 +37,15 @@ const Aboutus = () => {
 						key={value.title}
 						className="rounded-2xl glass-card p-6 lift-hover"
 					>
-						<h2 className="text-lg font-semibold text-slate-800">{value.title}</h2>
-						<p className="mt-2 text-sm text-gray-600">{value.description}</p>
+						<h2 className="text-lg font-semibold text-slate-800 dark:text-white">{value.title}</h2>
+						<p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{value.description}</p>
 					</article>
 				))}
 			</section>
 
 			<section className="max-w-5xl mx-auto mt-10 rounded-2xl glass-panel p-6 md:p-8">
-				<h2 className="text-2xl font-semibold text-slate-800">What We Support</h2>
-				<ul className="mt-4 grid gap-3 text-gray-700 sm:grid-cols-2">
+				<h2 className="text-2xl font-semibold text-slate-800 dark:text-white">What We Support</h2>
+				<ul className="mt-4 grid gap-3 text-gray-700 dark:text-gray-300 sm:grid-cols-2">
 					<li>• Patient registration and profile management</li>
 					<li>• Doctor workflows and dashboard tracking</li>
 					<li>• Medical record visibility with role-based access</li>

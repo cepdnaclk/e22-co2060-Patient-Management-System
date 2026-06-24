@@ -1,13 +1,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
 
 :root {
 	color-scheme: light;
 }
 
+html.dark {
+	color-scheme: dark;
+}
+
 body {
-	background-color: #f2f7ff;
-	color: #0f172a;
+	@apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300;
 	font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
@@ -28,9 +32,29 @@ body {
 		linear-gradient(180deg, #f6f9ff 0%, #eef5ff 45%, #ffffff 100%);
 }
 
+html.dark .app-shell {
+	background: radial-gradient(
+			1200px 800px at 8% -10%,
+			rgba(47, 128, 237, 0.1),
+			transparent 60%
+		),
+		radial-gradient(
+			900px 700px at 90% 10%,
+			rgba(99, 179, 237, 0.1),
+			transparent 60%
+		),
+		linear-gradient(180deg, #020617 0%, #0f172a 45%, #1e293b 100%);
+}
+
 .app-surface {
 	position: relative;
 	z-index: 2;
+}
+
+/* Dashboard pages need full-height without the decorative background */
+.app-shell:has(.dashboard-root) {
+	background: var(--color-slate-50, #f8fafc);
+	overflow: visible;
 }
 
 .ambient-orbs {
@@ -47,11 +71,23 @@ body {
 	backdrop-filter: blur(18px);
 }
 
+html.dark .glass-card {
+	background: rgba(15, 23, 42, 0.7);
+	border: 1px solid rgba(51, 65, 85, 0.5);
+	box-shadow: 0 18px 40px -32px rgba(0, 0, 0, 0.8);
+}
+
 .glass-panel {
 	background: rgba(255, 255, 255, 0.7);
 	border: 1px solid rgba(148, 163, 184, 0.16);
 	box-shadow: 0 20px 40px -30px rgba(15, 23, 42, 0.6);
 	backdrop-filter: blur(22px);
+}
+
+html.dark .glass-panel {
+	background: rgba(15, 23, 42, 0.6);
+	border: 1px solid rgba(51, 65, 85, 0.4);
+	box-shadow: 0 20px 40px -30px rgba(0, 0, 0, 0.8);
 }
 
 .lift-hover {

@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom"; // 1. Imported useLocation
 import { useAuth } from "../features/auth/AuthContext.jsx";
+import { useTheme } from "../features/theme/ThemeContext.jsx";
+import { Menu, X, LogOut, Sun, Moon } from "lucide-react";
 
 const Navbar = () => {
-  // --- FIX 1: Destructure isAdmin and isNurse ---
-  const { isLoggedIn, user, logout, isDoctor, isPatient, isAdmin, isNurse } =
-    useAuth();
+  const { isLoggedIn, user, logout, isDoctor, isPatient, isAdmin, isNurse } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation(); // 2. Initialized location hook
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+
+  // 3. Hide navbar completely if user is on /login or /signup
+  if (location.pathname === "/login" || location.pathname === "/signup") {
+    return null;
+  }
 
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "";
@@ -22,129 +29,163 @@ const Navbar = () => {
   };
 
   const closeMenu = () => setIsMenuOpen(false);
-  const toggleMenu = () => setIsMenuOpen((open) => !open);
 
-  // --- FIX 2: Update logic to handle Admin and Nurse ---
   const getHomeLink = () => {
     if (isLoggedIn) {
       if (isAdmin) return "/dashboard/admin";
-      if (isNurse) return "/dashboard/nurse";
+      if (isNurse) return "/dashboard/doctor";
       if (isDoctor) return "/dashboard/doctor";
       if (isPatient) return "/dashboard/patient";
     }
     return "/";
   };
 
+  const navLinkStyles = ({ isActive }) =>
+    `text-sm font-semibold transition-colors hover:text-blue-600 dark:hover:text-blue-400 ${isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-600 dark:text-slate-300"
+    }`;
+
+  const mobileNavLinkStyles = ({ isActive }) =>
+    `block py-3 px-4 rounded-xl text-base font-semibold transition-all ${isActive
+      ? "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400"
+      : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+    }`;
+
   return (
-    <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-17.5 tracking-wide relative z-50">
-      <div className="flex flex-wrap items-center justify-between gap-5 w-full">
-        {/* Logo now points to /dashboard/admin for Super Admins */}
+    <header className="sticky top-0 left-0 w-full z-[100] py-3 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md shadow-sm transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+
+        {/* Logo matching the professional drafted design */}
         <NavLink to={getHomeLink()} className="flex items-center gap-2">
-          <img src="/navbarlogo.png" alt="logo" className="w-10 h-10" />
-          <span className="text-sm font-semibold text-slate-800 sm:hidden">
-            PMS
+          <div className="p-1.5 bg-blue-600 rounded-lg">
+            <img src="/navbarlogo.png" alt="logo" className="w-6 h-6 brightness-0 invert" />
+          </div>
+          <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+            PATIENT<span className="text-blue-600">MS</span>
           </span>
         </NavLink>
 
-        <nav
-          className={`fixed top-0 left-0 z-50 h-full w-72 bg-white p-6 shadow-lg transition-transform duration-300 lg:static lg:z-auto lg:h-auto lg:w-auto lg:bg-transparent lg:p-0 lg:shadow-none ${isMenuOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
-        >
-          <ul className="lg:flex lg:items-center gap-x-4 space-y-3 lg:space-y-0">
-            {!isLoggedIn && (
-              <li>
-                <NavLink
-                  to="/"
-                  onClick={closeMenu}
-                  className="hover:text-blue-700 text-blue-700 block font-medium text-[15px]"
-                >
-                  Home
-                </NavLink>
-              </li>
-            )}
-            {isLoggedIn && isAdmin && (
-              <li>
-                <NavLink
-                  to="/dashboard/admin"
-                  onClick={closeMenu}
-                  className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-                >
-                  Admin Panel
-                </NavLink>
-              </li>
-            )}
-            {isLoggedIn && isDoctor && (
-              <li>
-                <NavLink
-                  to="/dashboard/doctor"
-                  onClick={closeMenu}
-                  className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-                >
-                  Dashboard
-                </NavLink>
-              </li>
-            )}
-            {isLoggedIn && isPatient && (
-              <li>
-                <NavLink
-                  to="/dashboard/patient"
-                  onClick={closeMenu}
-                  className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-                >
-                  My Profile
-                </NavLink>
-              </li>
-            )}
-            <li>
-              <NavLink
-                to="/about"
-                onClick={closeMenu}
-                className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-              >
-                About
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/contact"
-                onClick={closeMenu}
-                className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-              >
-                Contact
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/faq"
-                onClick={closeMenu}
-                className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-              >
-                FAQ
-              </NavLink>
-            </li>
-          </ul>
+        <nav className="hidden lg:flex items-center gap-8">
+          {!isLoggedIn && (
+            <NavLink to="/" className={navLinkStyles}>Home</NavLink>
+          )}
+          {isLoggedIn && isAdmin && (
+            <NavLink to="/dashboard/admin" className={navLinkStyles}>Admin Panel</NavLink>
+          )}
+          {isLoggedIn && isDoctor && (
+            <NavLink to="/dashboard/doctor" className={navLinkStyles}>Dashboard</NavLink>
+          )}
+          {isLoggedIn && isPatient && (
+            <NavLink to="/dashboard/patient" className={navLinkStyles}>My Profile</NavLink>
+          )}
+          <NavLink to="/about" className={navLinkStyles}>About</NavLink>
+          <NavLink to="/contact" className={navLinkStyles}>Contact</NavLink>
+          <NavLink to="/faq" className={navLinkStyles}>FAQ</NavLink>
         </nav>
 
-        <div className="flex max-lg:ml-auto space-x-4">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={toggleTheme}
+            className="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label="Toggle Theme"
+          >
+            {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+          </button>
+
           {!isLoggedIn ? (
-            <NavLink
-              to="/login"
-              className="px-4 py-2 text-sm rounded-full font-medium text-slate-900 border border-gray-400 bg-transparent hover:bg-gray-50 transition-all"
-            >
-              Login
-            </NavLink>
+            <div className="hidden sm:flex items-center gap-3">
+              <NavLink to="/login" className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                Log in
+              </NavLink>
+              <NavLink to="/signup" className="px-5 py-2 text-sm font-bold text-white bg-slate-900 dark:bg-white dark:text-slate-900 rounded-full hover:bg-blue-600 dark:hover:bg-blue-500 transition-all">
+                Sign Up
+              </NavLink>
+            </div>
           ) : (
-            <>
-              <div className="px-0.5 py-2 hidden sm:block text-sm font-medium text-slate-600">
-                Welcome, {user?.firstName}
+            <div className="hidden sm:flex items-center gap-4">
+              <div className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                Hi, {user?.firstName}
               </div>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm rounded-full font-medium text-white bg-purple-600 hover:bg-blue-700 transition-all"
-              >
-                Logout
+              <button onClick={handleLogout} className="p-2 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition-colors">
+                <LogOut size={20} />
               </button>
-            </>
+            </div>
           )}
+
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden text-slate-900 dark:text-white">
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Drawer (Menu Overlay) */}
+      <div
+        className={`fixed inset-0 top-[60px] z-40 w-full bg-white/95 dark:bg-slate-950/95 backdrop-blur-md transition-all duration-300 lg:hidden border-t border-slate-200/50 dark:border-slate-800/50 ${isMenuOpen
+            ? "opacity-100 pointer-events-auto translate-y-0"
+            : "opacity-0 pointer-events-none -translate-y-4"
+          }`}
+      >
+        <div className="flex flex-col h-full p-6 justify-between pb-24">
+          <nav className="space-y-2">
+            {!isLoggedIn && (
+              <NavLink to="/" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkStyles}>
+                Home
+              </NavLink>
+            )}
+            {isLoggedIn && isAdmin && (
+              <NavLink to="/dashboard/admin" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkStyles}>
+                Admin Panel
+              </NavLink>
+            )}
+            {isLoggedIn && isDoctor && (
+              <NavLink to="/dashboard/doctor" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkStyles}>
+                Dashboard
+              </NavLink>
+            )}
+            {isLoggedIn && isPatient && (
+              <NavLink to="/dashboard/patient" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkStyles}>
+                My Profile
+              </NavLink>
+            )}
+            <NavLink to="/about" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkStyles}>
+              About
+            </NavLink>
+            <NavLink to="/contact" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkStyles}>
+              Contact
+            </NavLink>
+            <NavLink to="/faq" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkStyles}>
+              FAQ
+            </NavLink>
+          </nav>
+
+          <div className="space-y-4 pt-6 border-t border-slate-200/60 dark:border-slate-800/60">
+            {!isLoggedIn ? (
+              <div className="grid grid-cols-2 gap-3">
+                <NavLink to="/login" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-center py-3 text-sm font-semibold rounded-xl text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800">
+                  Log in
+                </NavLink>
+                <NavLink to="/signup" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-center py-3 text-sm font-bold rounded-xl text-white bg-slate-900 dark:bg-blue-600 hover:bg-blue-600">
+                  Sign up
+                </NavLink>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl">
+                <div>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Logged in as</p>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{user?.firstName} {user?.lastName}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 rounded-xl"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

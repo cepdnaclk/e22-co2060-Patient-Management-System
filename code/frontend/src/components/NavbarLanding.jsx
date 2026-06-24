@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthContext.jsx";
+import { useTheme } from "../features/theme/ThemeContext.jsx";
+import { Menu, X, LogOut, Sun, Moon } from "lucide-react";
 
-const Navbar = () => {
-  //  Destructure the auth states and logout function
-  const { isLoggedIn, user, logout, isDoctor, isPatient } = useAuth();
+const NavbarLanding = () => {
+  const { isLoggedIn, user, logout, isDoctor, isPatient, isAdmin, isNurse } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "";
@@ -15,255 +25,160 @@ const Navbar = () => {
     };
   }, [isMenuOpen]);
 
-  // Handle the logout button click
   const handleLogout = () => {
-    logout(); // Clears session and user state
-    navigate("/login"); // Redirects to login page
+    logout();
+    navigate("/login");
   };
 
-  const closeMenu = () => setIsMenuOpen(false);
-  const toggleMenu = () => setIsMenuOpen((open) => !open);
+  const getDashboardLink = () => {
+    if (!user || !user.role) return "/";
+    const map = {
+      SUPER_ADMIN: "/dashboard/admin",
+      ADMIN: "/dashboard/admin",
+      DOCTOR: "/dashboard/doctor",
+      NURSE: "/dashboard/doctor",
+      PATIENT: "/dashboard/patient",
+      RECEPTIONIST: "/dashboard/receptionist",
+      PHARMACIST: "/dashboard/pharmacist",
+    };
+    return map[user.role] || "/";
+  };
 
   const navLinkStyles = ({ isActive }) => 
-    `relative px-1 py-2 text-sm font-semibold transition-all duration-300 hover:text-blue-600 ${
-      isActive ? "text-blue-600 after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-blue-600" : "text-slate-600"
+    `text-sm font-semibold transition-colors hover:text-blue-600 dark:hover:text-blue-400 ${
+      isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-600 dark:text-slate-300"
+    }`;
+
+  const mobileNavLinkStyles = ({ isActive }) =>
+    `block py-3 px-4 rounded-xl text-base font-semibold transition-all ${
+      isActive
+        ? "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400"
+        : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
     }`;
 
   return (
-    <header className="flex shadow-md py-4 px-4 sm:px-10 min-h-17.5 tracking-wide relative z-50 py-5 bg-transparent">
-      
-      <div className="flex flex-wrap items-center justify-between gap-5 w-full">
+    <header className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 ${
+      scrolled ? "py-3 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md shadow-sm" : "py-5 bg-transparent"
+    }`}>
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        
+        {/* Logo matching the professional drafted design */}
         <NavLink to="/" className="flex items-center gap-2">
-          <img src="/navbarlogo.png" alt="logo" className="w-10 h-10" />
-          <span className="text-sm font-semibold text-slate-800 sm:hidden">
-            PMS
+          <div className="p-1.5 bg-blue-600 rounded-lg">
+            <img src="/navbarlogo.png" alt="logo" className="w-6 h-6 brightness-0 invert" />
+          </div>
+          <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+            PATIENT<span className="text-blue-600">MS</span>
           </span>
         </NavLink>
 
-        {isMenuOpen && (
-          <button
-            type="button"
-            aria-label="Close menu"
-            onClick={closeMenu}
-            className="fixed inset-0 bg-black/40 z-40 lg:hidden"
-          />
-        )}
-
-        <nav
-          className={`fixed top-0 left-0 z-50 h-full w-72 bg-white p-6 shadow-lg transition-transform duration-300 lg:static lg:z-auto lg:h-auto lg:w-auto lg:bg-transparent lg:p-0 lg:shadow-none ${
-            isMenuOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0`}
-        >
-          <div className="flex items-center justify-between pb-4 lg:hidden">
-            <span className="text-sm font-semibold text-slate-800">Menu</span>
-            <button
-              type="button"
-              onClick={closeMenu}
-              className="rounded-full border border-gray-200 p-2 text-slate-600"
-              aria-label="Close menu"
-            >
-              <svg
-                className="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
-          <ul className="lg:flex lg:items-center gap-x-4 space-y-3 lg:space-y-0">
-            {!isLoggedIn && (
-              <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
-                <NavLink
-                  to="/"
-                  onClick={closeMenu}
-                  className="hover:text-blue-700 text-blue-700 block font-medium text-[15px]"
-                >
-                  Home
-                </NavLink>
-              </li>
-            )}
-            {isLoggedIn && isPatient && (
-              <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
-                <NavLink
-                  to="/dashboard/patient"
-                  onClick={closeMenu}
-                  className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-                >
-                  My Profile
-                </NavLink>
-              </li>
-            )}
-            {isLoggedIn && isDoctor && (
-              <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
-                <NavLink
-                  to="/dashboard/doctor"
-                  onClick={closeMenu}
-                  className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-                >
-                  Dashboard
-                </NavLink>
-              </li>
-            )}
-            <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
-              <NavLink
-                to="/about"
-                onClick={closeMenu}
-                className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-              >
-                About
-              </NavLink>
-            </li>
-            <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
-              <NavLink
-                to="/contact"
-                onClick={closeMenu}
-                className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-              >
-                Contact
-              </NavLink>
-            </li>
-            <li className="border-b border-gray-200 pb-3 lg:border-0 lg:pb-0">
-              <NavLink
-                to="/faq"
-                onClick={closeMenu}
-                className="hover:text-blue-700 text-slate-900 block font-medium text-[15px]"
-              >
-                FAQ
-              </NavLink>
-            </li>
-          </ul>
+        <nav className="hidden lg:flex items-center gap-8">
+          <NavLink to="/" className={navLinkStyles}>Home</NavLink>
+          {isLoggedIn && (
+            <NavLink to={getDashboardLink()} className={navLinkStyles}>Dashboard</NavLink>
+          )}
+          <NavLink to="/about" className={navLinkStyles}>About</NavLink>
+          <NavLink to="/contact" className={navLinkStyles}>Contact</NavLink>
+          <NavLink to="/faq" className={navLinkStyles}>FAQ</NavLink>
         </nav>
 
-        <div className="flex max-lg:ml-auto space-x-4">
-          {!isLoggedIn ? (
-            <>
-              {/* Show if logged out  */}
-              <NavLink
-                to="/login"
-                className="px-4 py-2 text-sm rounded-full font-medium cursor-pointer tracking-wide text-slate-900 border border-gray-400 bg-transparent hover:bg-gray-50 transition-all"
-              >
-                Login
-              </NavLink>
-              <NavLink
-                to="/signup"
-                className="px-4 py-2 text-sm rounded-full font-medium cursor-pointer tracking-wide text-white border border-blue-600 bg-blue-600 hover:bg-blue-700 transition-all"
-              >
-                Sign up
-              </NavLink>
-            </>
-          ) : (
-            <>
-              {/* Show if logged in  */}
-              <div className="px-0.5 py-2 hidden sm:block text-sm font-medium text-slate-600">
-                Welcome, {user?.firstName}
-              </div>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm rounded-full font-medium cursor-pointer tracking-wide text-white border border-purple-600 bg-purple-600 hover:bg-blue-700 transition-all"
-              >
-                Logout
-              </button>
-            </>
-          )}
+        <div className="flex items-center gap-4">
           <button
-            type="button"
-            aria-label="Toggle menu"
-            aria-expanded={isMenuOpen}
-            onClick={toggleMenu}
-            className="lg:hidden cursor-pointer"
+            onClick={toggleTheme}
+            className="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label="Toggle Theme"
           >
-            <svg
-              className="w-7 h-7"
-              fill="#000"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                clipRule="evenodd"
-              ></path>
-            </svg>
+            {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
           </button>
+
+          {!isLoggedIn ? (
+            <div className="hidden sm:flex items-center gap-3">
+              <NavLink to="/login" className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                Log in
+              </NavLink>
+              <NavLink to="/signup" className="px-5 py-2 text-sm font-bold text-white bg-slate-900 dark:bg-white dark:text-slate-900 rounded-full hover:bg-blue-600 dark:hover:bg-blue-500 transition-all">
+                Sign Up
+              </NavLink>
+            </div>
+          ) : (
+            <div className="hidden sm:flex items-center gap-4">
+              <div className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                Hi, {user?.firstName}
+              </div>
+              <button onClick={handleLogout} className="p-2 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition-colors">
+                <LogOut size={20} />
+              </button>
+            </div>
+          )}
+          
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden text-slate-900 dark:text-white">
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Drawer (Menu Overlay) */}
+      <div
+        className={`fixed inset-0 top-[70px] z-40 w-full bg-white/95 dark:bg-slate-950/95 backdrop-blur-md transition-all duration-300 lg:hidden border-t border-slate-200/50 dark:border-slate-800/50 ${
+          isMenuOpen
+            ? "opacity-100 pointer-events-auto translate-y-0"
+            : "opacity-0 pointer-events-none -translate-y-4"
+        }`}
+      >
+        <div className="flex flex-col h-full p-6 justify-between pb-24">
+          <nav className="space-y-2">
+            <NavLink to="/" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkStyles}>
+              Home
+            </NavLink>
+            {isLoggedIn && (
+              <NavLink to={getDashboardLink()} onClick={() => setIsMenuOpen(false)} className={mobileNavLinkStyles}>
+                Dashboard
+              </NavLink>
+            )}
+            <NavLink to="/about" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkStyles}>
+              About
+            </NavLink>
+            <NavLink to="/contact" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkStyles}>
+              Contact
+            </NavLink>
+            <NavLink to="/faq" onClick={() => setIsMenuOpen(false)} className={mobileNavLinkStyles}>
+              FAQ
+            </NavLink>
+          </nav>
+
+          <div className="space-y-4 pt-6 border-t border-slate-200/60 dark:border-slate-800/60">
+            {!isLoggedIn ? (
+              <div className="grid grid-cols-2 gap-3">
+                <NavLink to="/login" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-center py-3 text-sm font-semibold rounded-xl text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800">
+                  Log in
+                </NavLink>
+                <NavLink to="/signup" onClick={() => setIsMenuOpen(false)} className="flex items-center justify-center py-3 text-sm font-bold rounded-xl text-white bg-slate-900 dark:bg-blue-600 hover:bg-blue-600">
+                  Sign up
+                </NavLink>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl">
+                <div>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Logged in as</p>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{user?.firstName} {user?.lastName}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 rounded-xl"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
   );
 };
 
-export default Navbar;
-
-
-// import React, { useEffect, useState } from "react";
-// import { NavLink, useNavigate } from "react-router-dom";
-// import { useAuth } from "../features/auth/AuthContext.jsx";
-// import { Menu, X, LogOut } from "lucide-react";
-
-// const Navbar = () => {
-//   const { isLoggedIn, user, logout, isDoctor, isPatient } = useAuth();
-//   const navigate = useNavigate();
-//   const [isMenuOpen, setIsMenuOpen] = useState(false);
-//   const [scrolled, setScrolled] = useState(false);
-
-//   useEffect(() => {
-//     const handleScroll = () => setScrolled(window.scrollY > 20);
-//     window.addEventListener("scroll", handleScroll);
-//     return () => window.removeEventListener("scroll", handleScroll);
-//   }, []);
-
-//   const handleLogout = () => {
-//     logout();
-//     navigate("/login");
-//   };
-
-//   const navLinkStyles = ({ isActive }) => 
-//     `text-sm font-semibold transition-colors hover:text-blue-600 ${isActive ? "text-blue-600" : "text-slate-600"}`;
-
-//   return (
-//     <header className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 ${
-//       scrolled ? "py-3 bg-white/70 backdrop-blur-md shadow-sm" : "py-5 bg-transparent"
-//     }`}>
-//       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-//         <NavLink to="/" className="flex items-center gap-2">
-//           <div className="p-1.5 bg-blue-600 rounded-lg">
-//             <img src="/navbarlogo.png" alt="logo" className="w-6 h-6 brightness-0 invert" />
-//           </div>
-//           <span className="text-xl font-bold tracking-tight text-slate-900">PATIENT<span className="text-blue-600">MS</span></span>
-//         </NavLink>
-
-//         <nav className="hidden lg:flex items-center gap-8">
-//           <NavLink to="/" className={navLinkStyles}>Home</NavLink>
-//           {isLoggedIn && (isPatient ? 
-//             <NavLink to="/dashboard/patient" className={navLinkStyles}>My Profile</NavLink> : 
-//             <NavLink to="/dashboard/doctor" className={navLinkStyles}>Dashboard</NavLink>
-//           )}
-//           <NavLink to="/about" className={navLinkStyles}>About</NavLink>
-//           <NavLink to="/contact" className={navLinkStyles}>Contact</NavLink>
-//         </nav>
-
-//         <div className="flex items-center gap-4">
-//           {!isLoggedIn ? (
-//             <NavLink to="/signup" className="px-5 py-2 text-sm font-bold text-white bg-slate-900 rounded-full hover:bg-blue-600 transition-all">
-//               Sign Up
-//             </NavLink>
-//           ) : (
-//             <button onClick={handleLogout} className="p-2 text-slate-600 hover:text-red-600 transition-colors">
-//               <LogOut size={20} />
-//             </button>
-//           )}
-//           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden text-slate-900">
-//             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-//           </button>
-//         </div>
-//       </div>
-//     </header>
-//   );
-// };
-
-// export default Navbar;
+export default NavbarLanding;

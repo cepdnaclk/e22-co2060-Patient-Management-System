@@ -24,29 +24,29 @@ const ContactUs = () => {
 		<main className="px-4 sm:px-8 lg:px-12 py-10 sm:py-12">
 			<section className="max-w-6xl mx-auto grid gap-8 lg:grid-cols-2">
 				<article className="rounded-2xl glass-card p-6 md:p-8">
-					<h1 className="text-3xl md:text-4xl font-semibold text-slate-800">
+					<h1 className="text-3xl md:text-4xl font-semibold text-slate-800 dark:text-white">
 						Contact Us
 					</h1>
-					<p className="mt-3 text-gray-600">
+					<p className="mt-3 text-gray-600 dark:text-gray-400">
 						Have questions about the system, onboarding, or support? Send us a
 						message and our team will get back to you.
 					</p>
 
-					<div className="mt-6 space-y-4 text-sm text-gray-700">
+					<div className="mt-6 space-y-4 text-sm text-gray-700 dark:text-gray-300">
 						<p>
-							<span className="font-semibold text-slate-800">Email:</span>{" "}
+							<span className="font-semibold text-slate-800 dark:text-white">Email:</span>{" "}
 							support@pmscare.com
 						</p>
 						<p>
-							<span className="font-semibold text-slate-800">Phone:</span> +94
+							<span className="font-semibold text-slate-800 dark:text-white">Phone:</span> +94
 							11 234 5678
 						</p>
 						<p>
-							<span className="font-semibold text-slate-800">Office:</span> 120
+							<span className="font-semibold text-slate-800 dark:text-white">Office:</span> 120
 							Health Avenue, Kandy
 						</p>
 						<p>
-							<span className="font-semibold text-slate-800">Hours:</span>
+							<span className="font-semibold text-slate-800 dark:text-white">Hours:</span>
 							Monday - Friday, 8:30 AM - 5:30 PM
 						</p>
 					</div>
@@ -56,7 +56,7 @@ const ContactUs = () => {
 					onSubmit={handleSubmit}
 					className="rounded-2xl glass-card p-6 md:p-8"
 				>
-					<h2 className="text-xl font-semibold text-slate-800">Send a Message</h2>
+					<h2 className="text-xl font-semibold text-slate-800 dark:text-white">Send a Message</h2>
 
 					<div className="mt-5 space-y-4">
 						<input
@@ -66,7 +66,7 @@ const ContactUs = () => {
 							onChange={handleChange}
 							placeholder="Full Name"
 							required
-							className="w-full rounded-md border border-slate-200 bg-white/80 px-4 py-2.5 outline-none focus:border-blue-500"
+							className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/50 px-4 py-2.5 outline-none focus:border-blue-500 dark:text-white dark:placeholder-slate-400"
 						/>
 						<input
 							type="email"
@@ -75,7 +75,7 @@ const ContactUs = () => {
 							onChange={handleChange}
 							placeholder="Email Address"
 							required
-							className="w-full rounded-md border border-slate-200 bg-white/80 px-4 py-2.5 outline-none focus:border-blue-500"
+							className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/50 px-4 py-2.5 outline-none focus:border-blue-500 dark:text-white dark:placeholder-slate-400"
 						/>
 						<input
 							type="text"
@@ -84,7 +84,7 @@ const ContactUs = () => {
 							onChange={handleChange}
 							placeholder="Subject"
 							required
-							className="w-full rounded-md border border-slate-200 bg-white/80 px-4 py-2.5 outline-none focus:border-blue-500"
+							className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/50 px-4 py-2.5 outline-none focus:border-blue-500 dark:text-white dark:placeholder-slate-400"
 						/>
 						<textarea
 							name="message"
@@ -93,7 +93,7 @@ const ContactUs = () => {
 							placeholder="Your Message"
 							rows="5"
 							required
-							className="w-full rounded-md border border-slate-200 bg-white/80 px-4 py-2.5 outline-none focus:border-blue-500"
+							className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/50 px-4 py-2.5 outline-none focus:border-blue-500 dark:text-white dark:placeholder-slate-400"
 						/>
 					</div>
 
@@ -105,7 +105,7 @@ const ContactUs = () => {
 					</button>
 
 					{isSubmitted && (
-						<p className="mt-4 rounded-md bg-green-50 border border-green-200 text-green-700 px-4 py-2 text-sm">
+						<p className="mt-4 rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 px-4 py-2 text-sm">
 							Thanks for contacting us. We will respond shortly.
 						</p>
 					)}
