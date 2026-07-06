@@ -57,6 +57,8 @@ export const doctorDashboardService = {
         records: records.length,
       },
       appointments: todaysAppointments,
+      allAppointments: appointments,
+      criticalPatients: criticalAlerts,
     };
   },
 

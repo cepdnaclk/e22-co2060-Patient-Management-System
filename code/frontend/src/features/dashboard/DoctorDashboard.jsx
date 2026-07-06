@@ -57,11 +57,20 @@ const DoctorDashboard = () => {
     records: 0,
   });
   const [appointments, setAppointments] = useState([]);
+  const [allAppointments, setAllAppointments] = useState([]);
+  const [criticalPatients, setCriticalPatients] = useState([]);
   const [loadingDashboard, setLoadingDashboard] = useState(true);
   const [dashboardError, setDashboardError] = useState("");
   const [section, setSection] = useState("dashboard");
+  const [targetPatient, setTargetPatient] = useState(null);
 
   const handleSectionChange = (nextSection) => {
+    setSection(nextSection);
+    setIsSidebarOpen(false);
+  };
+
+  const handleNavigateToPatient = (nextSection, patient) => {
+    setTargetPatient(patient || null);
     setSection(nextSection);
     setIsSidebarOpen(false);
   };
@@ -93,6 +102,8 @@ const DoctorDashboard = () => {
       setDoctor(data.doctor);
       setStats(data.stats);
       setAppointments(data.appointments);
+      setAllAppointments(data.allAppointments || []);
+      setCriticalPatients(data.criticalPatients || []);
     } catch (error) {
       setDashboardError(error.response?.data?.message || "Failed to load doctor dashboard data.");
     } finally {
@@ -134,7 +145,7 @@ const DoctorDashboard = () => {
         `}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+        <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
           <div className="flex items-center gap-3">
             <div className={`w-8 h-8 ${ACCENT.bg} rounded-lg flex items-center justify-center shadow-lg ${ACCENT.shadow}`}>
               <Stethoscope className="w-5 h-5 text-white" />
@@ -143,12 +154,28 @@ const DoctorDashboard = () => {
               Doctor<span className="text-violet-400">Hub</span>
             </span>
           </div>
-          <button
-            className="lg:hidden text-slate-400 hover:text-white transition-colors"
-            onClick={() => setIsSidebarOpen(false)}
-          >
-            <X className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={handleLogout}
+              className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
+              aria-label="Sign out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+            <button
+              className="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Nav Items */}
@@ -255,9 +282,12 @@ const DoctorDashboard = () => {
             <DoctorOverview
               stats={stats}
               appointments={appointments}
+              allAppointments={allAppointments}
+              criticalPatients={criticalPatients}
               loading={loadingDashboard}
               error={dashboardError}
               onUpdateStatus={handleUpdateAppointmentStatus}
+              onNavigate={handleNavigateToPatient}
             />
           )}
           {section === "reportsandanalytics" && <ReportAndAnalytics />}
@@ -268,7 +298,7 @@ const DoctorDashboard = () => {
               error={dashboardError}
             />
           )}
-          {section === "records" && <PatientProfile onUpdate={loadDashboardData} />}
+          {section === "records" && <PatientProfile onUpdate={loadDashboardData} initialPatient={targetPatient} />}
           {section === "labreports" && <LabReports />}
         </div>
       </main>

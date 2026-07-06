@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PatientSearch from "./PatientSearch.jsx";
 import PatientRecordList from "./PatientRecordList.jsx";
 import MedicalRecordForm from "./MedicalRecordForm.jsx";
@@ -9,7 +9,7 @@ import { Card, CardContent } from "../../../components/ui/Card.jsx";
 import { Badge } from "../../../components/ui/Badge.jsx";
 import { Activity, Droplet, User, Ruler, Weight, AlertTriangle } from "lucide-react";
 
-export default function PatientProfile({ onUpdate }) {
+export default function PatientProfile({ onUpdate, initialPatient }) {
   const { user } = useAuth();
   const doctorName = user ? `Dr. ${user.firstName} ${user.lastName}` : "System";
   const doctorId = user?.id || null;
@@ -21,6 +21,13 @@ export default function PatientProfile({ onUpdate }) {
   const [showLabModal, setShowLabModal] = useState(false);
   const [labTestName, setLabTestName] = useState("");
   const [labTestNotes, setLabTestNotes] = useState("");
+
+  // Auto-select a patient when navigated from the critical alerts panel
+  useEffect(() => {
+    if (initialPatient) {
+      handleSelectPatient(initialPatient);
+    }
+  }, [initialPatient?.id]);
 
   const handleOrderLabTest = async () => {
     if (!selectedPatient || !labTestName.trim()) return;

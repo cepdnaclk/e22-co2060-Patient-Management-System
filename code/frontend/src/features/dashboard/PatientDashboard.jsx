@@ -633,16 +633,32 @@ const PatientDashboard = () => {
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Logo */}
-        <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+        <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
               <Activity className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-xl text-white tracking-tight">Patient<span className="text-blue-400">Portal</span></span>
           </div>
-          <button className="lg:hidden text-slate-400 hover:text-white transition-colors" onClick={() => setIsSidebarOpen(false)}>
-            <X className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={handleLogout}
+              className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
+              aria-label="Sign out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+            <button className="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" onClick={() => setIsSidebarOpen(false)}>
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Nav Items */}

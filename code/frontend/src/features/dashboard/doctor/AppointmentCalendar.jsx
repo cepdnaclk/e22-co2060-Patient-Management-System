@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "../../../components/ui/Card.jsx";
 import { Button } from "../../../components/ui/Button.jsx";
 import { Badge } from "../../../components/ui/Badge.jsx";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, User } from "lucide-react";
 
 export default function AppointmentCalendar({ appointments = [], onDateChange }) {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -106,11 +106,6 @@ export default function AppointmentCalendar({ appointments = [], onDateChange })
               </Button>
             </div>
           </div>
-        }
-        action={
-          <Button variant="primary" size="sm" icon={CalendarIcon}>
-            Schedule
-          </Button>
         }
       />
       <div className="p-0">

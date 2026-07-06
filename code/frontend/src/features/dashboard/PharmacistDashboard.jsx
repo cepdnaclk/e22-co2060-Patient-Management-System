@@ -50,16 +50,32 @@ export default function PharmacistDashboard() {
         transition-transform duration-300 ease-in-out flex flex-col
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-        <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+        <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
               <Pill className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-xl text-white tracking-tight">Pharma<span className="text-emerald-400">Core</span></span>
           </div>
-          <button className="lg:hidden text-slate-400 hover:text-white" onClick={() => setIsSidebarOpen(false)}>
-            <X className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={handleLogout}
+              className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
+              aria-label="Sign out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+            <button className="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" onClick={() => setIsSidebarOpen(false)}>
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         <div className="p-6 flex-1 overflow-y-auto">
