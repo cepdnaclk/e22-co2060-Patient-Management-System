@@ -32,6 +32,21 @@ public class BackendApplication {
 	}
 
 	@Bean
+	public CommandLineRunner dropUsersRoleCheck(javax.sql.DataSource dataSource) {
+		return args -> {
+			try (java.sql.Connection conn = dataSource.getConnection();
+				 java.sql.Statement stmt = conn.createStatement()) {
+				stmt.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check");
+				System.out.println("====================================================");
+				System.out.println("Successfully dropped users_role_check constraint!");
+				System.out.println("====================================================");
+			} catch (Exception e) {
+				System.err.println("Failed to drop users_role_check constraint: " + e.getMessage());
+			}
+		};
+	}
+
+	@Bean
 	public CommandLineRunner seedSuperAdmin(
 			UserRepository userRepository,
 			PasswordEncoder passwordEncoder,

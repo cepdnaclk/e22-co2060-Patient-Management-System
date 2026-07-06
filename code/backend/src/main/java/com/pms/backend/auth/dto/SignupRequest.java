@@ -22,6 +22,11 @@ public class SignupRequest {
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
+    @NotBlank(message = "Mobile number is required")
+    @Pattern(
+        regexp = "^\\+?[\\d\\s\\-().]{7,20}$",
+        message = "Enter a valid mobile number (e.g. +94771234567)"
+    )
     private String mobileNumber;
 
     // INTENTIONALLY NO role FIELD.

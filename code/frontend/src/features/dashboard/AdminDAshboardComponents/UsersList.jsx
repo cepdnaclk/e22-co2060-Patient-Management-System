@@ -3,6 +3,7 @@ import { adminService } from "../../../services/adminService";
 import { Card, CardContent, CardHeader } from "../../../components/ui/Card.jsx";
 import { Badge } from "../../../components/ui/Badge.jsx";
 import { Button } from "../../../components/ui/Button.jsx";
+import { useAuth } from "../../auth/AuthContext.jsx";
 import { 
   UserCircle, Trash2, Save, AlertCircle, CheckCircle2, UserCog, Mail, Phone 
 } from "lucide-react";
@@ -10,6 +11,7 @@ import {
 const ROLE_OPTIONS = [
   "SUPER_ADMIN",
   "ADMIN",
+  "MANAGEMENT",
   "DOCTOR",
   "NURSE",
   "RECEPTIONIST",
@@ -36,6 +38,7 @@ const getRoleColor = (role) => {
 };
 
 const UsersList = () => {
+  const { isManagement } = useAuth();
   const [users, setUsers] = useState([]);
   const [roleEdits, setRoleEdits] = useState({});
   const [loading, setLoading] = useState(true);
@@ -177,7 +180,7 @@ const UsersList = () => {
                         onChange={(e) => handleRoleChange(user.id, e.target.value)}
                         className="w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-shadow"
                       >
-                        {ROLE_OPTIONS.map((role) => (
+                        {ROLE_OPTIONS.filter(r => !isManagement || (r !== "ADMIN" && r !== "SUPER_ADMIN")).map((role) => (
                           <option key={role} value={role}>
                             {role.replace(/_/g, ' ')}
                           </option>

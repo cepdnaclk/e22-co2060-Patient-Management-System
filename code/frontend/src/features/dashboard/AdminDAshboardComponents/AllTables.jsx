@@ -4,6 +4,7 @@ import api from "../../../services/axiosClient";
 const ROLE_OPTIONS = [
   "SUPER_ADMIN",
   "ADMIN",
+  "MANAGEMENT",
   "DOCTOR",
   "NURSE",
   "RECEPTIONIST",
@@ -657,6 +658,8 @@ const AllTables = () => {
               {getTableByKey(modal.tableKey)?.fields.map((field) => {
                 const value = modal.data[field] ?? "";
                 if (field === "role") {
+                  const currentUser = JSON.parse(localStorage.getItem("pms_user") || "{}");
+                  const isManagementUser = currentUser?.role === "MANAGEMENT";
                   return (
                     <label key={field} className="text-sm text-slate-600">
                       {field}
@@ -666,7 +669,7 @@ const AllTables = () => {
                         className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
                       >
                         <option value="">Select role</option>
-                        {ROLE_OPTIONS.map((role) => (
+                        {ROLE_OPTIONS.filter(r => !isManagementUser || (r !== "ADMIN" && r !== "SUPER_ADMIN")).map((role) => (
                           <option key={role} value={role}>
                             {role}
                           </option>

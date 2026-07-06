@@ -40,6 +40,7 @@ export function AuthProvider({ children }) {
   // Role helpers — use in components to conditionally show UI elements
   const isAdmin       = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
   const isSuperAdmin  = user?.role === "SUPER_ADMIN";
+  const isManagement  = user?.role === "MANAGEMENT";
   const isDoctor      = user?.role === "DOCTOR";
   const isNurse       = user?.role === "NURSE";
   const isPatient     = user?.role === "PATIENT";
@@ -57,6 +58,7 @@ export function AuthProvider({ children }) {
         isLoggedIn: !!user,
         isAdmin,
         isSuperAdmin,
+        isManagement,
         isDoctor,
         isNurse,
         isPatient,

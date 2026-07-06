@@ -7,6 +7,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, Activity, ShieldCheck, Users, Cloc
 const ROLE_ROUTES = {
   SUPER_ADMIN: "/dashboard/admin",
   ADMIN: "/dashboard/admin",
+  MANAGEMENT: "/dashboard/management",
   DOCTOR: "/dashboard/doctor",
   NURSE: "/dashboard/doctor",
   RECEPTIONIST: "/dashboard/receptionist",

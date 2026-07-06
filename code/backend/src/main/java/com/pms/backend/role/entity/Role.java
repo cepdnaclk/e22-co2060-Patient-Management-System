@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 public enum Role {
     SUPER_ADMIN,     // Full access to everything
     ADMIN,           // Manages users, views reports
+    MANAGEMENT,      // User & staff management (excluding Admin accounts)
     DOCTOR,          // Full clinical access
     NURSE,           // Record vitals, assist doctors
     RECEPTIONIST,    // Book appointments, register patients

@@ -17,7 +17,7 @@ public class DoctorController {
     private final DoctorService doctorService;
 
     @PostMapping
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('MANAGEMENT')")
     public ResponseEntity<DoctorDto> createDoctor(@RequestParam Long userId, @RequestBody DoctorDto doctorDto) {
         DoctorDto createdDoctor = doctorService.createDoctor(userId, doctorDto);
         return new ResponseEntity<>(createdDoctor, HttpStatus.CREATED);
@@ -31,7 +31,7 @@ public class DoctorController {
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('MANAGEMENT') or hasRole('DOCTOR')")
     public ResponseEntity<DoctorDto> getDoctorByUserId(@PathVariable Long userId) {
         DoctorDto doctor = doctorService.getDoctorByUserId(userId);
         return ResponseEntity.ok(doctor);
@@ -59,14 +59,14 @@ public class DoctorController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('MANAGEMENT') or hasRole('DOCTOR')")
     public ResponseEntity<DoctorDto> updateDoctor(@PathVariable Long id, @RequestBody DoctorDto doctorDto) {
         DoctorDto updatedDoctor = doctorService.updateDoctor(id, doctorDto);
         return ResponseEntity.ok(updatedDoctor);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('MANAGEMENT')")
     public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {
         doctorService.deleteDoctor(id);
         return ResponseEntity.noContent().build();

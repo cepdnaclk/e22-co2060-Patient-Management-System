@@ -15,24 +15,30 @@ const Dashboard = () => {
     activeNurses: 0,
     totalAppointments: 0,
   });
-
+  const [recentActivities, setRecentActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await api.get("/api/v1/admin/stats");
-        setStatsData(response.data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching admin stats:", err);
-        setError("Failed to load dashboard statistics");
-        setLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [statsResponse, auditResponse] = await Promise.all([
+        api.get("/api/v1/admin/stats"),
+        api.get("/api/audit/logs/recent")
+      ]);
+      setStatsData(statsResponse.data);
+      setRecentActivities(auditResponse.data || []);
+    } catch (err) {
+      console.error("Error fetching admin dashboard data:", err);
+      setError("Failed to load dashboard statistics or audit logs");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchStats();
+  useEffect(() => {
+    fetchData();
   }, []);
 
   const stats = [
@@ -42,12 +48,15 @@ const Dashboard = () => {
     { id: 4, label: "Appointments", value: statsData.totalAppointments, icon: ShieldCheck, color: "text-amber-600", bg: "bg-amber-50" },
   ];
 
-  const recentActivities = [
-    { id: 1, action: "New Doctor Added", timestamp: "2 hours ago", status: "Success" },
-    { id: 2, action: "New Nurse Added", timestamp: "4 hours ago", status: "Success" },
-    { id: 3, action: "System Backup", timestamp: "1 day ago", status: "Completed" },
-    { id: 4, action: "User Report Generated", timestamp: "2 days ago", status: "Completed" },
-  ];
+  const formatTimestamp = (ts) => {
+    if (!ts) return "";
+    try {
+      const date = new Date(ts);
+      return date.toLocaleString();
+    } catch (e) {
+      return ts;
+    }
+  };
 
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 fade-in duration-500">
@@ -56,7 +65,9 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">System Overview</h1>
           <p className="text-sm text-slate-500 mt-1">High-level metrics and recent administrative activities.</p>
         </div>
-        <Button variant="secondary" icon={RefreshCw}>Refresh Data</Button>
+        <Button variant="secondary" icon={RefreshCw} onClick={fetchData} disabled={loading}>
+          {loading ? "Refreshing..." : "Refresh Data"}
+        </Button>
       </div>
 
       {error && (
@@ -98,23 +109,30 @@ const Dashboard = () => {
               </Button>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="divide-y divide-slate-100">
-                {recentActivities.map((activity) => (
-                  <div key={activity.id} className="p-5 hover:bg-slate-50 transition-colors flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                        <Activity className="w-5 h-5 text-slate-500" />
+              <div className="divide-y divide-slate-100 max-h-[400px] overflow-y-auto">
+                {recentActivities.length === 0 ? (
+                  <div className="p-5 text-center text-slate-500 text-sm">No recent activities found.</div>
+                ) : (
+                  recentActivities.map((activity) => (
+                    <div key={activity.id} className="p-5 hover:bg-slate-50 transition-colors flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                          <Activity className="w-5 h-5 text-slate-500" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-800">
+                            {activity.action} <span className="text-slate-400 font-normal text-xs">• {activity.userEmail || "System"}</span>
+                          </p>
+                          <p className="text-xs text-slate-600 mt-0.5">{activity.details}</p>
+                          <p className="text-[10px] text-slate-400 mt-1 font-medium">{formatTimestamp(activity.timestamp)}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-bold text-slate-800">{activity.action}</p>
-                        <p className="text-xs text-slate-500 font-medium">{activity.timestamp}</p>
-                      </div>
+                      <Badge variant={activity.status === "SUCCESS" ? "success" : "error"}>
+                        {activity.status}
+                      </Badge>
                     </div>
-                    <Badge variant={activity.status === "Success" ? "success" : "blue"}>
-                      {activity.status}
-                    </Badge>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>

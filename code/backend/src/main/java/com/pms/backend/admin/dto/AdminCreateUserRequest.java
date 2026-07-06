@@ -5,6 +5,7 @@ import com.pms.backend.role.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -26,6 +27,10 @@ public class AdminCreateUserRequest {
     private String password;
 
     @NotBlank(message = "Mobile number is required")
+    @Pattern(
+        regexp = "^\\+?[\\d\\s\\-().]{7,20}$",
+        message = "Enter a valid mobile number (e.g. +94771234567)"
+    )
     private String mobileNumber;
 
     @NotNull(message = "Role is required")
