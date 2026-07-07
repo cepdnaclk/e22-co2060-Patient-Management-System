@@ -116,14 +116,36 @@ public class AppointmentService {
     }
 
     private AppointmentDto convertToDto(Appointment appointment) {
+        String patientName = "Unknown";
+        String patientEmail = "";
+        if (appointment.getPatient() != null) {
+            if (appointment.getPatient().getUser() != null) {
+                patientName = appointment.getPatient().getUser().getFirstName() + " " + appointment.getPatient().getUser().getLastName();
+                patientEmail = appointment.getPatient().getUser().getEmail();
+            } else {
+                patientName = "Patient #" + appointment.getPatient().getId();
+            }
+        }
+
+        String doctorName = "Unknown";
+        String doctorSpecialization = "";
+        if (appointment.getDoctor() != null) {
+            if (appointment.getDoctor().getUser() != null) {
+                doctorName = "Dr. " + appointment.getDoctor().getUser().getFirstName() + " " + appointment.getDoctor().getUser().getLastName();
+            } else {
+                doctorName = "Doctor #" + appointment.getDoctor().getId();
+            }
+            doctorSpecialization = appointment.getDoctor().getSpecialization();
+        }
+
         return AppointmentDto.builder()
                 .id(appointment.getId())
-                .patientId(appointment.getPatient().getId())
-                .patientName(appointment.getPatient().getUser().getFirstName() + " " + appointment.getPatient().getUser().getLastName())
-                .patientEmail(appointment.getPatient().getUser().getEmail())
-                .doctorId(appointment.getDoctor().getId())
-                .doctorName(appointment.getDoctor().getUser().getFirstName() + " " + appointment.getDoctor().getUser().getLastName())
-                .doctorSpecialization(appointment.getDoctor().getSpecialization())
+                .patientId(appointment.getPatient() != null ? appointment.getPatient().getId() : null)
+                .patientName(patientName)
+                .patientEmail(patientEmail)
+                .doctorId(appointment.getDoctor() != null ? appointment.getDoctor().getId() : null)
+                .doctorName(doctorName)
+                .doctorSpecialization(doctorSpecialization)
                 .appointmentDateTime(appointment.getAppointmentDateTime())
                 .durationMinutes(appointment.getDurationMinutes())
                 .reason(appointment.getReason())
