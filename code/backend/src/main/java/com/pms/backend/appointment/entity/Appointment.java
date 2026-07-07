@@ -32,6 +32,7 @@ public class Appointment {
     @Column(nullable = false)
     private LocalDateTime appointmentDateTime;
 
+    @Builder.Default
     @Column(nullable = false)
     private Integer durationMinutes = 30;
 
@@ -41,6 +42,7 @@ public class Appointment {
     @Column(length = 1000)
     private String notes;
 
+    @Builder.Default
     @Column(nullable = false)
     private String status = "SCHEDULED"; // SCHEDULED, COMPLETED, CANCELLED, NO_SHOW
 

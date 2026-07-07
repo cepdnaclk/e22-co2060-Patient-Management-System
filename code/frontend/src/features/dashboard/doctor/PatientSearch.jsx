@@ -20,9 +20,11 @@ export default function PatientSearch({ onSelectPatient }) {
       try {
         const { data } = await api.get('/api/patients');
         const patients = data?.content || data || [];
+        console.log("PatientSearch loaded patients:", patients);
         setAllPatients(patients);
         setResults(patients);
       } catch (err) {
+        console.error("PatientSearch failed to load patients:", err);
         setError("Failed to load patients.");
       } finally {
         setLoading(false);
@@ -49,11 +51,11 @@ export default function PatientSearch({ onSelectPatient }) {
     }
     const term = query.toLowerCase();
     const filtered = allPatients.filter(p => {
-      const fName = p.firstName || "";
-      const lName = p.lastName || "";
-      const pId = p.patientId || p.displayId || "";
-      const phone = p.mobileNumber || (p.user && p.user.mobileNumber) || "";
-      const nic = p.nic || "";
+      const fName = String(p.firstName || "");
+      const lName = String(p.lastName || "");
+      const pId = String(p.patientId || p.displayId || p.id || "");
+      const phone = String(p.mobileNumber || (p.user && p.user.mobileNumber) || "");
+      const nic = String(p.nic || "");
       
       return fName.toLowerCase().includes(term) ||
              lName.toLowerCase().includes(term) ||
@@ -124,9 +126,9 @@ export default function PatientSearch({ onSelectPatient }) {
                               <FileText className="w-3 h-3" /> {patient.patientId}
                             </span>
                           )}
-                          {patient.user?.mobileNumber && (
+                          {(patient.mobileNumber || patient.user?.mobileNumber) && (
                             <span className="flex items-center gap-1">
-                              <Phone className="w-3 h-3" /> {patient.user.mobileNumber}
+                              <Phone className="w-3 h-3" /> {patient.mobileNumber || patient.user.mobileNumber}
                             </span>
                           )}
                         </div>

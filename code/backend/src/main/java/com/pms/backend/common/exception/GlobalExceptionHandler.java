@@ -68,7 +68,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleAll(Exception ex) {
         ex.printStackTrace(); // Print to console so you can debug
+        String detail = ex.getMessage() != null ? ex.getMessage() : ex.getClass().getSimpleName();
         return ResponseEntity.internalServerError()
-                .body(Map.of("message", "An error occurred. Please try again."));
+                .body(Map.of("message", "An error occurred: " + detail));
     }
 }
