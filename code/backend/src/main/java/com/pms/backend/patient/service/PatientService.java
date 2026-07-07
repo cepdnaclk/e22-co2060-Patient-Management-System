@@ -4,12 +4,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.pms.backend.common.exception.AppException;
 import com.pms.backend.patient.dto.PatientDto;
+import com.pms.backend.patient.dto.PatientRegistrationRequest;
 import com.pms.backend.patient.entity.Patient;
 import com.pms.backend.patient.repository.PatientRepository;
+import com.pms.backend.role.entity.Role;
 import com.pms.backend.user.entity.User;
 import com.pms.backend.user.repository.UserRepository;
 
@@ -20,6 +23,43 @@ import lombok.RequiredArgsConstructor;
 public class PatientService {
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public PatientDto registerPatient(PatientRegistrationRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AppException("This email is already registered", HttpStatus.CONFLICT);
+        }
+        if (userRepository.existsByMobileNumber(request.getMobileNumber())) {
+            throw new AppException("This mobile number is already registered", HttpStatus.CONFLICT);
+        }
+
+        User user = User.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .mobileNumber(request.getMobileNumber())
+                .passwordHash(passwordEncoder.encode("P@tient@123"))
+                .role(Role.PATIENT)
+                .isActive(true)
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        Patient patient = Patient.builder()
+                .user(savedUser)
+                .dateOfBirth(request.getDateOfBirth())
+                .gender(request.getGender())
+                .bloodType(request.getBloodType())
+                .address(request.getAddress())
+                .admissionStatus("Registered")
+                .emergencyContactName(request.getEmergencyContactName())
+                .emergencyContactPhone(request.getEmergencyContactPhone())
+                .emergencyContactRelation(request.getEmergencyContactRelation())
+                .build();
+
+        Patient savedPatient = patientRepository.save(patient);
+        return convertToDto(savedPatient);
+    }
 
     public PatientDto createPatient(Long userId, PatientDto patientDto) {
         User user = userRepository.findById(userId)
