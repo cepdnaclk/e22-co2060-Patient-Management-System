@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
 import { 
-  LayoutDashboard, Pill, Activity, Menu, X, CheckCircle2, Sun, Moon
+  LayoutDashboard, Pill, Activity, Menu, X, LogOut, Sun, Moon
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -120,7 +120,7 @@ export default function PharmacistDashboard() {
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors"
           >
-            <X className="w-4 h-4" />
+            <LogOut className="w-4 h-4" />
             Sign Out
           </button>
         </div>
