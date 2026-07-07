@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
 import {
-  LayoutDashboard, Users, Stethoscope, UserPlus,
+  LayoutDashboard, Users, Stethoscope, HeartPulse, UserPlus,
   Menu, X, Shield, Sun, Moon, LogOut
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -14,8 +14,9 @@ import AddUser from "./AdminDAshboardComponents/AddUser";
 
 const sectionLabels = {
   overview: "Overview",
-  users: "Manage Users",
   doctors: "Manage Doctors",
+  nurses: "Manage Nurses",
+  patients: "Manage Patients",
   addUser: "Add Staff",
 };
 
@@ -33,8 +34,9 @@ const ManagementDashboard = () => {
 
   const menuItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
-    { id: "users", label: "Manage Users", icon: Users },
     { id: "doctors", label: "Manage Doctors", icon: Stethoscope },
+    { id: "nurses", label: "Manage Nurses", icon: HeartPulse },
+    { id: "patients", label: "Manage Patients", icon: Users },
     { id: "addUser", label: "Add Staff", icon: UserPlus },
   ];
 
@@ -174,8 +176,9 @@ const ManagementDashboard = () => {
         {/* Dynamic Content */}
         <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto">
           {section === "overview" && <MgmtOverview />}
-          {section === "users" && <MgmtUsersList />}
           {section === "doctors" && <MgmtDoctorsList />}
+          {section === "nurses" && <MgmtUsersList roleFilter="NURSE" />}
+          {section === "patients" && <MgmtUsersList roleFilter="PATIENT" />}
           {section === "addUser" && <AddUser />}
         </div>
       </main>

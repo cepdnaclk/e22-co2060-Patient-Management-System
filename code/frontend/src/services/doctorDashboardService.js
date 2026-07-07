@@ -24,6 +24,30 @@ export const doctorDashboardService = {
 
     const { data: doctor } = await api.get(`/api/doctors/user/${userId}`);
 
+    // For roles without a dedicated doctor profile (e.g., NURSE), skip doctor-specific fetches
+    if (!doctor.id) {
+      const patientsResponse = await api.get("/api/patients");
+      const patients = patientsResponse.data || [];
+
+      const criticalAlerts = patients.filter((patient) => 
+        patient.criticalStatus === true
+      );
+
+      return {
+        doctor,
+        stats: {
+          patients: patients.length,
+          appointmentsToday: 0,
+          activeAppointments: 0,
+          criticalAlerts: criticalAlerts.length,
+          records: 0,
+        },
+        appointments: [],
+        allAppointments: [],
+        criticalPatients: criticalAlerts,
+      };
+    }
+
     const [appointmentsResponse, patientsResponse, recordsResponse] =
       await Promise.all([
         api.get(`/api/appointments/doctor/${doctor.id}`),

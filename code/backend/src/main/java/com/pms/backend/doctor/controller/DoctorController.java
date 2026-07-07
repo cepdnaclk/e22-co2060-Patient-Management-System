@@ -31,7 +31,7 @@ public class DoctorController {
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('MANAGEMENT') or hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('MANAGEMENT') or hasRole('DOCTOR') or hasRole('NURSE')")
     public ResponseEntity<DoctorDto> getDoctorByUserId(@PathVariable Long userId) {
         DoctorDto doctor = doctorService.getDoctorByUserId(userId);
         return ResponseEntity.ok(doctor);

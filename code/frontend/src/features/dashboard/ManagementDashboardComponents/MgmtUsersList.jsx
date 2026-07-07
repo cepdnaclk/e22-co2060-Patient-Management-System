@@ -31,7 +31,7 @@ const getRoleColor = (role) => {
   }
 };
 
-const MgmtUsersList = () => {
+const MgmtUsersList = ({ roleFilter }) => {
   const [users, setUsers] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState("");
@@ -49,21 +49,24 @@ const MgmtUsersList = () => {
   }, []);
 
   useEffect(() => {
+    let list = users;
+    if (roleFilter) {
+      list = list.filter((u) => u.role === roleFilter);
+    }
     if (!search.trim()) {
-      setFiltered(users);
+      setFiltered(list);
     } else {
       const q = search.toLowerCase();
       setFiltered(
-        users.filter(
+        list.filter(
           (u) =>
             u.firstName?.toLowerCase().includes(q) ||
             u.lastName?.toLowerCase().includes(q) ||
-            u.email?.toLowerCase().includes(q) ||
-            u.role?.toLowerCase().includes(q)
+            u.email?.toLowerCase().includes(q)
         )
       );
     }
-  }, [search, users]);
+  }, [search, users, roleFilter]);
 
   const loadUsers = () => {
     setLoading(true);
@@ -126,10 +129,12 @@ const MgmtUsersList = () => {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <UserCog className="w-7 h-7 text-violet-600" />
-            Manage Users
+            Manage {roleFilter === "NURSE" ? "Nurses" : roleFilter === "PATIENT" ? "Patients" : roleFilter ? roleFilter.replace(/_/g, " ") + "s" : "Users"}
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Edit user profiles, change roles, and update contact details (Admin accounts are protected)
+            {roleFilter === "NURSE" ? "View and manage nurse staff profiles and account details" :
+             roleFilter === "PATIENT" ? "View and manage patient profiles and account details" :
+             "Edit user profiles, change roles, and update contact details (Admin accounts are protected)"}
           </p>
         </div>
         <div className="relative w-full md:w-72">
@@ -181,7 +186,7 @@ const MgmtUsersList = () => {
                 <tr className="bg-slate-50 border-b border-slate-100">
                   <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">User</th>
                   <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Contact</th>
-                  <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Role</th>
+                  {!roleFilter && <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Role</th>}
                   <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
@@ -213,11 +218,13 @@ const MgmtUsersList = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="p-4">
-                      <Badge variant={getRoleColor(user.role)} className="text-xs px-2 py-0.5">
-                        {user.role?.replace(/_/g, " ")}
-                      </Badge>
-                    </td>
+                    {!roleFilter && (
+                      <td className="p-4">
+                        <Badge variant={getRoleColor(user.role)} className="text-xs px-2 py-0.5">
+                          {user.role?.replace(/_/g, " ")}
+                        </Badge>
+                      </td>
+                    )}
                     <td className="p-4 text-right">
                       <Button
                         variant="soft"

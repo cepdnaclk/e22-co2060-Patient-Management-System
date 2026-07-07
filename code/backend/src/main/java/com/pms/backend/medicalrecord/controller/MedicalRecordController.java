@@ -17,14 +17,14 @@ public class MedicalRecordController {
     private final MedicalRecordService medicalRecordService;
 
     @PostMapping
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('NURSE')")
     public ResponseEntity<MedicalRecordDto> createMedicalRecord(@RequestBody MedicalRecordDto medicalRecordDto) {
         MedicalRecordDto createdRecord = medicalRecordService.createMedicalRecord(medicalRecordDto);
         return new ResponseEntity<>(createdRecord, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT') or hasRole('NURSE')")
     public ResponseEntity<MedicalRecordDto> getMedicalRecordById(@PathVariable Long id) {
         MedicalRecordDto record = medicalRecordService.getMedicalRecordById(id);
         return ResponseEntity.ok(record);
@@ -38,7 +38,7 @@ public class MedicalRecordController {
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT') or hasRole('NURSE')")
     public ResponseEntity<List<MedicalRecordDto>> getMedicalRecordsByPatientId(@PathVariable Long patientId) {
         List<MedicalRecordDto> records = medicalRecordService.getMedicalRecordsByPatientId(patientId);
         return ResponseEntity.ok(records);

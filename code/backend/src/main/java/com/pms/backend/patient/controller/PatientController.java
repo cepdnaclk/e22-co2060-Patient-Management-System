@@ -24,7 +24,7 @@ public class PatientController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT') or hasRole('RECEPTIONIST') or hasRole('BILLING_STAFF')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('PATIENT') or hasRole('RECEPTIONIST') or hasRole('BILLING_STAFF') or hasRole('NURSE')")
     public ResponseEntity<PatientDto> getPatientById(@PathVariable Long id) {
         PatientDto patient = patientService.getPatientById(id);
         return ResponseEntity.ok(patient);
@@ -38,14 +38,14 @@ public class PatientController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('RECEPTIONIST') or hasRole('BILLING_STAFF')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('RECEPTIONIST') or hasRole('BILLING_STAFF') or hasRole('NURSE')")
     public ResponseEntity<List<PatientDto>> getAllPatients() {
         List<PatientDto> patients = patientService.getAllPatients();
         return ResponseEntity.ok(patients);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('PATIENT') or hasRole('DOCTOR') or hasRole('RECEPTIONIST')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('PATIENT') or hasRole('DOCTOR') or hasRole('RECEPTIONIST') or hasRole('NURSE')")
     public ResponseEntity<PatientDto> updatePatient(@PathVariable Long id, @RequestBody PatientDto patientDto) {
         PatientDto updatedPatient = patientService.updatePatient(id, patientDto);
         return ResponseEntity.ok(updatedPatient);
