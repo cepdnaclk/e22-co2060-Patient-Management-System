@@ -13,6 +13,7 @@ import Navbar from "./components/Navbar.jsx";
 import AdminDashboard from "./features/dashboard/AdminDashboard.jsx";
 import ReceptionistDashboard from "./features/dashboard/ReceptionistDashboard.jsx";
 import PharmacistDashboard from "./features/dashboard/PharmacistDashboard.jsx";
+import ManagementDashboard from "./features/dashboard/ManagementDashboard.jsx";
 import AmbientOrbs from "./components/AmbientOrbs.jsx";
 import NavbarLanding from "./components/NavbarLanding.jsx";
 
@@ -62,8 +63,16 @@ function App() {
           <Route
             path="/dashboard/admin"
             element={
-              <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
+              <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "MANAGEMENT"]}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/management"
+            element={
+              <ProtectedRoute allowedRoles={["MANAGEMENT"]}>
+                <ManagementDashboard />
               </ProtectedRoute>
             }
           />

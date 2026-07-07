@@ -42,7 +42,7 @@ const sectionLabels = {
 };
 
 const DoctorDashboard = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, isNurse } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -151,7 +151,7 @@ const DoctorDashboard = () => {
               <Stethoscope className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-xl text-white tracking-tight">
-              Doctor<span className="text-violet-400">Hub</span>
+              {isNurse ? "Nurse" : "Doctor"}<span className="text-violet-400">Hub</span>
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -212,9 +212,9 @@ const DoctorDashboard = () => {
               {user?.email?.charAt(0).toUpperCase() || "D"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white truncate">
-                {doctor?.fullName || "Doctor"}
-              </p>
+                <p className="text-sm font-semibold text-white truncate">
+                  {doctor?.fullName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || (isNurse ? "Nurse" : "Doctor")}
+                </p>
               <p className="text-xs text-slate-400 truncate">{user?.email}</p>
             </div>
           </div>
@@ -246,7 +246,7 @@ const DoctorDashboard = () => {
                 <Stethoscope className="w-4 h-4 text-white" />
               </div>
               <span className="font-bold text-slate-900">
-                Doctor<span className="text-violet-600">Hub</span>
+                {isNurse ? "Nurse" : "Doctor"}<span className="text-violet-600">Hub</span>
               </span>
             </div>
             {/* Desktop breadcrumb */}
@@ -270,7 +270,7 @@ const DoctorDashboard = () => {
               </div>
               <div className="hidden md:block">
                 <p className="text-sm font-semibold text-slate-900 leading-tight">{doctor?.fullName || user?.firstName || "Doctor"}</p>
-                <p className="text-xs text-slate-500 leading-tight">Doctor</p>
+                <p className="text-xs text-slate-500 leading-tight">{isNurse ? "Nurse" : "Doctor"}</p>
               </div>
             </div>
           </div>

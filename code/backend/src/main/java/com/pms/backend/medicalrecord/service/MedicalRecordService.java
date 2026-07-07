@@ -29,8 +29,7 @@ public class MedicalRecordService {
         Doctor doctor = null;
         if (medicalRecordDto.getDoctorId() != null) {
             doctor = doctorRepository.findByUserId(medicalRecordDto.getDoctorId())
-                    .orElseGet(() -> doctorRepository.findById(medicalRecordDto.getDoctorId())
-                    .orElseThrow(() -> new AppException("Doctor not found", HttpStatus.NOT_FOUND)));
+                    .orElse(null);
         }
 
         MedicalRecord medicalRecord = MedicalRecord.builder()

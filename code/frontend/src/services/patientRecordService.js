@@ -89,10 +89,12 @@ const formatRecord = (record) => ({
       })
     : "N/A",
   type: normalizeRecordTypeLabel(record.recordType),
-  title: record.diagnosis || record.testName || record.treatment || "Medical Record",
+  title: (record.recordType === "NOTE" && record.description)
+    ? record.description.split("\n\n")[0]
+    : record.diagnosis || record.testName || record.treatment || "Nursing Note",
   description:
     record.description || record.treatment || record.testResult || "No details",
-  doctor: record.doctorName || "Doctor",
+  doctor: record.doctorName || "System",
 });
 
 export const patientRecordService = {
@@ -116,11 +118,14 @@ export const patientRecordService = {
   async createMedicalRecord(patientId, recordInput, doctorId = null) {
     const apiType = mapUiTypeToApiType(recordInput.type);
     const isPrescription = apiType === "PRESCRIPTION";
+    const description = recordInput.title
+      ? `${recordInput.title}${recordInput.description ? `\n\n${recordInput.description}` : ""}`
+      : recordInput.description;
     const payload = {
       patientId,
       doctorId,
       recordType: apiType,
-      description: recordInput.description,
+      description,
       diagnosis: apiType === "DIAGNOSIS" ? recordInput.title : null,
       treatment: apiType === "PROCEDURE" || isPrescription ? recordInput.title : null,
       testName: apiType === "LAB_RESULT" ? recordInput.title : null,
@@ -136,6 +141,17 @@ export const patientRecordService = {
     const { data: updatedPatient } = await api.put(`/api/patients/${patientId}`, {
       ...rawPatient,
       criticalStatus,
+    });
+    return formatPatient(updatedPatient);
+  },
+
+  async updatePatientVitals(patientId, vitals) {
+    if (!patientId) return null;
+    const { data: rawPatient } = await api.get(`/api/patients/${patientId}`);
+    const { data: updatedPatient } = await api.put(`/api/patients/${patientId}`, {
+      ...rawPatient,
+      ...vitals,
+      lastVitalsUpdate: new Date().toISOString(),
     });
     return formatPatient(updatedPatient);
   },

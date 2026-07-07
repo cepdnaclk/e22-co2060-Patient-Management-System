@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "../../../components/ui/Card.jsx";
 import { Button } from "../../../components/ui/Button.jsx";
 import { FileText, Save, Loader2 } from "lucide-react";
 
-export default function MedicalRecordForm({ patient, onSaveRecord, doctorName, loading }) {
+export default function MedicalRecordForm({ patient, onSaveRecord, doctorName, loading, isNurse }) {
   const [newRecord, setNewRecord] = useState({
     date: new Date().toISOString().slice(0, 10),
     type: "Note",
@@ -40,7 +40,7 @@ export default function MedicalRecordForm({ patient, onSaveRecord, doctorName, l
 
   return (
     <Card className="border-none shadow-md shadow-slate-200/50">
-      <CardHeader title="Add New Clinical Record" />
+      <CardHeader title={isNurse ? "Add Nursing Note" : "Add New Clinical Record"} />
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -60,11 +60,18 @@ export default function MedicalRecordForm({ patient, onSaveRecord, doctorName, l
                 value={newRecord.type}
                 onChange={(e) => setNewRecord({ ...newRecord, type: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                disabled={isNurse}
               >
-                <option value="Diagnosis">Diagnosis</option>
-                <option value="Note">Clinical Note</option>
-                <option value="Procedure">Procedure</option>
-                <option value="Allergy">Allergy Update</option>
+                {isNurse ? (
+                  <option value="Note">Clinical Note</option>
+                ) : (
+                  <>
+                    <option value="Diagnosis">Diagnosis</option>
+                    <option value="Note">Clinical Note</option>
+                    <option value="Procedure">Procedure</option>
+                    <option value="Allergy">Allergy Update</option>
+                  </>
+                )}
               </select>
             </div>
           </div>
@@ -73,7 +80,7 @@ export default function MedicalRecordForm({ patient, onSaveRecord, doctorName, l
             <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
             <input
               type="text"
-              placeholder="e.g. Follow-up Checkup"
+              placeholder={isNurse ? "e.g. Patient Observation" : "e.g. Follow-up Checkup"}
               value={newRecord.title}
               onChange={(e) => setNewRecord({ ...newRecord, title: e.target.value })}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
@@ -83,8 +90,8 @@ export default function MedicalRecordForm({ patient, onSaveRecord, doctorName, l
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Detailed Notes</label>
-            <textarea
-              placeholder="Enter clinical observations, diagnosis, or procedure details..."
+              <textarea
+              placeholder={isNurse ? "Describe your observations about the patient's condition..." : "Enter clinical observations, diagnosis, or procedure details..."}
               value={newRecord.description}
               onChange={(e) => setNewRecord({ ...newRecord, description: e.target.value })}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm h-32 resize-y focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"

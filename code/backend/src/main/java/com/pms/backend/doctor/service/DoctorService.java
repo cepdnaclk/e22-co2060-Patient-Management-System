@@ -57,6 +57,20 @@ public class DoctorService {
     }
 
     public DoctorDto getDoctorByUserId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        // For non-DOCTOR roles (e.g., NURSE), return basic user info
+        if (user.getRole() != com.pms.backend.role.entity.Role.DOCTOR) {
+            return DoctorDto.builder()
+                    .userId(user.getId())
+                    .firstName(user.getFirstName())
+                    .lastName(user.getLastName())
+                    .email(user.getEmail())
+                    .mobileNumber(user.getMobileNumber())
+                    .build();
+        }
+
         Doctor doctor = doctorRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException("Doctor profile not found", HttpStatus.NOT_FOUND));
         if (doctor.getUser() == null) {

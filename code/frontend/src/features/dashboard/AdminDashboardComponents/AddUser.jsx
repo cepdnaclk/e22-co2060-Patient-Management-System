@@ -182,6 +182,7 @@ const AddStaff = () => {
                     <option value="pharmacist">Pharmacist</option>
                     <option value="receptionist">Receptionist</option>
                     <option value="lab_technician">Lab Technician</option>
+                    <option value="management">Management</option>
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
                     <svg className="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor">

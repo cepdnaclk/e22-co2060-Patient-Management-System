@@ -43,13 +43,23 @@ public class AdminService {
     }
 
     public List<UserDto> getAllUsers() {
+        User currentUser = com.pms.backend.auth.service.SecurityUtil.getCurrentUser();
+        boolean isManagement = currentUser.getRole() == Role.MANAGEMENT;
         return userRepository.findAll()
                 .stream()
+                .filter(u -> !isManagement || (u.getRole() != Role.ADMIN && u.getRole() != Role.SUPER_ADMIN))
                 .map(UserDto::from)
                 .toList();
     }
 
     public UserDto createUser(AdminCreateUserRequest req) {
+        User currentUser = com.pms.backend.auth.service.SecurityUtil.getCurrentUser();
+        if (currentUser.getRole() == Role.MANAGEMENT) {
+            if (req.getRole() == Role.ADMIN || req.getRole() == Role.SUPER_ADMIN) {
+                throw AppException.forbidden("Management users cannot create Administrator accounts");
+            }
+        }
+
         if (userRepository.existsByEmail(req.getEmail())) {
             throw AppException.conflict("This email is already registered");
         }
@@ -74,6 +84,16 @@ public class AdminService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> AppException.notFound("User not found"));
 
+        User currentUser = com.pms.backend.auth.service.SecurityUtil.getCurrentUser();
+        if (currentUser.getRole() == Role.MANAGEMENT) {
+            if (user.getRole() == Role.ADMIN || user.getRole() == Role.SUPER_ADMIN) {
+                throw AppException.forbidden("Management users cannot modify Administrator accounts");
+            }
+            if (req.getRole() == Role.ADMIN || req.getRole() == Role.SUPER_ADMIN) {
+                throw AppException.forbidden("Management users cannot assign Administrator roles");
+            }
+        }
+
         user.setRole(req.getRole());
         return UserDto.from(userRepository.save(user));
     }
@@ -81,6 +101,16 @@ public class AdminService {
     public UserDto updateUser(Long id, AdminUpdateUserRequest req) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> AppException.notFound("User not found"));
+
+        User currentUser = com.pms.backend.auth.service.SecurityUtil.getCurrentUser();
+        if (currentUser.getRole() == Role.MANAGEMENT) {
+            if (user.getRole() == Role.ADMIN || user.getRole() == Role.SUPER_ADMIN) {
+                throw AppException.forbidden("Management users cannot modify Administrator accounts");
+            }
+            if (req.getRole() == Role.ADMIN || req.getRole() == Role.SUPER_ADMIN) {
+                throw AppException.forbidden("Management users cannot assign Administrator roles");
+            }
+        }
 
         if (req.getEmail() != null && !req.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmailAndIdNot(req.getEmail(), user.getId())) {
@@ -118,6 +148,14 @@ public class AdminService {
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> AppException.notFound("User not found"));
+
+        User currentUser = com.pms.backend.auth.service.SecurityUtil.getCurrentUser();
+        if (currentUser.getRole() == Role.MANAGEMENT) {
+            if (user.getRole() == Role.ADMIN || user.getRole() == Role.SUPER_ADMIN) {
+                throw AppException.forbidden("Management users cannot delete Administrator accounts");
+            }
+        }
+
         userRepository.delete(user);
     }
 
