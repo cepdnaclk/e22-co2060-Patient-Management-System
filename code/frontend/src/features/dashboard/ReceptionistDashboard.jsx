@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 const sectionLabels = {
   overview: "Overview",
   register: "Patient Registration",
-  appointments: "Appointments",
+  appointments: "Scheduling",
 };
 
 const ReceptionistDashboard = () => {
@@ -32,7 +32,7 @@ const ReceptionistDashboard = () => {
   const menuItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "register", label: "Patient Registration", icon: UserPlus },
-    { id: "appointments", label: "Appointments", icon: Calendar },
+    { id: "appointments", label: "Scheduling", icon: Calendar },
   ];
 
   return (
