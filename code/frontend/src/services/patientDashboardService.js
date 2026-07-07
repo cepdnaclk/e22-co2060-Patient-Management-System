@@ -167,7 +167,7 @@ export const patientDashboardService = {
 
       throw new Error(
         lastLookupError?.response?.data?.message ||
-          "Unable to load patient profile right now.",
+        "Unable to load patient profile right now.",
       );
     }
 
@@ -198,7 +198,7 @@ export const patientDashboardService = {
           : 0,
       profileStatus:
         patient.updatedAt !== "N/A" ? "Updated" : "Incomplete",
-      upcomingAppointments: appointmentsData.filter(app => new Date(app.appointmentDate) >= new Date() && app.status !== "CANCELLED").length,
+      upcomingAppointments: appointmentsData.filter(app => (app.status || "SCHEDULED") === "SCHEDULED").length,
       unpaidBills: invoicesData.filter(inv => inv.paymentStatus !== "PAID").length,
     };
 
@@ -210,5 +210,9 @@ export const patientDashboardService = {
       stats,
     };
   },
-};
 
+  async updatePatientProfile(id, payload) {
+    const response = await api.put(`/api/patients/${id}`, payload);
+    return response.data;
+  },
+};

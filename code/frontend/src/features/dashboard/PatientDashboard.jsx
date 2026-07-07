@@ -5,8 +5,8 @@ import { patientDashboardService } from "../../services/patientDashboardService"
 import { Card, CardContent, CardHeader } from "../../components/ui/Card.jsx";
 import { Badge } from "../../components/ui/Badge.jsx";
 import { Button } from "../../components/ui/Button.jsx";
-import { 
-  LayoutDashboard, UserCircle, FileText, Pill, 
+import {
+  LayoutDashboard, UserCircle, FileText, Pill,
   Menu, X, Activity, Droplet, Ruler, Weight, Calendar, Clock, ChevronRight,
   CreditCard, CheckCircle2, AlertCircle, Receipt, Sun, Moon, LogOut
 } from "lucide-react";
@@ -45,6 +45,88 @@ const PatientDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({});
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  const parseDateForInput = (dateStr) => {
+    if (!dateStr || dateStr === "N/A") return "";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return "";
+      return d.toISOString().split('T')[0];
+    } catch {
+      return "";
+    }
+  };
+
+  const startEditingProfile = () => {
+    setProfileForm({
+      dateOfBirth: parseDateForInput(patient?.dateOfBirth),
+      gender: patient?.gender === "N/A" ? "" : patient?.gender,
+      bloodType: patient?.bloodType === "N/A" ? "" : patient?.bloodType,
+      email: patient?.email === "N/A" ? "" : patient?.email,
+      mobileNumber: patient?.mobileNumber === "N/A" ? "" : patient?.mobileNumber,
+      address: patient?.address === "N/A" ? "" : patient?.address,
+    });
+    setIsEditingProfile(true);
+    setError("");
+  };
+
+  const cancelEditingProfile = () => {
+    setIsEditingProfile(false);
+    setProfileForm({});
+    setError("");
+  };
+
+  const handleProfileFormChange = (e) => {
+    setProfileForm({ ...profileForm, [e.target.name]: e.target.value });
+  };
+
+  const saveProfile = async () => {
+    setIsSavingProfile(true);
+    setError("");
+    try {
+      const payload = {
+        patientId: patient.patientId !== "N/A" ? patient.patientId : null,
+        userId: user?.id,
+        firstName: patient.firstName !== "N/A" ? patient.firstName : null,
+        lastName: patient.lastName !== "N/A" ? patient.lastName : null,
+        dateOfBirth: profileForm.dateOfBirth || null,
+        gender: profileForm.gender || null,
+        bloodType: profileForm.bloodType || null,
+        email: profileForm.email || null,
+        mobileNumber: profileForm.mobileNumber || null,
+        address: profileForm.address || null,
+        bloodPressure: patient.bloodPressure !== "N/A" ? patient.bloodPressure : null,
+        heartRate: patient.heartRate !== "N/A" ? patient.heartRate : null,
+        temperature: patient.temperature !== "N/A" ? patient.temperature : null,
+        oxygenSaturation: patient.oxygenSaturation !== "N/A" ? patient.oxygenSaturation : null,
+        respiratoryRate: patient.respiratoryRate !== "N/A" ? patient.respiratoryRate : null,
+        height: patient.height !== "N/A" ? patient.height : null,
+        weight: patient.weight !== "N/A" ? patient.weight : null,
+        emergencyContactName: patient.emergencyContactName !== "N/A" ? patient.emergencyContactName : null,
+        emergencyContactPhone: patient.emergencyContactPhone !== "N/A" ? patient.emergencyContactPhone : null,
+        emergencyContactRelation: patient.emergencyContactRelation !== "N/A" ? patient.emergencyContactRelation : null,
+        medicalHistory: patient.medicalHistory !== "No medical history provided." ? patient.medicalHistory : null,
+        allergies: patient.allergies !== "None listed" ? patient.allergies : null,
+        currentMedications: patient.currentMedications !== "None listed" ? patient.currentMedications : null,
+        primaryDoctor: patient.primaryDoctor !== "N/A" ? patient.primaryDoctor : null,
+      };
+
+      const updatedRawPatient = await patientDashboardService.updatePatientProfile(patient.id, payload);
+      const data = await patientDashboardService.getDashboardData(user);
+      setPatient(data.patient);
+      setIsEditingProfile(false);
+    } catch (err) {
+      console.error("Failed to update profile:", err);
+      setError(err?.response?.data?.message || err.message || "Failed to update profile.");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
 
   useEffect(() => {
     let isMounted = true;
@@ -86,11 +168,9 @@ const PatientDashboard = () => {
   const latestRecords = useMemo(() => records.slice(0, 5), [records]);
   const upcomingAppointments = useMemo(() => {
     return appointments
-      .filter(app => new Date(app.appointmentDate) >= new Date() && app.status !== "CANCELLED")
-      .sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate));
+      .filter(app => (app.status || "SCHEDULED") === "SCHEDULED")
+      .sort((a, b) => new Date(a.appointmentDateTime) - new Date(b.appointmentDateTime));
   }, [appointments]);
-
-  const nextAppointment = upcomingAppointments[0] || null;
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
@@ -132,7 +212,7 @@ const PatientDashboard = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="border-none shadow-md shadow-purple-900/5 hover:-translate-y-1 transition-transform duration-300 cursor-pointer" onClick={() => setSection("records")}>
           <CardContent className="p-5 flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
@@ -179,45 +259,49 @@ const PatientDashboard = () => {
               <h3 className="font-semibold text-blue-100 mb-4">Vital Signs</h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10">
-                  <div className="flex items-center gap-2"><Droplet className="w-4 h-4 text-red-300"/> Blood Type</div>
+                  <div className="flex items-center gap-2"><Droplet className="w-4 h-4 text-red-300" /> Blood Type</div>
                   <span className="font-bold">{loading ? "..." : patient?.bloodType || "N/A"}</span>
                 </div>
                 <div className="flex justify-between items-center bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10">
-                  <div className="flex items-center gap-2"><Ruler className="w-4 h-4 text-blue-200"/> Height</div>
+                  <div className="flex items-center gap-2"><Ruler className="w-4 h-4 text-blue-200" /> Height</div>
                   <span className="font-bold">{loading ? "..." : patient?.height ? `${patient.height} cm` : "N/A"}</span>
                 </div>
                 <div className="flex justify-between items-center bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10">
-                  <div className="flex items-center gap-2"><Weight className="w-4 h-4 text-emerald-200"/> Weight</div>
+                  <div className="flex items-center gap-2"><Weight className="w-4 h-4 text-emerald-200" /> Weight</div>
                   <span className="font-bold">{loading ? "..." : patient?.weight ? `${patient.weight} kg` : "N/A"}</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-md shadow-slate-200/50">
-            <CardHeader title="Next Appointment" />
-            <CardContent className="p-6 pt-0">
-              {nextAppointment ? (
-                <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex items-start gap-4">
-                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex flex-col items-center justify-center shrink-0">
-                    <span className="text-xs font-bold uppercase tracking-wider">
-                      {new Date(nextAppointment.appointmentDate).toLocaleString('default', { month: 'short' })}
-                    </span>
-                    <span className="text-lg font-bold leading-none">
-                      {new Date(nextAppointment.appointmentDate).getDate()}
-                    </span>
+          <Card className="border-none shadow-md shadow-slate-200/50 flex flex-col max-h-[400px]">
+            <CardHeader title="Upcoming Appointments" />
+            <CardContent className="p-6 pt-0 overflow-y-auto hide-scrollbar space-y-4">
+              {upcomingAppointments.length > 0 ? (
+                upcomingAppointments.map((app) => (
+                  <div key={app.id} className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex items-start gap-4 shrink-0">
+                    <div className="bg-blue-50 text-blue-600 rounded-xl p-3 flex flex-col items-center justify-center min-w-[70px]">
+                      <span className="text-xs font-bold uppercase">
+                        {new Date(app.appointmentDateTime).toLocaleString('default', { month: 'short' })}
+                      </span>
+                      <span className="text-2xl font-bold">
+                        {new Date(app.appointmentDateTime).getDate()}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-800">{app.reason || "Checkup"}</h4>
+                      <div className="text-sm text-slate-500 flex items-center gap-2 mt-1">
+                        <Clock className="w-4 h-4 text-slate-400" />
+                        <span>
+                          {new Date(app.appointmentDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          &nbsp;with Dr. {app.doctorName || "Unknown"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-800">{nextAppointment.reason || "Checkup"}</h4>
-                    <p className="text-sm text-slate-500 mt-1 flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> 
-                      {new Date(nextAppointment.appointmentDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} 
-                      &nbsp;with Dr. {nextAppointment.doctorName || "Unknown"}
-                    </p>
-                  </div>
-                </div>
+                ))
               ) : (
-                <div className="text-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="text-center p-6 bg-slate-50 rounded-xl border border-slate-100">
                   <Calendar className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                   <p className="text-slate-500 text-sm font-medium">No upcoming appointments</p>
                 </div>
@@ -293,54 +377,122 @@ const PatientDashboard = () => {
               <div className="flex gap-2 mt-2">
                 <Badge variant="gray">{patient?.patientId || "ID: N/A"}</Badge>
                 {patient?.admissionStatus === "ADMITTED" ? (
-                   <Badge variant="warning">In-Patient</Badge>
+                  <Badge variant="warning">In-Patient</Badge>
                 ) : (
-                   <Badge variant="success">Out-Patient</Badge>
+                  <Badge variant="success">Out-Patient</Badge>
                 )}
               </div>
             </div>
-            <Button variant="outline" icon={Activity}>Edit Profile</Button>
           </div>
         </div>
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="border-none shadow-md shadow-slate-200/50">
-          <CardHeader title="Personal Information" />
+          <CardHeader
+            title="Personal Information"
+            action={
+              !isEditingProfile && (
+                <button
+                  onClick={startEditingProfile}
+                  className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  Edit Details
+                </button>
+              )
+            }
+          />
           <CardContent className="p-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-slate-500 font-medium mb-1">Date of Birth</p>
-                <p className="font-semibold text-slate-900">{patient?.dateOfBirth || "N/A"}</p>
+            {isEditingProfile ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <label className="block text-slate-500 font-medium mb-1">Date of Birth</label>
+                    <input type="date" name="dateOfBirth" value={profileForm.dateOfBirth} onChange={handleProfileFormChange} className="w-full border border-slate-300 rounded p-1.5 focus:ring-1 focus:ring-indigo-500 bg-white text-slate-900" />
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 font-medium mb-1">Gender</label>
+                    <select name="gender" value={profileForm.gender} onChange={handleProfileFormChange} className="w-full border border-slate-300 rounded p-1.5 focus:ring-1 focus:ring-indigo-500 bg-white text-slate-900">
+                      <option value="">Select</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 font-medium mb-1">Blood Type</label>
+                    <select name="bloodType" value={profileForm.bloodType} onChange={handleProfileFormChange} className="w-full border border-slate-300 rounded p-1.5 focus:ring-1 focus:ring-indigo-500 bg-white text-slate-900">
+                      <option value="">Select</option>
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
+                    </select>
+                  </div>
+                </div>
+                <hr className="border-slate-100" />
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <label className="block text-slate-500 font-medium mb-1">Email Address</label>
+                    <input type="email" name="email" value={profileForm.email} onChange={handleProfileFormChange} className="w-full border border-slate-300 rounded p-1.5 focus:ring-1 focus:ring-indigo-500 bg-white text-slate-900" />
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 font-medium mb-1">Mobile Number</label>
+                    <input type="text" name="mobileNumber" value={profileForm.mobileNumber} onChange={handleProfileFormChange} className="w-full border border-slate-300 rounded p-1.5 focus:ring-1 focus:ring-indigo-500 bg-white text-slate-900" />
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 font-medium mb-1">Home Address</label>
+                    <input type="text" name="address" value={profileForm.address} onChange={handleProfileFormChange} className="w-full border border-slate-300 rounded p-1.5 focus:ring-1 focus:ring-indigo-500 bg-white text-slate-900" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 pt-2 justify-end">
+                  <button onClick={cancelEditingProfile} disabled={isSavingProfile} className="text-sm font-medium text-slate-500 hover:text-slate-700 disabled:opacity-50">Cancel</button>
+                  <button onClick={saveProfile} disabled={isSavingProfile} className="text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                    {isSavingProfile ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
               </div>
-              <div>
-                <p className="text-slate-500 font-medium mb-1">Age</p>
-                <p className="font-semibold text-slate-900">{patient?.age || "N/A"} years</p>
-              </div>
-              <div>
-                <p className="text-slate-500 font-medium mb-1">Gender</p>
-                <p className="font-semibold text-slate-900">{patient?.gender || "N/A"}</p>
-              </div>
-              <div>
-                <p className="text-slate-500 font-medium mb-1">Blood Type</p>
-                <p className="font-semibold text-slate-900">{patient?.bloodType || "N/A"}</p>
-              </div>
-            </div>
-            <hr className="border-slate-100" />
-            <div className="space-y-3 text-sm">
-              <div>
-                <p className="text-slate-500 font-medium mb-1">Email Address</p>
-                <p className="font-semibold text-slate-900">{patient?.email || "N/A"}</p>
-              </div>
-              <div>
-                <p className="text-slate-500 font-medium mb-1">Mobile Number</p>
-                <p className="font-semibold text-slate-900">{patient?.mobileNumber || "N/A"}</p>
-              </div>
-              <div>
-                <p className="text-slate-500 font-medium mb-1">Home Address</p>
-                <p className="font-semibold text-slate-900">{patient?.address || "N/A"}</p>
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-slate-500 font-medium mb-1">Date of Birth</p>
+                    <p className="font-semibold text-slate-900">{patient?.dateOfBirth || "N/A"}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-500 font-medium mb-1">Age</p>
+                    <p className="font-semibold text-slate-900">{patient?.age || "N/A"} years</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-500 font-medium mb-1">Gender</p>
+                    <p className="font-semibold text-slate-900">{patient?.gender || "N/A"}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-500 font-medium mb-1">Blood Type</p>
+                    <p className="font-semibold text-slate-900">{patient?.bloodType || "N/A"}</p>
+                  </div>
+                </div>
+                <hr className="border-slate-100" />
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <p className="text-slate-500 font-medium mb-1">Email Address</p>
+                    <p className="font-semibold text-slate-900">{patient?.email || "N/A"}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-500 font-medium mb-1">Mobile Number</p>
+                    <p className="font-semibold text-slate-900">{patient?.mobileNumber || "N/A"}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-500 font-medium mb-1">Home Address</p>
+                    <p className="font-semibold text-slate-900">{patient?.address || "N/A"}</p>
+                  </div>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -361,14 +513,14 @@ const PatientDashboard = () => {
           <Card className="border-none shadow-md shadow-slate-200/50">
             <CardHeader title="Hospital Details" />
             <CardContent className="p-6 space-y-4">
-               <div className="flex justify-between items-center text-sm pb-3 border-b border-slate-100">
-                 <span className="text-slate-500 font-medium">Primary Doctor</span>
-                 <span className="font-semibold text-slate-900">{patient?.primaryDoctor || "N/A"}</span>
-               </div>
-               <div className="flex justify-between items-center text-sm pb-3 border-b border-slate-100">
-                 <span className="text-slate-500 font-medium">Last Updated</span>
-                 <span className="font-semibold text-slate-900">{patient?.updatedAt || "N/A"}</span>
-               </div>
+              <div className="flex justify-between items-center text-sm pb-3 border-b border-slate-100">
+                <span className="text-slate-500 font-medium">Primary Doctor</span>
+                <span className="font-semibold text-slate-900">{patient?.primaryDoctor || "N/A"}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm pb-3 border-b border-slate-100">
+                <span className="text-slate-500 font-medium">Last Updated</span>
+                <span className="font-semibold text-slate-900">{patient?.updatedAt || "N/A"}</span>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -412,9 +564,8 @@ const PatientDashboard = () => {
                         <div className="flex flex-col items-start gap-2">
                           <Badge variant={record.type.toUpperCase() === "PRESCRIPTION" ? "success" : "blue"}>{record.type}</Badge>
                           {record.type.toUpperCase() === "PRESCRIPTION" && record.isFulfilled !== undefined && (
-                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                              record.isFulfilled ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-                            }`}>
+                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${record.isFulfilled ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                              }`}>
                               {record.isFulfilled ? "Dispensed" : "Pending Pharmacy"}
                             </span>
                           )}
@@ -476,16 +627,16 @@ const PatientDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {appointments.sort((a,b) => new Date(b.appointmentDate) - new Date(a.appointmentDate)).map((app) => (
+                  {appointments.sort((a, b) => new Date(b.appointmentDateTime) - new Date(a.appointmentDateTime)).map((app) => (
                     <tr key={app.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="py-4 px-6 whitespace-nowrap">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex flex-col items-center justify-center shrink-0 border border-blue-100">
-                            <span className="text-[10px] font-bold uppercase leading-none">{new Date(app.appointmentDate).toLocaleString('default', { month: 'short' })}</span>
-                            <span className="text-sm font-bold leading-none mt-0.5">{new Date(app.appointmentDate).getDate()}</span>
+                            <span className="text-[10px] font-bold uppercase leading-none">{new Date(app.appointmentDateTime).toLocaleString('default', { month: 'short' })}</span>
+                            <span className="text-sm font-bold leading-none mt-0.5">{new Date(app.appointmentDateTime).getDate()}</span>
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-slate-900">{new Date(app.appointmentDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                            <p className="text-sm font-semibold text-slate-900">{new Date(app.appointmentDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                             <p className="text-xs text-slate-500">Duration: {app.durationMinutes} mins</p>
                           </div>
                         </div>
@@ -497,14 +648,14 @@ const PatientDashboard = () => {
                         <span className="text-sm text-slate-700">{app.reason || "Checkup"}</span>
                       </td>
                       <td className="py-4 px-6">
-                        <Badge 
+                        <Badge
                           variant={
-                            app.status === "COMPLETED" ? "success" : 
-                            app.status === "SCHEDULED" ? "blue" : 
-                            "gray"
+                            (app.status || "SCHEDULED") === "COMPLETED" ? "success" :
+                              (app.status || "SCHEDULED") === "SCHEDULED" ? "info" :
+                                "neutral"
                           }
                         >
-                          {app.status}
+                          {app.status || "SCHEDULED"}
                         </Badge>
                       </td>
                     </tr>
@@ -587,14 +738,14 @@ const PatientDashboard = () => {
             </CardContent>
           </Card>
         </div>
-        
+
         <div className="md:col-span-1">
           <Card className="border-none shadow-md shadow-slate-200/50 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
             <CardContent className="p-6">
               <h3 className="font-semibold text-slate-300 mb-6 flex items-center gap-2">
                 <CreditCard className="w-5 h-5" /> Account Balance
               </h3>
-              
+
               <div className="mb-8">
                 <p className="text-slate-400 text-sm mb-1">Total Outstanding</p>
                 <p className="text-4xl font-bold text-white tracking-tight">
@@ -619,7 +770,7 @@ const PatientDashboard = () => {
     <div className="min-h-screen bg-slate-50 flex">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -675,15 +826,14 @@ const PatientDashboard = () => {
                     setSection(item.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${
-                    active 
-                      ? "bg-blue-500 text-white shadow-md shadow-blue-500/20" 
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${active
+                      ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
                       : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <Icon className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"}`} />
                   {item.label}
-                  
+
                   {item.id === "billing" && stats.unpaidBills > 0 && (
                     <span className="ml-auto bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-500/30">
                       {stats.unpaidBills}
