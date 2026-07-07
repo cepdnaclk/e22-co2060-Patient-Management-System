@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
 import {
-  LayoutDashboard, Users, Stethoscope, HeartPulse, UserPlus,
+  LayoutDashboard, Users, Stethoscope, HeartPulse, UserPlus, FileText,
   Menu, X, Shield, Sun, Moon, LogOut
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import MgmtOverview from "./ManagementDashboardComponents/MgmtOverview";
 import MgmtUsersList from "./ManagementDashboardComponents/MgmtUsersList";
 import MgmtDoctorsList from "./ManagementDashboardComponents/MgmtDoctorsList";
+import MgmtProfileApprovals from "./ManagementDashboardComponents/MgmtProfileApprovals";
 import AddUser from "./AdminDAshboardComponents/AddUser";
 
 const sectionLabels = {
@@ -17,6 +18,7 @@ const sectionLabels = {
   doctors: "Manage Doctors",
   nurses: "Manage Nurses",
   patients: "Manage Patients",
+  approvals: "Profile Approvals",
   addUser: "Add Staff",
 };
 
@@ -37,6 +39,7 @@ const ManagementDashboard = () => {
     { id: "doctors", label: "Manage Doctors", icon: Stethoscope },
     { id: "nurses", label: "Manage Nurses", icon: HeartPulse },
     { id: "patients", label: "Manage Patients", icon: Users },
+    { id: "approvals", label: "Profile Approvals", icon: FileText },
     { id: "addUser", label: "Add Staff", icon: UserPlus },
   ];
 
@@ -179,6 +182,7 @@ const ManagementDashboard = () => {
           {section === "doctors" && <MgmtDoctorsList />}
           {section === "nurses" && <MgmtUsersList roleFilter="NURSE" />}
           {section === "patients" && <MgmtUsersList roleFilter="PATIENT" />}
+          {section === "approvals" && <MgmtProfileApprovals />}
           {section === "addUser" && <AddUser />}
         </div>
       </main>
