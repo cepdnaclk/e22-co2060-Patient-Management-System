@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "../../../components/ui/Card.jsx";
 import { Button } from "../../../components/ui/Button.jsx";
-import { UserPlus, CheckCircle2, AlertCircle, FileText, User } from "lucide-react";
-import { adminPatientsService } from "../../../services/adminPatientsService";
+import { UserPlus, CheckCircle2, AlertCircle, FileText, User, KeyRound } from "lucide-react";
+import { receptionistService } from "../../../services/receptionistService";
 
 const PatientRegistration = () => {
   const [formData, setFormData] = useState({
@@ -23,6 +23,7 @@ const PatientRegistration = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [registeredPatientId, setRegisteredPatientId] = useState("");
+  const [registeredEmail, setRegisteredEmail] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,20 +36,17 @@ const PatientRegistration = () => {
     setIsSaving(true);
 
     try {
-      const payload = {
-        ...formData,
-        admissionStatus: "Registered"
-      };
-      
-      const created = await adminPatientsService.createPatient(payload);
+      const res = await receptionistService.registerPatient(formData);
+      const created = res.data;
       setRegisteredPatientId(created.patientId || `ID-${created.id}`);
+      setRegisteredEmail(created.email || formData.email);
       setSubmitted(true);
       setFormData({
         firstName: "", lastName: "", email: "", mobileNumber: "", gender: "", 
         dateOfBirth: "", bloodType: "", address: "", 
         emergencyContactName: "", emergencyContactPhone: "", emergencyContactRelation: ""
       });
-      setTimeout(() => setSubmitted(false), 5000);
+      setTimeout(() => setSubmitted(false), 10000);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to register patient. Please try again.");
     } finally {
@@ -74,7 +72,8 @@ const PatientRegistration = () => {
           <CheckCircle2 className="w-6 h-6 shrink-0 mt-0.5" />
           <div>
             <p className="font-bold text-lg">Registration Successful!</p>
-            <p className="text-sm mt-1">Patient has been registered. System generated ID: <span className="font-bold bg-emerald-100 px-2 py-0.5 rounded">{registeredPatientId}</span></p>
+            <p className="text-sm mt-1">Patient ID: <span className="font-bold bg-emerald-100 px-2 py-0.5 rounded">{registeredPatientId}</span></p>
+            <p className="text-sm mt-2 flex items-center gap-1"><KeyRound className="w-4 h-4" /> Login: <span className="font-bold">{registeredEmail}</span> / Password: <span className="font-bold">P@tient@123</span></p>
           </div>
         </div>
       )}

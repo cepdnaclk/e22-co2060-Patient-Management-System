@@ -1,32 +1,46 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "../../../components/ui/Card.jsx";
-import { Users, CalendarCheck, Clock, FileText, ArrowUpRight } from "lucide-react";
-import { adminPatientsService } from "../../../services/adminPatientsService";
-import api from "../../../services/axiosClient";
+import { Users, CalendarCheck, Clock, CalendarRange, ArrowUpRight } from "lucide-react";
+import { receptionistService } from "../../../services/receptionistService";
 
 const ReceptionistOverview = () => {
   const [patientsCount, setPatientsCount] = useState(0);
   const [appointmentsCount, setAppointmentsCount] = useState(0);
+  const [todayCount, setTodayCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [recentPatients, setRecentPatients] = useState([]);
+  const [upcomingAppts, setUpcomingAppts] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
         const [patientsRes, appointmentsRes] = await Promise.all([
-          adminPatientsService.listPatients(),
-          api.get("/api/appointments")
+          receptionistService.listPatients(),
+          receptionistService.listAppointments()
         ]);
-        
-        setPatientsCount(Array.isArray(patientsRes) ? patientsRes.length : 0);
-        
+
+        const pts = Array.isArray(patientsRes.data) ? patientsRes.data : [];
+        setPatientsCount(pts.length);
+        setRecentPatients(pts.slice(-5).reverse());
+
         const appts = appointmentsRes.data;
-        let aCount = 0;
-        if (Array.isArray(appts)) aCount = appts.length;
-        else if (Array.isArray(appts?.items)) aCount = appts.items.length;
-        else if (Array.isArray(appts?.content)) aCount = appts.content.length;
-        setAppointmentsCount(aCount);
-        
+        let aList = [];
+        if (Array.isArray(appts)) aList = appts;
+        else if (Array.isArray(appts?.items)) aList = appts.items;
+        else if (Array.isArray(appts?.content)) aList = appts.content;
+        setAppointmentsCount(aList.length);
+
+        const today = new Date();
+        const todayStr = today.toISOString().slice(0, 10);
+        const todayAppts = aList.filter((a) => a.appointmentDateTime && a.appointmentDateTime.slice(0, 10) === todayStr);
+        setTodayCount(todayAppts.length);
+
+        const upcoming = aList
+          .filter((a) => a.status === "SCHEDULED" && a.appointmentDateTime && new Date(a.appointmentDateTime) > today)
+          .sort((a, b) => new Date(a.appointmentDateTime) - new Date(b.appointmentDateTime))
+          .slice(0, 5);
+        setUpcomingAppts(upcoming);
       } catch (err) {
         console.error("Error fetching overview stats:", err);
       } finally {
@@ -38,9 +52,9 @@ const ReceptionistOverview = () => {
 
   const stats = [
     { label: "Total Patients", value: patientsCount, icon: Users, color: "text-sky-600", bg: "bg-sky-100" },
-    { label: "Today's Appointments", value: appointmentsCount, icon: CalendarCheck, color: "text-emerald-600", bg: "bg-emerald-100" },
-    { label: "Pending Walk-ins", value: "12", icon: Clock, color: "text-amber-600", bg: "bg-amber-100" },
-    { label: "Unpaid Invoices", value: "5", icon: FileText, color: "text-rose-600", bg: "bg-rose-100" },
+    { label: "Total Appointments", value: appointmentsCount, icon: CalendarCheck, color: "text-emerald-600", bg: "bg-emerald-100" },
+    { label: "Today's Appointments", value: todayCount, icon: CalendarRange, color: "text-indigo-600", bg: "bg-indigo-100" },
+    { label: "Today's Date", value: new Date().toLocaleDateString(), icon: Clock, color: "text-amber-600", bg: "bg-amber-100" },
   ];
 
   return (
@@ -72,30 +86,56 @@ const ReceptionistOverview = () => {
         <Card className="border-none shadow-md shadow-slate-200/50">
           <CardHeader className="p-6 pb-2 border-b border-slate-100 flex flex-row items-center justify-between">
             <h2 className="text-lg font-bold text-slate-800">Recent Registrations</h2>
-            <button className="text-sm font-medium text-sky-600 flex items-center gap-1 hover:text-sky-700">
-              View All <ArrowUpRight className="w-4 h-4" />
-            </button>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="p-8 text-center text-slate-500">
-              <Users className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-              <p>No recent registrations found.</p>
-            </div>
+            {recentPatients.length === 0 ? (
+              <div className="p-8 text-center text-slate-500">
+                <Users className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+                <p>No recent registrations.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {recentPatients.map((p) => (
+                  <div key={p.id} className="px-6 py-3 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-700 font-bold text-sm">
+                      {p.firstName?.charAt(0)}{p.lastName?.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800 truncate">{p.firstName} {p.lastName}</p>
+                      <p className="text-xs text-slate-500 truncate">{p.email}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
         <Card className="border-none shadow-md shadow-slate-200/50">
           <CardHeader className="p-6 pb-2 border-b border-slate-100 flex flex-row items-center justify-between">
             <h2 className="text-lg font-bold text-slate-800">Upcoming Appointments</h2>
-            <button className="text-sm font-medium text-emerald-600 flex items-center gap-1 hover:text-emerald-700">
-              View Schedule <ArrowUpRight className="w-4 h-4" />
-            </button>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="p-8 text-center text-slate-500">
-              <CalendarCheck className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-              <p>No upcoming appointments found for today.</p>
-            </div>
+            {upcomingAppts.length === 0 ? (
+              <div className="p-8 text-center text-slate-500">
+                <CalendarCheck className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+                <p>No upcoming appointments.</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {upcomingAppts.map((a) => (
+                  <div key={a.id} className="px-6 py-3 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm">
+                      <CalendarCheck className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800 truncate">{a.patientName}</p>
+                      <p className="text-xs text-slate-500">Dr. {a.doctorName} — {a.appointmentDateTime ? new Date(a.appointmentDateTime).toLocaleString() : "TBD"}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

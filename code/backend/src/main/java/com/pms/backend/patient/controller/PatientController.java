@@ -1,7 +1,9 @@
 package com.pms.backend.patient.controller;
 
 import com.pms.backend.patient.dto.PatientDto;
+import com.pms.backend.patient.dto.PatientRegistrationRequest;
 import com.pms.backend.patient.service.PatientService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +19,16 @@ public class PatientController {
     private final PatientService patientService;
 
     @PostMapping
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('PATIENT')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('PATIENT') or hasRole('RECEPTIONIST')")
     public ResponseEntity<PatientDto> createPatient(@RequestParam Long userId, @RequestBody PatientDto patientDto) {
         PatientDto createdPatient = patientService.createPatient(userId, patientDto);
+        return new ResponseEntity<>(createdPatient, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/register")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('RECEPTIONIST')")
+    public ResponseEntity<PatientDto> registerPatient(@Valid @RequestBody PatientRegistrationRequest request) {
+        PatientDto createdPatient = patientService.registerPatient(request);
         return new ResponseEntity<>(createdPatient, HttpStatus.CREATED);
     }
 
