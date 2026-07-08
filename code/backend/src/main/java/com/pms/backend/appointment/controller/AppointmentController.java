@@ -60,7 +60,8 @@ public class AppointmentController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('DOCTOR') or hasRole('RECEPTIONIST')")
-    public ResponseEntity<AppointmentDto> updateAppointment(@PathVariable Long id, @RequestBody AppointmentDto appointmentDto) {
+    public ResponseEntity<AppointmentDto> updateAppointment(@PathVariable Long id,
+            @RequestBody AppointmentDto appointmentDto) {
         AppointmentDto updatedAppointment = appointmentService.updateAppointment(id, appointmentDto);
         return ResponseEntity.ok(updatedAppointment);
     }
@@ -79,4 +80,3 @@ public class AppointmentController {
         return ResponseEntity.noContent().build();
     }
 }
-

@@ -59,6 +59,7 @@ const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [allAppointments, setAllAppointments] = useState([]);
   const [criticalPatients, setCriticalPatients] = useState([]);
+  const [allPatients, setAllPatients] = useState([]);
   const [loadingDashboard, setLoadingDashboard] = useState(true);
   const [dashboardError, setDashboardError] = useState("");
   const [section, setSection] = useState("dashboard");
@@ -104,6 +105,7 @@ const DoctorDashboard = () => {
       setAppointments(data.appointments);
       setAllAppointments(data.allAppointments || []);
       setCriticalPatients(data.criticalPatients || []);
+      setAllPatients(data.allPatients || []);
     } catch (error) {
       setDashboardError(error.response?.data?.message || "Failed to load doctor dashboard data.");
     } finally {
@@ -284,10 +286,12 @@ const DoctorDashboard = () => {
               appointments={appointments}
               allAppointments={allAppointments}
               criticalPatients={criticalPatients}
+              allPatients={allPatients}
               loading={loadingDashboard}
               error={dashboardError}
               onUpdateStatus={handleUpdateAppointmentStatus}
               onNavigate={handleNavigateToPatient}
+              isNurse={isNurse}
             />
           )}
           {section === "reportsandanalytics" && <ReportAndAnalytics />}
