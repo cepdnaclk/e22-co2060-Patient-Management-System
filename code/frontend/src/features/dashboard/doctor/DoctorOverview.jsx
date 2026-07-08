@@ -9,6 +9,8 @@ import {
   Clock, User, Activity,
 } from "lucide-react";
 import AppointmentCalendar from "./AppointmentCalendar.jsx";
+import PatientVitalsCard from "../NurseDashboardComponents/PatientVitalsCard.jsx";
+import MARCard from "../NurseDashboardComponents/MARCard.jsx";
 
 /* ─── helpers ─────────────────────────────────────────────────── */
 const formatTime = (dateTime) => {
@@ -237,10 +239,18 @@ function CriticalPatientsPanel({ criticalPatients, onClose, onNavigate }) {
 
 /* ─── Main Component ───────────────────────────────────────────── */
 export default function DoctorOverview({
-  stats, appointments, allAppointments = [], criticalPatients = [],
-  loading, error, onUpdateStatus, onNavigate,
+  stats, appointments, allAppointments = [], criticalPatients = [], allPatients = [],
+  loading, error, onUpdateStatus, onNavigate, isNurse,
 }) {
   const [expandedPanel, setExpandedPanel] = useState(null); // "calendar" | "critical" | null
+  const [selectedNursePatient, setSelectedNursePatient] = useState(null);
+
+  // Initialize selected patient for nurses
+  React.useEffect(() => {
+    if (isNurse && !selectedNursePatient && allPatients?.length > 0) {
+      setSelectedNursePatient(allPatients[0]);
+    }
+  }, [isNurse, allPatients, selectedNursePatient]);
 
   const togglePanel = (panel) =>
     setExpandedPanel((prev) => (prev === panel ? null : panel));
@@ -269,6 +279,10 @@ export default function DoctorOverview({
     red:     { icon: "bg-red-50 text-red-600",      border: "hover:border-red-300",     active: "border-red-300 bg-red-50/30" },
     purple:  { icon: "bg-purple-50 text-purple-600",border: "hover:border-purple-300",  active: "border-purple-300 bg-purple-50/30" },
   };
+
+  const filteredStatCards = isNurse 
+    ? statCards.filter(c => c.id !== 2 && c.id !== 3)
+    : statCards;
 
   return (
     <div className="space-y-6">
@@ -353,6 +367,8 @@ export default function DoctorOverview({
       {/* ── Today's Table + Quick Actions ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Appointments Table */}
+        {!isNurse ? (
+        <>
         <div className="lg:col-span-2">
           <Card className="h-full border-none shadow-md shadow-slate-200/50 flex flex-col">
             <CardHeader
@@ -444,7 +460,6 @@ export default function DoctorOverview({
             </div>
           </Card>
         </div>
-
         {/* Quick Actions */}
         <div>
           <Card className="h-full border-none shadow-md shadow-slate-200/50">
@@ -487,6 +502,37 @@ export default function DoctorOverview({
             </CardContent>
           </Card>
         </div>
+        </>
+        ) : (
+          <div className="lg:col-span-3 flex flex-col gap-4">
+             <div className="flex items-center justify-between bg-white px-5 py-3 rounded-2xl border border-slate-200 shadow-sm">
+                <span className="font-semibold text-slate-700 flex items-center gap-2">
+                   <User className="w-5 h-5 text-violet-500" />
+                   Select Patient:
+                </span>
+                <select 
+                  className="border border-slate-200 rounded-lg py-2 px-3 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-500 min-w-[200px]"
+                  value={selectedNursePatient?.id || ""}
+                  onChange={(e) => {
+                    const p = allPatients.find(cp => cp.id === parseInt(e.target.value));
+                    if (p) setSelectedNursePatient(p);
+                  }}
+                >
+                  {allPatients.length === 0 && <option value="">No patients available</option>}
+                  {allPatients.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.firstName && p.lastName ? `${p.firstName} ${p.lastName}` : (p.name || "Unknown")}
+                    </option>
+                  ))}
+                </select>
+             </div>
+             
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <PatientVitalsCard patient={selectedNursePatient} />
+                <MARCard patient={selectedNursePatient} />
+             </div>
+          </div>
+        )}
       </div>
     </div>
   );

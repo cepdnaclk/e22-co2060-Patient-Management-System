@@ -29,7 +29,7 @@ export const doctorDashboardService = {
       const patientsResponse = await api.get("/api/patients");
       const patients = patientsResponse.data || [];
 
-      const criticalAlerts = patients.filter((patient) => 
+      const criticalAlerts = patients.filter((patient) =>
         patient.criticalStatus === true
       );
 
@@ -45,6 +45,7 @@ export const doctorDashboardService = {
         appointments: [],
         allAppointments: [],
         criticalPatients: criticalAlerts,
+        allPatients: patients,
       };
     }
 
@@ -67,7 +68,7 @@ export const doctorDashboardService = {
       isActiveStatus(appointment.status),
     );
 
-    const criticalAlerts = patients.filter((patient) => 
+    const criticalAlerts = patients.filter((patient) =>
       patient.criticalStatus === true
     );
 
@@ -83,6 +84,7 @@ export const doctorDashboardService = {
       appointments: todaysAppointments,
       allAppointments: appointments,
       criticalPatients: criticalAlerts,
+      allPatients: patients,
     };
   },
 
