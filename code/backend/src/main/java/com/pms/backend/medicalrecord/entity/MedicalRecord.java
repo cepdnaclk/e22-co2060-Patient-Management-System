@@ -47,7 +47,7 @@ public class MedicalRecord {
     @Column(length = 2000)
     private String testResult;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String attachmentUrl;
 
     @Column
