@@ -43,10 +43,12 @@ export default function PrescriptionQueue() {
     }
   };
 
+  const q = search.toLowerCase();
   const filtered = prescriptions.filter(p => 
-    p.patientName?.toLowerCase().includes(search.toLowerCase()) ||
-    p.doctorName?.toLowerCase().includes(search.toLowerCase()) ||
-    p.description?.toLowerCase().includes(search.toLowerCase())
+    p.patientName?.toLowerCase().includes(q) ||
+    String(p.patientId ?? "").includes(q) ||
+    p.doctorName?.toLowerCase().includes(q) ||
+    p.description?.toLowerCase().includes(q)
   );
 
   return (
@@ -79,7 +81,7 @@ export default function PrescriptionQueue() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
                 type="text"
-                placeholder="Search by patient, doctor, or medicine..."
+                placeholder="Search by name, patient ID, doctor, or medicine..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm outline-none transition-all"

@@ -792,20 +792,6 @@ const PatientDashboard = () => {
             <span className="font-bold text-xl text-white tracking-tight">Patient<span className="text-blue-400">Portal</span></span>
           </div>
           <div className="flex items-center gap-1">
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={handleLogout}
-              className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
-              aria-label="Sign out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
             <button className="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" onClick={() => setIsSidebarOpen(false)}>
               <X className="w-5 h-5" />
             </button>
@@ -895,13 +881,6 @@ const PatientDashboard = () => {
           </div>
           {/* Right */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-            </button>
             <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
               <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
                 {user?.email?.charAt(0).toUpperCase()}

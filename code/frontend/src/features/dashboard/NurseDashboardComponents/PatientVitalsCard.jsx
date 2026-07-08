@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Activity, ArrowUp, ArrowDown, Clock, X } from "lucide-react";
+import { Activity, ArrowUp, ArrowDown, Clock, X, History } from "lucide-react";
 import { nurseDashboardService } from "../../../services/nurseDashboardService";
 
 export default function PatientVitalsCard({ patient }) {
-  const [vitalsData, setVitalsData] = useState(null);
+  const [allVitals, setAllVitals] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRecordModalOpen, setIsRecordModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     bloodPressure: "",
     heartRate: "",
@@ -17,17 +18,13 @@ export default function PatientVitalsCard({ patient }) {
   useEffect(() => {
     async function loadVitals() {
       if (!patient?.id) {
-        setVitalsData(null);
+        setAllVitals([]);
         return;
       }
       setLoading(true);
       try {
         const records = await nurseDashboardService.getPatientVitals(patient.id);
-        if (records && records.length > 0) {
-          setVitalsData(records[0]);
-        } else {
-          setVitalsData(null);
-        }
+        setAllVitals(records || []);
       } catch (error) {
         console.error("Failed to fetch vitals", error);
       } finally {
@@ -37,6 +34,8 @@ export default function PatientVitalsCard({ patient }) {
     loadVitals();
   }, [patient?.id]);
 
+  const latest = allVitals.length > 0 ? allVitals[0] : null;
+
   const handleRecordVitals = async (e) => {
     e.preventDefault();
     if (!patient?.id) return;
@@ -45,21 +44,30 @@ export default function PatientVitalsCard({ patient }) {
         patientId: patient.id,
         ...formData
       });
-      setVitalsData(newVitals);
-      setIsModalOpen(false);
+      setAllVitals([newVitals, ...allVitals]);
+      setIsRecordModalOpen(false);
       setFormData({ bloodPressure: "", heartRate: "", temperature: "", oxygenSaturation: "", respiratoryRate: "" });
     } catch (error) {
       console.error("Failed to record vitals", error);
     }
   };
 
-  // Convert backend data to display format
+  const getTimeAgo = (dateStr) => {
+    if (!dateStr) return "";
+    const diff = new Date() - new Date(dateStr);
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "Just now";
+    if (mins < 60) return `${mins} min ago`;
+    const hrs = Math.floor(mins / 60);
+    return `${hrs} hr ago`;
+  };
+
   const vitals = [
-    { label: "Blood Pressure", value: vitalsData?.bloodPressure || "N/A", unit: "mmHg", trend: "stable", isAbnormal: false },
-    { label: "Heart Rate", value: vitalsData?.heartRate || "N/A", unit: "bpm", trend: "stable", isAbnormal: false },
-    { label: "Temperature", value: vitalsData?.temperature || "N/A", unit: "°F", trend: "stable", isAbnormal: vitalsData?.temperature > 100 },
-    { label: "SpO2", value: vitalsData?.oxygenSaturation || "N/A", unit: "%", trend: "stable", isAbnormal: vitalsData?.oxygenSaturation < 95 },
-    { label: "Resp Rate", value: vitalsData?.respiratoryRate || "N/A", unit: "bpm", trend: "stable", isAbnormal: false },
+    { label: "Blood Pressure", value: latest?.bloodPressure || "N/A", unit: "mmHg", isAbnormal: false },
+    { label: "Heart Rate", value: latest?.heartRate ?? "N/A", unit: "bpm", isAbnormal: latest?.heartRate != null && (latest.heartRate < 60 || latest.heartRate > 100) },
+    { label: "Temperature", value: latest?.temperature ?? "N/A", unit: "°F", isAbnormal: latest?.temperature != null && latest.temperature > 100.4 },
+    { label: "SpO2", value: latest?.oxygenSaturation ?? "N/A", unit: "%", isAbnormal: latest?.oxygenSaturation != null && latest.oxygenSaturation < 95 },
+    { label: "Resp Rate", value: latest?.respiratoryRate ?? "N/A", unit: "bpm", isAbnormal: latest?.respiratoryRate != null && (latest.respiratoryRate < 12 || latest.respiratoryRate > 20) },
   ];
 
   return (
@@ -71,17 +79,19 @@ export default function PatientVitalsCard({ patient }) {
             Current Vitals
           </h3>
           <p className="text-xs text-teal-700 mt-1 font-medium">
-             {patient ? `For ${patient.firstName} ${patient.lastName}` : "No patient selected"}
+             {patient ? `${patient.firstName} ${patient.lastName}` : "No patient selected"}
           </p>
         </div>
         <div className="flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-100/50 px-2.5 py-1 rounded-full border border-teal-200/50">
            <Clock className="w-3.5 h-3.5" />
-           2 hrs ago
+           {latest?.recordedAt ? getTimeAgo(latest.recordedAt) : "—"}
         </div>
       </div>
       
       <div className="p-5 flex-1 flex flex-col gap-4">
-        {vitals.map((vital, idx) => (
+        {loading ? (
+          <div className="text-center text-sm text-slate-500 py-4">Loading vitals...</div>
+        ) : vitals.map((vital, idx) => (
           <div key={idx} className={`flex items-center justify-between p-3 rounded-xl border ${vital.isAbnormal ? 'bg-red-50/50 border-red-100' : 'bg-slate-50 border-slate-100'}`}>
             <span className="text-sm font-semibold text-slate-600">{vital.label}</span>
             <div className="flex items-center gap-3">
@@ -92,35 +102,41 @@ export default function PatientVitalsCard({ patient }) {
                  <span className="text-xs text-slate-500 ml-1">{vital.unit}</span>
                </div>
                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                 vital.trend === 'up' && vital.isAbnormal ? 'bg-red-100 text-red-600' : 
-                 vital.trend === 'down' && vital.isAbnormal ? 'bg-red-100 text-red-600' :
-                 vital.trend === 'up' ? 'bg-orange-100 text-orange-600' : 
-                 vital.trend === 'down' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-200 text-slate-400'
+                 vital.isAbnormal ? 'bg-red-100 text-red-600' : 'bg-slate-200 text-slate-400'
                }`}>
-                 {vital.trend === 'up' ? <ArrowUp className="w-3.5 h-3.5" /> : 
-                  vital.trend === 'down' ? <ArrowDown className="w-3.5 h-3.5" /> : <span className="text-xl leading-none -mt-2">-</span>}
+                 {vital.isAbnormal ? <ArrowUp className="w-3.5 h-3.5" /> : <span className="text-xl leading-none -mt-2">-</span>}
                </div>
             </div>
           </div>
         ))}
       </div>
       
-      <div className="p-4 border-t border-slate-100 bg-slate-50">
+      <div className="p-4 border-t border-slate-100 bg-slate-50 flex gap-2">
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setIsHistoryModalOpen(true)}
+          disabled={!patient || allVitals.length === 0}
+          className="flex-1 py-2.5 bg-white border border-teal-200 text-teal-700 font-bold rounded-xl hover:bg-teal-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+           <History className="w-4 h-4" />
+           History
+        </button>
+        <button 
+          onClick={() => setIsRecordModalOpen(true)}
           disabled={!patient}
-          className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm shadow-teal-600/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          className="flex-1 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm shadow-teal-600/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
            <Activity className="w-4 h-4" />
-           Record New Vitals
+           Record New
         </button>
       </div>
 
-      {isModalOpen && (
+      {/* Record Vitals Modal */}
+      {isRecordModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
               <h3 className="font-bold text-slate-800">Record Vitals</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setIsRecordModalOpen(false)} className="text-slate-400 hover:text-slate-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -153,10 +169,61 @@ export default function PatientVitalsCard({ patient }) {
                 </div>
               </div>
               <div className="mt-2 flex justify-end gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+                <button type="button" onClick={() => setIsRecordModalOpen(false)} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
                 <button type="submit" className="px-4 py-2 text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl">Save Vitals</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Vitals History Modal */}
+      {isHistoryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" onClick={() => setIsHistoryModalOpen(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                <Activity className="w-5 h-5 text-teal-600" />
+                Vitals History — {patient?.firstName} {patient?.lastName}
+              </h3>
+              <button onClick={() => setIsHistoryModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-0 overflow-x-auto overflow-y-auto max-h-[calc(80vh-80px)]">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 text-slate-500 uppercase text-xs font-semibold tracking-wider sticky top-0">
+                  <tr>
+                    <th className="px-5 py-3">Date & Time</th>
+                    <th className="px-5 py-3">BP (mmHg)</th>
+                    <th className="px-5 py-3">HR (bpm)</th>
+                    <th className="px-5 py-3">Temp (°F)</th>
+                    <th className="px-5 py-3">SpO2 (%)</th>
+                    <th className="px-5 py-3">RR (bpm)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {allVitals.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="p-8 text-center text-slate-500">No vitals recorded yet.</td>
+                    </tr>
+                  ) : (
+                    allVitals.map((v) => (
+                      <tr key={v.id} className="hover:bg-slate-50">
+                        <td className="px-5 py-3 whitespace-nowrap font-medium text-slate-800">
+                          {v.recordedAt ? new Date(v.recordedAt).toLocaleString() : "—"}
+                        </td>
+                        <td className="px-5 py-3">{v.bloodPressure || "—"}</td>
+                        <td className="px-5 py-3">{v.heartRate ?? "—"}</td>
+                        <td className="px-5 py-3">{v.temperature ?? "—"}</td>
+                        <td className="px-5 py-3">{v.oxygenSaturation ?? "—"}</td>
+                        <td className="px-5 py-3">{v.respiratoryRate ?? "—"}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

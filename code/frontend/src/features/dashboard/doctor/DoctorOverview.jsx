@@ -299,8 +299,8 @@ export default function DoctorOverview({
       )}
 
       {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {statCards.map((card) => {
+      <div className={`grid grid-cols-1 sm:grid-cols-2 ${isNurse ? 'lg:grid-cols-3' : 'lg:grid-cols-5'} gap-4`}>
+        {(isNurse ? filteredStatCards : statCards).map((card) => {
           const Icon = card.icon;
           const cm = colorMap[card.color];
           const isActive = card.panel && expandedPanel === card.panel;

@@ -44,7 +44,7 @@ export default function PatientRecordList({ records, loading }) {
   ];
 
   return (
-    <Card className="border-none shadow-md shadow-slate-200/50 h-full flex flex-col">
+    <Card noPadding className="border-none shadow-md shadow-slate-200/50 h-full flex flex-col">
       <CardHeader className="pb-0 border-b-0">
         <div className="flex space-x-1 overflow-x-auto pb-2 scrollbar-hide">
           {tabs.map((tab) => (

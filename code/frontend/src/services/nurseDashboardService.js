@@ -15,6 +15,15 @@ export const nurseDashboardService = {
     return response.data;
   },
 
+  // --- Prescriptions from doctors ---
+
+  async getPatientPrescriptions(patientId) {
+    if (!patientId) return [];
+    const response = await api.get(`/api/medical-records/patient/${patientId}`);
+    const all = response.data || [];
+    return all.filter((r) => r.recordType === "PRESCRIPTION");
+  },
+
   // --- MAR (Medication Administration Record) ---
 
   async getPatientMedications(patientId) {
