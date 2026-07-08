@@ -48,6 +48,8 @@ const calculateAge = (dateOfBirth) => {
 const formatPatient = (patient) => ({
   id: patient.id,
   displayId: `PMS-${String(patient.id).padStart(5, "0")}`,
+  firstName: patient.firstName || "",
+  lastName: patient.lastName || "",
   name: `${patient.firstName || ""} ${patient.lastName || ""}`.trim(),
   age: calculateAge(patient.dateOfBirth),
   gender: patient.gender || "N/A",
