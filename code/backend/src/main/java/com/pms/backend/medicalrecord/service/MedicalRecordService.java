@@ -104,6 +104,9 @@ public class MedicalRecordService {
         if (medicalRecordDto.getAttachmentUrl() != null) {
             medicalRecord.setAttachmentUrl(medicalRecordDto.getAttachmentUrl());
         }
+        if (medicalRecordDto.getIsFulfilled() != null) {
+            medicalRecord.setIsFulfilled(medicalRecordDto.getIsFulfilled());
+        }
 
         MedicalRecord updatedRecord = medicalRecordRepository.save(medicalRecord);
         return convertToDto(updatedRecord);
