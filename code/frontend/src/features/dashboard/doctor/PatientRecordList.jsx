@@ -89,6 +89,7 @@ export default function PatientRecordList({ records, loading }) {
               const isLab = (record.recordType || record.type || "").toLowerCase().includes("lab");
               const isPending = isLab && !record.testResult;
 
+
               return (
                 <div
                   key={record.id}
