@@ -20,8 +20,8 @@ const normalizeRecordTypeLabel = (recordType) => {
 };
 
 const mapUiTypeToApiType = (recordType) => {
-  const normalized = (recordType || "").toString().trim().toUpperCase();
-  if (normalized === "LAB RESULT") return "LAB_RESULT";
+  const normalized = (recordType || "").toString().trim().replace(/_/g, " ").toUpperCase();
+  if (normalized === "LAB RESULT" || normalized === "LAB TEST") return "LAB_RESULT";
   if (normalized === "CLINICAL NOTE") return "CLINICAL_NOTE";
   return normalized || "NOTE";
 };
