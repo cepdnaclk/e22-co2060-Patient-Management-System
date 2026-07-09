@@ -91,12 +91,17 @@ const formatRecord = (record) => ({
       })
     : "N/A",
   type: normalizeRecordTypeLabel(record.recordType),
+  recordType: record.recordType,
   title: (record.recordType === "NOTE" && record.description)
     ? record.description.split("\n\n")[0]
     : record.diagnosis || record.testName || record.treatment || "Nursing Note",
   description:
     record.description || record.treatment || record.testResult || "No details",
   doctor: record.doctorName || "System",
+  testName: record.testName || null,
+  testResult: record.testResult || null,
+  attachmentUrl: record.attachmentUrl || null,
+  isFulfilled: record.isFulfilled || false,
 });
 
 export const patientRecordService = {
@@ -131,6 +136,7 @@ export const patientRecordService = {
       diagnosis: apiType === "DIAGNOSIS" ? recordInput.title : null,
       treatment: apiType === "PROCEDURE" || isPrescription ? recordInput.title : null,
       testName: apiType === "LAB_RESULT" ? recordInput.title : null,
+      attachmentUrl: recordInput.attachmentUrl || null,
     };
 
     const { data } = await api.post("/api/medical-records", payload);

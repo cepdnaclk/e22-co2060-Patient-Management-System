@@ -78,6 +78,10 @@ public class SecurityConfig {
                     .requestMatchers("/api/users/**")
                         .hasAnyRole("ADMIN", "SUPER_ADMIN", "DOCTOR")
 
+                    // File downloads — publicly accessible so embedded images/PDFs render
+                    .requestMatchers("/api/files/**")
+                        .permitAll()
+
                     // All other endpoints require authentication
                     .anyRequest().authenticated()
                 )

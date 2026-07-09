@@ -4,6 +4,7 @@ import PatientRecordList from "./PatientRecordList.jsx";
 import MedicalRecordForm from "./MedicalRecordForm.jsx";
 import New_Prescription from "../DoctorDashboardComponents/Pharmacy.jsx";
 import { patientRecordService } from "../../../services/patientRecordService";
+import { fileUploadService } from "../../../services/fileUploadService";
 import { useAuth } from "../../auth/AuthContext";
 import { Card, CardContent } from "../../../components/ui/Card.jsx";
 import { Badge } from "../../../components/ui/Badge.jsx";
@@ -23,6 +24,8 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
   const [showLabModal, setShowLabModal] = useState(false);
   const [labTestName, setLabTestName] = useState("");
   const [labTestNotes, setLabTestNotes] = useState("");
+  const [labAttachment, setLabAttachment] = useState(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   // Auto-select a patient when navigated from the critical alerts panel
   useEffect(() => {
@@ -34,7 +37,14 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
   const handleOrderLabTest = async () => {
     if (!selectedPatient || !labTestName.trim()) return;
 
+    setUploadingFile(true);
     try {
+      let attachmentUrl = null;
+      if (labAttachment) {
+        const uploadResult = await fileUploadService.uploadFile(labAttachment);
+        attachmentUrl = uploadResult.fileName;
+      }
+
       const createdRecord = await patientRecordService.createMedicalRecord(
         selectedPatient.id,
         {
@@ -43,6 +53,7 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
           title: labTestName,
           description: labTestNotes || "No clinical notes provided",
           isFulfilled: false,
+          attachmentUrl,
         },
         doctorId
       );
@@ -51,9 +62,12 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
       setShowLabModal(false);
       setLabTestName("");
       setLabTestNotes("");
+      setLabAttachment(null);
       alert("Lab Test ordered successfully.");
     } catch (err) {
       alert("Failed to order Lab Test.");
+    } finally {
+      setUploadingFile(false);
     }
   };
 
@@ -313,6 +327,28 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
                     onChange={(e) => setLabTestNotes(e.target.value)}
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Attachment (PDF / Image)</label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 border-dashed rounded-xl cursor-pointer hover:bg-slate-100 transition-colors text-sm text-slate-500">
+                      <input
+                        type="file"
+                        accept=".pdf,.png,.jpg,.jpeg,.gif"
+                        className="hidden"
+                        onChange={(e) => setLabAttachment(e.target.files[0] || null)}
+                      />
+                      {labAttachment ? labAttachment.name : "Choose file..."}
+                    </label>
+                    {labAttachment && (
+                      <button
+                        onClick={() => setLabAttachment(null)}
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="p-6 border-t border-slate-100 flex gap-3">
                 <button
@@ -323,10 +359,12 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
                 </button>
                 <button
                   onClick={handleOrderLabTest}
-                  disabled={!labTestName.trim()}
-                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  disabled={!labTestName.trim() || uploadingFile}
+                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Submit Order
+                  {uploadingFile ? (
+                    <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Uploading...</>
+                  ) : "Submit Order"}
                 </button>
               </div>
             </div>
