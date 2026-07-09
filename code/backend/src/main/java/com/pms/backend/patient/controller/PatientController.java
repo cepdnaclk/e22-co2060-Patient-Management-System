@@ -33,21 +33,21 @@ public class PatientController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('MANAGEMENT') or hasRole('DOCTOR') or hasRole('PATIENT') or hasRole('RECEPTIONIST') or hasRole('BILLING_STAFF') or hasRole('NURSE')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('MANAGEMENT') or hasRole('DOCTOR') or hasRole('LAB_TECHNICIAN') or hasRole('PATIENT') or hasRole('RECEPTIONIST') or hasRole('BILLING_STAFF') or hasRole('NURSE')")
     public ResponseEntity<PatientDto> getPatientById(@PathVariable Long id) {
         PatientDto patient = patientService.getPatientById(id);
         return ResponseEntity.ok(patient);
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('MANAGEMENT') or hasRole('DOCTOR') or hasRole('PATIENT') or hasRole('RECEPTIONIST') or hasRole('BILLING_STAFF')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('MANAGEMENT') or hasRole('DOCTOR') or hasRole('LAB_TECHNICIAN') or hasRole('PATIENT') or hasRole('RECEPTIONIST') or hasRole('BILLING_STAFF')")
     public ResponseEntity<PatientDto> getPatientByUserId(@PathVariable Long userId) {
         PatientDto patient = patientService.getPatientByUserId(userId);
         return ResponseEntity.ok(patient);
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('MANAGEMENT') or hasRole('DOCTOR') or hasRole('RECEPTIONIST') or hasRole('BILLING_STAFF') or hasRole('NURSE')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ADMIN') or hasRole('MANAGEMENT') or hasRole('DOCTOR') or hasRole('LAB_TECHNICIAN') or hasRole('RECEPTIONIST') or hasRole('BILLING_STAFF') or hasRole('NURSE')")
     public ResponseEntity<List<PatientDto>> getAllPatients() {
         List<PatientDto> patients = patientService.getAllPatients();
         return ResponseEntity.ok(patients);
