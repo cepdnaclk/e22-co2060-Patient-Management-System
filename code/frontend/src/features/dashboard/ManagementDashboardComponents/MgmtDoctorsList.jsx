@@ -59,6 +59,8 @@ const MgmtDoctorsList = () => {
       consultationFee: doctor.consultationFee || "",
       bio: doctor.bio || "",
       isAvailable: doctor.isAvailable ?? true,
+      mobileNumber: doctor.mobileNumber || "",
+      licenseNumber: doctor.licenseNumber || "",
     });
     setError("");
   };
@@ -161,8 +163,12 @@ const MgmtDoctorsList = () => {
                 <tr className="bg-slate-50 border-b border-slate-100">
                   <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Doctor</th>
                   <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Specialization</th>
+                  <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Mobile</th>
+                  <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">License</th>
                   <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Hospital</th>
+                  <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Department</th>
                   <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Fee</th>
+                  <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Bio</th>
                   <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
                   <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                 </tr>
@@ -188,9 +194,15 @@ const MgmtDoctorsList = () => {
                         {doc.specialization || "—"}
                       </span>
                     </td>
+                    <td className="p-4 text-sm text-slate-600">{doc.mobileNumber || "—"}</td>
+                    <td className="p-4 text-sm text-slate-600 font-mono">{doc.licenseNumber || "—"}</td>
                     <td className="p-4 text-sm text-slate-600">{doc.hospital || "—"}</td>
+                    <td className="p-4 text-sm text-slate-600">{doc.department || "—"}</td>
                     <td className="p-4 text-sm font-medium text-slate-700">
                       {doc.consultationFee ? `Rs. ${doc.consultationFee.toLocaleString()}` : "—"}
+                    </td>
+                    <td className="p-4 text-sm text-slate-500 max-w-[200px] truncate" title={doc.bio || ""}>
+                      {doc.bio || "—"}
                     </td>
                     <td className="p-4">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -252,6 +264,14 @@ const MgmtDoctorsList = () => {
                   <option value="Dermatology">Dermatology</option>
                   <option value="Psychiatry">Psychiatry</option>
                 </select>
+              </div>
+              <div>
+                <label className={labelStyles}>Mobile Number</label>
+                <input type="tel" name="mobileNumber" value={editForm.mobileNumber} onChange={handleEditChange} className={inputStyles} />
+              </div>
+              <div>
+                <label className={labelStyles}>License Number</label>
+                <input type="text" name="licenseNumber" value={editForm.licenseNumber} onChange={handleEditChange} className={inputStyles} />
               </div>
               <div>
                 <label className={labelStyles}>Hospital</label>

@@ -1,8 +1,10 @@
 package com.pms.backend.patient.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -208,6 +210,27 @@ public class PatientService {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new AppException("Patient not found", HttpStatus.NOT_FOUND));
         patientRepository.delete(patient);
+    }
+
+    @Transactional
+    public PatientDto createPatientFromUser(User user) {
+        if (patientRepository.existsByUserId(user.getId())) {
+            throw new AppException("Patient profile already exists for this user", HttpStatus.CONFLICT);
+        }
+
+        Patient patient = Patient.builder()
+                .user(user)
+                .admissionStatus("Registered")
+                .build();
+
+        Patient saved = patientRepository.save(patient);
+
+        String generatedId = "P-" + String.format("%05d", saved.getId());
+        saved.setPatientId(generatedId);
+        saved.setUpdatedAt(LocalDateTime.now());
+        patientRepository.save(saved);
+
+        return convertToDto(saved);
     }
 
     private PatientDto convertToDto(Patient patient) {

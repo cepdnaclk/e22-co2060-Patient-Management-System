@@ -7,6 +7,8 @@ import com.pms.backend.auth.dto.SignupRequest;
 import com.pms.backend.auth.entity.RefreshToken;
 import com.pms.backend.auth.repository.RefreshTokenRepository;
 import com.pms.backend.common.exception.AppException;
+import com.pms.backend.patient.dto.PatientDto;
+import com.pms.backend.patient.service.PatientService;
 import com.pms.backend.role.entity.Role;
 import com.pms.backend.user.dto.UserDto;
 import com.pms.backend.user.entity.User;
@@ -14,10 +16,13 @@ import com.pms.backend.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +33,7 @@ public class AuthService {
     private final JwtUtil                 jwtUtil;
     private final RefreshTokenRepository  refreshTokenRepo;
     private final AuditLogService         auditLogService;
+    private final PatientService          patientService;
 
     @Value("${app.jwt.refresh-expiration-ms:604800000}")
     private long refreshExpirationMs;
@@ -56,7 +62,7 @@ public class AuthService {
                 .mobileNumber(req.getMobileNumber())
                 .passwordHash(passwordEncoder.encode(req.getPassword()))
                 .role(Role.PATIENT)
-                .isActive(true)
+                .isActive(false)
                 .build();
 
         User saved = userRepo.save(user);
@@ -97,6 +103,9 @@ public class AuthService {
         if (!user.isActive()) {
             auditLogService.logFailure(user.getId(), user.getEmail(),
                     "LOGIN_FAILED", "Account deactivated", ipAddress);
+            if (user.getRole() == Role.PATIENT) {
+                throw AppException.unauthorized("Account pending management approval. Please wait for activation.");
+            }
             throw AppException.unauthorized("Account deactivated. Contact admin.");
         }
 
@@ -157,6 +166,59 @@ public class AuthService {
                     "LOGOUT", "User", rt.getUser().getId().toString(),
                     "All tokens revoked", ipAddress);
         });
+    }
+
+    // ── PENDING SIGNUP APPROVAL ────────────────────────────────────────────
+
+    public List<UserDto> getPendingSignups() {
+        List<User> pending = userRepo.findByRoleAndIsActive(Role.PATIENT, false);
+        return pending.stream()
+                .map(UserDto::from)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public PatientDto approveSignup(Long userId, String ipAddress) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        if (user.getRole() != Role.PATIENT) {
+            throw new AppException("Only patient signups can be approved", HttpStatus.BAD_REQUEST);
+        }
+        if (user.isActive()) {
+            throw new AppException("Signup already approved", HttpStatus.CONFLICT);
+        }
+
+        user.setActive(true);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepo.save(user);
+
+        PatientDto patient = patientService.createPatientFromUser(user);
+
+        auditLogService.log(user.getId(), user.getEmail(),
+                "SIGNUP_APPROVED", "User", user.getId().toString(),
+                "Patient signup approved — patient profile created with ID " + patient.getPatientId(), ipAddress);
+
+        return patient;
+    }
+
+    @Transactional
+    public void rejectSignup(Long userId, String ipAddress) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        if (user.getRole() != Role.PATIENT) {
+            throw new AppException("Only patient signups can be rejected", HttpStatus.BAD_REQUEST);
+        }
+        if (user.isActive()) {
+            throw new AppException("Cannot reject an already approved signup", HttpStatus.CONFLICT);
+        }
+
+        userRepo.delete(user);
+
+        auditLogService.log(user.getId(), user.getEmail(),
+                "SIGNUP_REJECTED", "User", user.getId().toString(),
+                "Patient signup rejected and user deleted", ipAddress);
     }
 
     // ── PRIVATE HELPERS ─────────────────────────────────────────────────────
