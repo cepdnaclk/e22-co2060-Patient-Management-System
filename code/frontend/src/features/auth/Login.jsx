@@ -18,6 +18,8 @@ const ROLE_ROUTES = {
   PATIENT: "/dashboard/patient",
 };
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 const benefits = [
   { icon: ShieldCheck, text: "HIPAA-compliant & fully encrypted" },
   { icon: Users, text: "Role-based access for every team member" },
@@ -217,33 +219,35 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-            <span className="text-xs font-semibold text-slate-400 uppercase">or</span>
-            <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-          </div>
-
-          {/* Google Sign-In */}
-          <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={async (credentialResponse) => {
-                try {
-                  const data = await authService.googleLogin(credentialResponse.credential);
-                  saveLogin(data.accessToken, data.refreshToken, data.user);
-                  navigate(ROLE_ROUTES[data.user.role] || "/dashboard");
-                } catch (err) {
-                  setError(err.response?.data?.message || "Google sign-in failed.");
-                }
-              }}
-              onError={() => setError("Google sign-in failed. Please try again.")}
-              theme="outline"
-              size="large"
-              text="signin_with"
-              shape="rectangular"
-              width="300"
-            />
-          </div>
+          {/* Divider + Google Sign-In */}
+          {GOOGLE_CLIENT_ID && (
+            <>
+              <div className="my-6 flex items-center gap-3">
+                <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+                <span className="text-xs font-semibold text-slate-400 uppercase">or</span>
+                <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+              </div>
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    try {
+                      const data = await authService.googleLogin(credentialResponse.credential);
+                      saveLogin(data.accessToken, data.refreshToken, data.user);
+                      navigate(ROLE_ROUTES[data.user.role] || "/dashboard");
+                    } catch (err) {
+                      setError(err.response?.data?.message || "Google sign-in failed.");
+                    }
+                  }}
+                  onError={() => setError("Google sign-in failed. Please try again.")}
+                  theme="outline"
+                  size="large"
+                  text="signin_with"
+                  shape="rectangular"
+                  width="300"
+                />
+              </div>
+            </>
+          )}
 
           {/* Register link */}
           <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">

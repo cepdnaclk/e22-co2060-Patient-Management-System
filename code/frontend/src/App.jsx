@@ -19,7 +19,9 @@ import AmbientOrbs from "./components/AmbientOrbs.jsx";
 import NavbarLanding from "./components/NavbarLanding.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const AuthWrapper = GOOGLE_CLIENT_ID ? GoogleOAuthProvider : ({ children }) => <>{children}</>;
+const authWrapperProps = GOOGLE_CLIENT_ID ? { clientId: GOOGLE_CLIENT_ID } : {};
 
 function App() {
   const location = useLocation();
@@ -31,7 +33,7 @@ function App() {
   const isAuthPage = authPaths.includes(location.pathname);
 
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    <AuthWrapper {...authWrapperProps}>
       <div className="app-shell">
         <AmbientOrbs />
         <div className="app-surface">
@@ -119,7 +121,7 @@ function App() {
           </Routes>
         </div>
       </div>
-    </GoogleOAuthProvider>
+    </AuthWrapper>
   );
 }
 
