@@ -1,6 +1,7 @@
 package com.pms.backend.auth.controller;
 
 import com.pms.backend.auth.dto.AuthResponse;
+import com.pms.backend.auth.dto.GoogleAuthRequest;
 import com.pms.backend.auth.dto.LoginRequest;
 import com.pms.backend.auth.dto.SignupRequest;
 import com.pms.backend.auth.service.AuthService;
@@ -37,6 +38,14 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest httpRequest) {
         AuthResponse response = authService.login(request, getClientIp(httpRequest));
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> googleLogin(
+            @Valid @RequestBody GoogleAuthRequest request,
+            HttpServletRequest httpRequest) {
+        AuthResponse response = authService.googleLogin(request, getClientIp(httpRequest));
         return ResponseEntity.ok(response);
     }
 

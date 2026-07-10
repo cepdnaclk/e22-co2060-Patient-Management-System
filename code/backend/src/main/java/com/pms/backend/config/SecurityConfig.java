@@ -1,7 +1,6 @@
 package com.pms.backend.config;
 
 import com.pms.backend.auth.service.JwtAuthFilter;
-import com.pms.backend.auth.service.OAuth2LoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +29,6 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Value("${FRONTEND_URL:https://e22-2yp-co2060-pms-frontend.vercel.app}")
     private String frontendUrl;
@@ -43,7 +41,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsSource()))
 
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> 
@@ -70,6 +68,7 @@ public class SecurityConfig {
                     .requestMatchers(
                         "/api/auth/signup",
                         "/api/auth/login",
+                        "/api/auth/google",
                         "/api/auth/refresh"
                     ).permitAll()
 
@@ -80,20 +79,12 @@ public class SecurityConfig {
                     .requestMatchers("/api/users/**")
                         .hasAnyRole("ADMIN", "SUPER_ADMIN", "DOCTOR")
 
-                    // OAuth2 login endpoints
-                    .requestMatchers("/login/oauth2/**", "/oauth2/**")
-                        .permitAll()
-
                     // File downloads — publicly accessible so embedded images/PDFs render
                     .requestMatchers("/api/files/**")
                         .permitAll()
 
                     // All other endpoints require authentication
                     .anyRequest().authenticated()
-                )
-
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler(oAuth2LoginSuccessHandler)
                 )
 
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -119,7 +110,6 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://localhost:5174",
                 "http://localhost:3000",
-                "http://localhost:8082",
                 frontendUrl
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
