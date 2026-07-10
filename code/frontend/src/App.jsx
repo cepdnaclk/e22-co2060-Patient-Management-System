@@ -1,5 +1,6 @@
 import Signup from "./features/auth/Signup.jsx";
 import Login from "./features/auth/Login.jsx";
+import OAuth2Callback from "./features/auth/OAuth2Callback.jsx";
 import "./App.css";
 import Home from "./pages/Home.jsx";
 import Aboutus from "./pages/Aboutus.jsx";
@@ -24,7 +25,7 @@ function App() {
   // Define the paths where you want the Landing Navbar
   const landingPaths = ["/", "/signup", "/login", "/about", "/contact", "/faq"];
   const isLandingPage = landingPaths.includes(location.pathname);
-  const authPaths = ["/login", "/signup"];
+  const authPaths = ["/login", "/signup", "/oauth2/callback"];
   const isAuthPage = authPaths.includes(location.pathname);
 
   return (
@@ -41,6 +42,7 @@ function App() {
           <Route path="/faq" element={<FAQ />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/oauth2/callback" element={<OAuth2Callback />} />
 
           {/* Dashboards and Protected Routes */}
           <Route
