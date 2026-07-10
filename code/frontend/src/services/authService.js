@@ -21,6 +21,11 @@ export const authService = {
     return data; // { accessToken, refreshToken, user }
   },
 
+  googleLogin: async (idToken) => {
+    const { data } = await api.post("/api/auth/google", { idToken });
+    return data; // { accessToken, refreshToken, user }
+  },
+
   logout: async () => {
     const refreshToken = localStorage.getItem("pms_refresh_token");
     if (refreshToken) {

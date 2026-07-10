@@ -17,6 +17,11 @@ import LabTechnicianDashboard from "./features/dashboard/LabTechnicianDashboard.
 import ManagementDashboard from "./features/dashboard/ManagementDashboard.jsx";
 import AmbientOrbs from "./components/AmbientOrbs.jsx";
 import NavbarLanding from "./components/NavbarLanding.jsx";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const AuthWrapper = GOOGLE_CLIENT_ID ? GoogleOAuthProvider : ({ children }) => <>{children}</>;
+const authWrapperProps = GOOGLE_CLIENT_ID ? { clientId: GOOGLE_CLIENT_ID } : {};
 
 function App() {
   const location = useLocation();
@@ -28,93 +33,95 @@ function App() {
   const isAuthPage = authPaths.includes(location.pathname);
 
   return (
-    <div className="app-shell">
-      <AmbientOrbs />
-      <div className="app-surface">
-        {/* Conditional Navbar Rendering */}
-        {!isAuthPage && (isLandingPage ? <NavbarLanding /> : <Navbar />)}
+    <AuthWrapper {...authWrapperProps}>
+      <div className="app-shell">
+        <AmbientOrbs />
+        <div className="app-surface">
+          {/* Conditional Navbar Rendering */}
+          {!isAuthPage && (isLandingPage ? <NavbarLanding /> : <Navbar />)}
 
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<Aboutus />} />
-          <Route path="/contact" element={<ContactUs />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<Aboutus />} />
+            <Route path="/contact" element={<ContactUs />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
 
-          {/* Dashboards and Protected Routes */}
-          <Route
-            path="/dashboard/doctor"
-            element={
-              <ProtectedRoute
-                allowedRoles={["DOCTOR", "NURSE", "ADMIN", "SUPER_ADMIN"]}
-              >
-                <DoctorDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/patient"
-            element={
-              <ProtectedRoute allowedRoles={["PATIENT"]}>
-                <PatientDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/admin"
-            element={
-              <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "MANAGEMENT"]}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/management"
-            element={
-              <ProtectedRoute allowedRoles={["MANAGEMENT"]}>
-                <ManagementDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/receptionist"
-            element={
-              <ProtectedRoute allowedRoles={["RECEPTIONIST", "ADMIN", "SUPER_ADMIN"]}>
-                <ReceptionistDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/pharmacist"
-            element={
-              <ProtectedRoute allowedRoles={["PHARMACIST", "ADMIN", "SUPER_ADMIN"]}>
-                <PharmacistDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/labtechnician"
-            element={
-              <ProtectedRoute allowedRoles={["LAB_TECHNICIAN", "ADMIN", "SUPER_ADMIN"]}>
-                <LabTechnicianDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/unauthorized"
-            element={
-              <div className="text-center p-16">
-                <h1 className="text-2xl font-bold text-red-600">
-                  Access Denied
-                </h1>
-                <p>You do not have permission to view this page.</p>
-              </div>
-            }
-          />
-        </Routes>
+            {/* Dashboards and Protected Routes */}
+            <Route
+              path="/dashboard/doctor"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["DOCTOR", "NURSE", "ADMIN", "SUPER_ADMIN"]}
+                >
+                  <DoctorDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/patient"
+              element={
+                <ProtectedRoute allowedRoles={["PATIENT"]}>
+                  <PatientDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/admin"
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN", "MANAGEMENT"]}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/management"
+              element={
+                <ProtectedRoute allowedRoles={["MANAGEMENT"]}>
+                  <ManagementDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/receptionist"
+              element={
+                <ProtectedRoute allowedRoles={["RECEPTIONIST", "ADMIN", "SUPER_ADMIN"]}>
+                  <ReceptionistDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/pharmacist"
+              element={
+                <ProtectedRoute allowedRoles={["PHARMACIST", "ADMIN", "SUPER_ADMIN"]}>
+                  <PharmacistDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/labtechnician"
+              element={
+                <ProtectedRoute allowedRoles={["LAB_TECHNICIAN", "ADMIN", "SUPER_ADMIN"]}>
+                  <LabTechnicianDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/unauthorized"
+              element={
+                <div className="text-center p-16">
+                  <h1 className="text-2xl font-bold text-red-600">
+                    Access Denied
+                  </h1>
+                  <p>You do not have permission to view this page.</p>
+                </div>
+              }
+            />
+          </Routes>
+        </div>
       </div>
-    </div>
+    </AuthWrapper>
   );
 }
 
