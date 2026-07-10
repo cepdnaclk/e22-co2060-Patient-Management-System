@@ -16,6 +16,7 @@ import com.pms.backend.user.entity.User;
 import com.pms.backend.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +34,7 @@ import com.google.api.client.json.gson.GsonFactory;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository          userRepo;
@@ -90,6 +92,11 @@ public class AuthService {
     // ── GOOGLE SIGN-IN ────────────────────────────────────────────────────────
     @Transactional
     public AuthResponse googleLogin(GoogleAuthRequest req, String ipAddress) {
+        if (googleClientId == null || googleClientId.isBlank()) {
+            log.warn("Google sign-in attempted but GOOGLE_CLIENT_ID is not configured");
+            throw AppException.unauthorized("Google sign-in is not configured. Contact administrator.");
+        }
+
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
                 new NetHttpTransport(), GsonFactory.getDefaultInstance())
                 .setAudience(Collections.singletonList(googleClientId))
@@ -99,11 +106,12 @@ public class AuthService {
         try {
             idToken = verifier.verify(req.getIdToken());
         } catch (Exception e) {
-            throw AppException.unauthorized("Invalid Google token");
+            log.error("Google token verification error", e);
+            throw AppException.unauthorized("Google sign-in temporarily unavailable.");
         }
 
         if (idToken == null) {
-            throw AppException.unauthorized("Invalid Google token");
+            throw AppException.unauthorized("Invalid Google token.");
         }
 
         GoogleIdToken.Payload payload = idToken.getPayload();
