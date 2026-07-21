@@ -7,6 +7,7 @@ import AssignedPatientsList from "./NurseDashboardComponents/AssignedPatientsLis
 import PatientVitalsCard from "./NurseDashboardComponents/PatientVitalsCard.jsx";
 import MARCard from "./NurseDashboardComponents/MARCard.jsx";
 import ClinicalOrdersCard from "./NurseDashboardComponents/ClinicalOrdersCard.jsx";
+import { patientRecordService } from "../../services/patientRecordService";
 
 const ACCENT = {
   bg: "bg-teal-500",
@@ -17,6 +18,16 @@ const ACCENT = {
   border: "border-teal-500/30",
 };
 
+const calculateAge = (dateOfBirth) => {
+  if (!dateOfBirth) return "N/A";
+  const birthDate = new Date(dateOfBirth);
+  if (isNaN(birthDate.getTime())) return "N/A";
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  if (today.getMonth() < birthDate.getMonth() || (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) age -= 1;
+  return age;
+};
+
 export default function NurseDashboard() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -24,18 +35,35 @@ export default function NurseDashboard() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedPatient, setSelectedPatient] = useState(null);
-
-  // Mock data for UI demonstration
-  const mockPatients = [
-    { id: 1, name: "John Doe", room: "Ward A - Bed 04", age: 45, diagnosis: "Pneumonia", status: "Needs Attention", allergies: "Penicillin" },
-    { id: 2, name: "Jane Smith", room: "Ward A - Bed 05", age: 62, diagnosis: "Post-op Hip Replacement", status: "Stable", allergies: "None" },
-    { id: 3, name: "Robert Johnson", room: "ICU - Bed 01", age: 78, diagnosis: "Myocardial Infarction", status: "Critical", allergies: "Aspirin" },
-  ];
+  const [patientsList, setPatientsList] = useState([]);
+  const [listLoading, setListLoading] = useState(true);
 
   useEffect(() => {
-    if (mockPatients.length > 0 && !selectedPatient) {
-      setSelectedPatient(mockPatients[0]);
+    async function loadPatients() {
+      try {
+        const pts = await patientRecordService.getAllPatients();
+        const mapped = pts.map((p) => ({
+          id: p.id,
+          name: p.name,
+          firstName: p.name.split(" ")[0] || "",
+          lastName: p.name.split(" ").slice(1).join(" ") || "",
+          room: p.admissionStatus || "Registered",
+          age: p.age,
+          diagnosis: "N/A",
+          status: p.criticalStatus ? "Critical" : "Stable",
+          allergies: p.allergies || "None",
+        }));
+        setPatientsList(mapped);
+        if (mapped.length > 0 && !selectedPatient) {
+          setSelectedPatient(mapped[0]);
+        }
+      } catch (err) {
+        console.error("Failed to load patients:", err);
+      } finally {
+        setListLoading(false);
+      }
     }
+    loadPatients();
   }, []);
 
   const handleLogout = () => {
@@ -98,8 +126,12 @@ export default function NurseDashboard() {
               <Bell className="w-5 h-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
-            <button onClick={toggleTheme} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
-              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all border border-red-100 ml-2 shadow-sm"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sign Out</span>
             </button>
             <div className="h-6 w-px bg-slate-200 mx-1"></div>
             <div className="flex items-center gap-2">

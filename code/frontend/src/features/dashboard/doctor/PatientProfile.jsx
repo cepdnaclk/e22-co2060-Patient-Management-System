@@ -4,10 +4,13 @@ import PatientRecordList from "./PatientRecordList.jsx";
 import MedicalRecordForm from "./MedicalRecordForm.jsx";
 import New_Prescription from "../DoctorDashboardComponents/Pharmacy.jsx";
 import { patientRecordService } from "../../../services/patientRecordService";
+import { fileUploadService } from "../../../services/fileUploadService";
 import { useAuth } from "../../auth/AuthContext";
 import { Card, CardContent } from "../../../components/ui/Card.jsx";
 import { Badge } from "../../../components/ui/Badge.jsx";
-import { Activity, Droplet, User, Ruler, Weight, AlertTriangle, HeartPulse, Thermometer, Wind, Gauge, Save, Loader2 } from "lucide-react";
+import { Activity, Droplet, Ruler, Weight, AlertTriangle } from "lucide-react";
+import PatientVitalsCard from "../NurseDashboardComponents/PatientVitalsCard.jsx";
+import MARCard from "../NurseDashboardComponents/MARCard.jsx";
 
 export default function PatientProfile({ onUpdate, initialPatient }) {
   const { user, isNurse } = useAuth();
@@ -21,8 +24,8 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
   const [showLabModal, setShowLabModal] = useState(false);
   const [labTestName, setLabTestName] = useState("");
   const [labTestNotes, setLabTestNotes] = useState("");
-  const [vitals, setVitals] = useState({ bloodPressure: "", heartRate: "", temperature: "", oxygenSaturation: "", respiratoryRate: "" });
-  const [savingVitals, setSavingVitals] = useState(false);
+  const [labAttachment, setLabAttachment] = useState(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   // Auto-select a patient when navigated from the critical alerts panel
   useEffect(() => {
@@ -34,7 +37,14 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
   const handleOrderLabTest = async () => {
     if (!selectedPatient || !labTestName.trim()) return;
 
+    setUploadingFile(true);
     try {
+      let attachmentUrl = null;
+      if (labAttachment) {
+        const uploadResult = await fileUploadService.uploadFile(labAttachment);
+        attachmentUrl = uploadResult.fileName;
+      }
+
       const createdRecord = await patientRecordService.createMedicalRecord(
         selectedPatient.id,
         {
@@ -43,6 +53,7 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
           title: labTestName,
           description: labTestNotes || "No clinical notes provided",
           isFulfilled: false,
+          attachmentUrl,
         },
         doctorId
       );
@@ -51,30 +62,12 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
       setShowLabModal(false);
       setLabTestName("");
       setLabTestNotes("");
+      setLabAttachment(null);
       alert("Lab Test ordered successfully.");
     } catch (err) {
       alert("Failed to order Lab Test.");
-    }
-  };
-
-  const handleSaveVitals = async () => {
-    if (!selectedPatient) return;
-    setSavingVitals(true);
-    try {
-      const payload = {};
-      if (vitals.bloodPressure) payload.bloodPressure = vitals.bloodPressure;
-      if (vitals.heartRate) payload.heartRate = Number(vitals.heartRate);
-      if (vitals.temperature) payload.temperature = Number(vitals.temperature);
-      if (vitals.oxygenSaturation) payload.oxygenSaturation = Number(vitals.oxygenSaturation);
-      if (vitals.respiratoryRate) payload.respiratoryRate = Number(vitals.respiratoryRate);
-      const updatedPatient = await patientRecordService.updatePatientVitals(selectedPatient.id, payload);
-      setSelectedPatient(updatedPatient);
-      setVitals({ bloodPressure: "", heartRate: "", temperature: "", oxygenSaturation: "", respiratoryRate: "" });
-      alert("Vitals updated successfully.");
-    } catch (err) {
-      alert("Failed to update vitals.");
     } finally {
-      setSavingVitals(false);
+      setUploadingFile(false);
     }
   };
 
@@ -273,56 +266,6 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
                   doctorName={doctorName}
                   isNurse={isNurse}
                 />
-                {isNurse && (
-                  <Card className="border-none shadow-md shadow-slate-200/50">
-                    <CardContent className="p-6">
-                      <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <HeartPulse className="w-5 h-5 text-red-500" /> Record Vitals
-                      </h3>
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block text-xs font-medium text-slate-600 mb-1">Blood Pressure</label>
-                          <input type="text" placeholder="e.g. 120/80" value={vitals.bloodPressure}
-                            onChange={(e) => setVitals({ ...vitals, bloodPressure: e.target.value })}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-medium text-slate-600 mb-1">Heart Rate (bpm)</label>
-                            <input type="number" placeholder="72" value={vitals.heartRate}
-                              onChange={(e) => setVitals({ ...vitals, heartRate: e.target.value })}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none" />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-slate-600 mb-1">Temp (°C)</label>
-                            <input type="number" step="0.1" placeholder="36.6" value={vitals.temperature}
-                              onChange={(e) => setVitals({ ...vitals, temperature: e.target.value })}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none" />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-xs font-medium text-slate-600 mb-1">O₂ Sat (%)</label>
-                            <input type="number" step="0.1" placeholder="98" value={vitals.oxygenSaturation}
-                              onChange={(e) => setVitals({ ...vitals, oxygenSaturation: e.target.value })}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none" />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-slate-600 mb-1">Resp Rate (breaths/min)</label>
-                            <input type="number" placeholder="16" value={vitals.respiratoryRate}
-                              onChange={(e) => setVitals({ ...vitals, respiratoryRate: e.target.value })}
-                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none" />
-                          </div>
-                        </div>
-                        <button onClick={handleSaveVitals} disabled={savingVitals}
-                          className="w-full bg-gradient-to-r from-red-500 to-rose-600 text-white py-2.5 rounded-xl font-medium hover:from-red-600 hover:to-rose-700 transition-all flex items-center justify-center gap-2 disabled:opacity-60">
-                          {savingVitals ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                          {savingVitals ? "Saving..." : "Save Vitals"}
-                        </button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
                 {!isNurse && (
                   <Card className="border-none shadow-md shadow-slate-200/50">
                     <CardContent className="p-6">
@@ -347,6 +290,11 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
                   </Card>
                 )}
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <PatientVitalsCard patient={selectedPatient} />
+              <MARCard patient={selectedPatient} />
             </div>
           </div>
         )}
@@ -379,6 +327,28 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
                     onChange={(e) => setLabTestNotes(e.target.value)}
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Attachment (PDF / Image)</label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 border-dashed rounded-xl cursor-pointer hover:bg-slate-100 transition-colors text-sm text-slate-500">
+                      <input
+                        type="file"
+                        accept=".pdf,.png,.jpg,.jpeg,.gif"
+                        className="hidden"
+                        onChange={(e) => setLabAttachment(e.target.files[0] || null)}
+                      />
+                      {labAttachment ? labAttachment.name : "Choose file..."}
+                    </label>
+                    {labAttachment && (
+                      <button
+                        onClick={() => setLabAttachment(null)}
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="p-6 border-t border-slate-100 flex gap-3">
                 <button
@@ -389,10 +359,12 @@ export default function PatientProfile({ onUpdate, initialPatient }) {
                 </button>
                 <button
                   onClick={handleOrderLabTest}
-                  disabled={!labTestName.trim()}
-                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  disabled={!labTestName.trim() || uploadingFile}
+                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Submit Order
+                  {uploadingFile ? (
+                    <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Uploading...</>
+                  ) : "Submit Order"}
                 </button>
               </div>
             </div>

@@ -20,8 +20,8 @@ const normalizeRecordTypeLabel = (recordType) => {
 };
 
 const mapUiTypeToApiType = (recordType) => {
-  const normalized = (recordType || "").toString().trim().toUpperCase();
-  if (normalized === "LAB RESULT") return "LAB_RESULT";
+  const normalized = (recordType || "").toString().trim().replace(/_/g, " ").toUpperCase();
+  if (normalized === "LAB RESULT" || normalized === "LAB TEST") return "LAB_RESULT";
   if (normalized === "CLINICAL NOTE") return "CLINICAL_NOTE";
   return normalized || "NOTE";
 };
@@ -48,6 +48,8 @@ const calculateAge = (dateOfBirth) => {
 const formatPatient = (patient) => ({
   id: patient.id,
   displayId: `PMS-${String(patient.id).padStart(5, "0")}`,
+  firstName: patient.firstName || "",
+  lastName: patient.lastName || "",
   name: `${patient.firstName || ""} ${patient.lastName || ""}`.trim(),
   age: calculateAge(patient.dateOfBirth),
   gender: patient.gender || "N/A",
@@ -89,12 +91,17 @@ const formatRecord = (record) => ({
       })
     : "N/A",
   type: normalizeRecordTypeLabel(record.recordType),
+  recordType: record.recordType,
   title: (record.recordType === "NOTE" && record.description)
     ? record.description.split("\n\n")[0]
     : record.diagnosis || record.testName || record.treatment || "Nursing Note",
   description:
     record.description || record.treatment || record.testResult || "No details",
   doctor: record.doctorName || "System",
+  testName: record.testName || null,
+  testResult: record.testResult || null,
+  attachmentUrl: record.attachmentUrl || null,
+  isFulfilled: record.isFulfilled || false,
 });
 
 export const patientRecordService = {
@@ -129,6 +136,7 @@ export const patientRecordService = {
       diagnosis: apiType === "DIAGNOSIS" ? recordInput.title : null,
       treatment: apiType === "PROCEDURE" || isPrescription ? recordInput.title : null,
       testName: apiType === "LAB_RESULT" ? recordInput.title : null,
+      attachmentUrl: recordInput.attachmentUrl || null,
     };
 
     const { data } = await api.post("/api/medical-records", payload);

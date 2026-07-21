@@ -4,6 +4,7 @@ import { useAuth } from "./AuthContext.jsx";
 import { authService } from "../../services/authService";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Activity, ShieldCheck, Users, Clock } from "lucide-react";
 
+
 const ROLE_ROUTES = {
   SUPER_ADMIN: "/dashboard/admin",
   ADMIN: "/dashboard/admin",
@@ -16,6 +17,8 @@ const ROLE_ROUTES = {
   LAB_TECHNICIAN: "/dashboard/labtechnician",
   PATIENT: "/dashboard/patient",
 };
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const benefits = [
   { icon: ShieldCheck, text: "HIPAA-compliant & fully encrypted" },
@@ -215,6 +218,8 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+
 
           {/* Register link */}
           <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">

@@ -8,9 +8,11 @@ import { Button } from "../../components/ui/Button.jsx";
 import {
   LayoutDashboard, UserCircle, FileText, Pill,
   Menu, X, Activity, Droplet, Ruler, Weight, Calendar, Clock, ChevronRight,
-  CreditCard, CheckCircle2, AlertCircle, Receipt, Sun, Moon, LogOut
+  CreditCard, CheckCircle2, AlertCircle, Receipt, Sun, Moon, LogOut,
+  FileIcon, FileImage, FlaskConical, Hourglass
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { fileUploadService } from "../../services/fileUploadService";
 
 const sectionLabels = {
   dashboard: "Overview",
@@ -326,21 +328,38 @@ const PatientDashboard = () => {
                 ) : latestRecords.length > 0 ? (
                   latestRecords.map((record) => (
                     <div key={record.id} className="p-5 hover:bg-slate-50 transition-colors flex gap-4">
-                      <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                        <FileText className="w-5 h-5 text-slate-500" />
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${record.recordType?.includes("LAB") ? "bg-purple-100" : "bg-slate-100"}`}>
+                        {record.recordType?.includes("LAB") ? <FlaskConical className="w-5 h-5 text-purple-600" /> : <FileText className="w-5 h-5 text-slate-500" />}
                       </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-semibold text-slate-800">{record.title}</h4>
-                          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">{record.date}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start gap-2">
+                          <h4 className="font-semibold text-slate-800 truncate">{record.title}</h4>
+                          <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full shrink-0">{record.date}</span>
                         </div>
                         <p className="text-sm text-slate-600 mt-1 line-clamp-2">{record.description}</p>
-                        <div className="flex items-center gap-3 mt-3">
-                          <Badge variant="blue" className="bg-blue-50 text-blue-700">{record.type}</Badge>
+                        <div className="flex items-center gap-3 mt-3 flex-wrap">
+                          {record.recordType?.includes("LAB") ? (
+                            <>
+                              <Badge variant={record.testResult ? "success" : "warning"}>
+                                {record.testResult ? "Completed" : "Pending"}
+                              </Badge>
+                              {record.attachmentUrl && (
+                                <a href={fileUploadService.getFileUrl(record.attachmentUrl)} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1">
+                                  {fileUploadService.isImage(record.attachmentUrl) ? <FileImage className="w-3 h-3" /> : <FileIcon className="w-3 h-3" />}
+                                  Attachment
+                                </a>
+                              )}
+                            </>
+                          ) : (
+                            <Badge variant={record.type?.toUpperCase() === "PRESCRIPTION" ? "success" : "blue"}>{record.type}</Badge>
+                          )}
                           <span className="text-xs text-slate-500 font-medium flex items-center gap-1">
                             <UserCircle className="w-3.5 h-3.5" /> {record.doctorName || "Doctor"}
                           </span>
                         </div>
+                        {record.recordType?.includes("LAB") && record.testResult && (
+                          <p className="text-xs text-purple-700 font-medium mt-1.5 bg-purple-50 inline-block px-2 py-0.5 rounded">Result: {record.testResult}</p>
+                        )}
                       </div>
                     </div>
                   ))
@@ -562,12 +581,24 @@ const PatientDashboard = () => {
                       </td>
                       <td className="py-5 px-6">
                         <div className="flex flex-col items-start gap-2">
-                          <Badge variant={record.type.toUpperCase() === "PRESCRIPTION" ? "success" : "blue"}>{record.type}</Badge>
-                          {record.type.toUpperCase() === "PRESCRIPTION" && record.isFulfilled !== undefined && (
-                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${record.isFulfilled ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-                              }`}>
-                              {record.isFulfilled ? "Dispensed" : "Pending Pharmacy"}
-                            </span>
+                          {record.recordType?.includes("LAB") ? (
+                            <>
+                              <Badge variant="blue">{record.type}</Badge>
+                              <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${record.testResult ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                                }`}>
+                                {record.testResult ? "Completed" : "Pending"}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <Badge variant={record.type?.toUpperCase() === "PRESCRIPTION" ? "success" : "blue"}>{record.type}</Badge>
+                              {record.type?.toUpperCase() === "PRESCRIPTION" && record.isFulfilled !== undefined && (
+                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${record.isFulfilled ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+                                  }`}>
+                                  {record.isFulfilled ? "Dispensed" : "Pending Pharmacy"}
+                                </span>
+                              )}
+                            </>
                           )}
                         </div>
                       </td>
@@ -582,6 +613,28 @@ const PatientDashboard = () => {
                       <td className="py-5 px-6">
                         <h4 className="text-sm font-bold text-slate-900 mb-1">{record.title}</h4>
                         <p className="text-sm text-slate-600 whitespace-pre-line">{record.description}</p>
+
+                        {record.recordType?.includes("LAB") && record.testResult && (
+                          <div className="mt-2 bg-purple-50 border border-purple-100 rounded-lg p-2.5">
+                            <p className="text-[10px] font-semibold text-purple-700 uppercase tracking-wider">Result</p>
+                            <p className="text-sm font-medium text-slate-800 mt-0.5">{record.testResult}</p>
+                          </div>
+                        )}
+
+                        {record.attachmentUrl && (
+                          <div className="mt-2">
+                            {fileUploadService.isImage(record.attachmentUrl) ? (
+                              <a href={fileUploadService.getFileUrl(record.attachmentUrl)} target="_blank" rel="noopener noreferrer" className="inline-block">
+                                <img src={fileUploadService.getFileUrl(record.attachmentUrl)} alt="Lab attachment" className="max-h-36 rounded-lg border border-slate-200 hover:shadow-md transition-shadow" />
+                              </a>
+                            ) : (
+                              <a href={fileUploadService.getFileUrl(record.attachmentUrl)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors">
+                                <FileIcon className="w-3.5 h-3.5" />
+                                View PDF
+                              </a>
+                            )}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -881,13 +934,6 @@ const PatientDashboard = () => {
           </div>
           {/* Right */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-            </button>
             <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
               <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">
                 {user?.email?.charAt(0).toUpperCase()}

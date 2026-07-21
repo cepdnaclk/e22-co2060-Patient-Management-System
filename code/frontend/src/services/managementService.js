@@ -26,6 +26,12 @@ export const managementService = {
     return data;
   },
 
+  // ── Patient Management ──
+  fetchPatients: async () => {
+    const { data } = await api.get("/api/patients");
+    return data;
+  },
+
   // ── Doctor Management ──
   fetchDoctors: async () => {
     const { data } = await api.get("/api/doctors");

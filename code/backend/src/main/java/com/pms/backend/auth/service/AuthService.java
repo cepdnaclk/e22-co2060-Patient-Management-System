@@ -2,32 +2,47 @@ package com.pms.backend.auth.service;
 
 import com.pms.backend.audit.service.AuditLogService;
 import com.pms.backend.auth.dto.AuthResponse;
+import com.pms.backend.auth.dto.GoogleAuthRequest;
 import com.pms.backend.auth.dto.LoginRequest;
 import com.pms.backend.auth.dto.SignupRequest;
 import com.pms.backend.auth.entity.RefreshToken;
 import com.pms.backend.auth.repository.RefreshTokenRepository;
 import com.pms.backend.common.exception.AppException;
+import com.pms.backend.patient.dto.PatientDto;
+import com.pms.backend.patient.service.PatientService;
 import com.pms.backend.role.entity.Role;
 import com.pms.backend.user.dto.UserDto;
 import com.pms.backend.user.entity.User;
 import com.pms.backend.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
-    private final UserRepository userRepo;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
-    private final RefreshTokenRepository refreshTokenRepo;
-    private final AuditLogService auditLogService;
+    private final UserRepository          userRepo;
+    private final PasswordEncoder         passwordEncoder;
+    private final JwtUtil                 jwtUtil;
+    private final RefreshTokenRepository  refreshTokenRepo;
+    private final AuditLogService         auditLogService;
+    private final PatientService          patientService;
 
     @Value("${app.jwt.refresh-expiration-ms:604800000}")
     private long refreshExpirationMs;
@@ -37,6 +52,9 @@ public class AuthService {
 
     @Value("${app.security.lockout-duration-minutes:15}")
     private int lockoutDurationMinutes;
+
+    @Value("${app.google.client-id}")
+    private String googleClientId;
 
     // ── SIGNUP ──────────────────────────────────────────────────────────────
     @Transactional
@@ -56,7 +74,7 @@ public class AuthService {
                 .mobileNumber(req.getMobileNumber())
                 .passwordHash(passwordEncoder.encode(req.getPassword()))
                 .role(Role.PATIENT)
-                .isActive(true)
+                .isActive(false)
                 .build();
 
         User saved = userRepo.save(user);
@@ -69,6 +87,64 @@ public class AuthService {
                 "New patient account created", ipAddress);
 
         return new AuthResponse(accessToken, refreshToken, UserDto.from(saved));
+    }
+
+    // ── GOOGLE SIGN-IN ────────────────────────────────────────────────────────
+    @Transactional
+    public AuthResponse googleLogin(GoogleAuthRequest req, String ipAddress) {
+        if (googleClientId == null || googleClientId.isBlank()) {
+            log.warn("Google sign-in attempted but GOOGLE_CLIENT_ID is not configured");
+            throw AppException.unauthorized("Google sign-in is not configured. Contact administrator.");
+        }
+
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                new NetHttpTransport(), GsonFactory.getDefaultInstance())
+                .setAudience(Collections.singletonList(googleClientId))
+                .build();
+
+        GoogleIdToken idToken;
+        try {
+            idToken = verifier.verify(req.getIdToken());
+        } catch (Exception e) {
+            log.error("Google token verification error", e);
+            throw AppException.unauthorized("Google sign-in temporarily unavailable.");
+        }
+
+        if (idToken == null) {
+            throw AppException.unauthorized("Invalid Google token.");
+        }
+
+        GoogleIdToken.Payload payload = idToken.getPayload();
+        String email = payload.getEmail();
+        String givenName = (String) payload.get("given_name");
+        String familyName = (String) payload.get("family_name");
+        if (givenName == null) givenName = payload.getEmail().split("@")[0];
+        if (familyName == null) familyName = "";
+        final String firstName = givenName;
+        final String lastName = familyName;
+        final String googleSub = payload.getSubject();
+
+        User user = userRepo.findByEmail(email).orElseGet(() -> {
+            User newUser = User.builder()
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .email(email)
+                    .mobileNumber("google-" + googleSub.substring(0, 8))
+                    .passwordHash("")  // No password for Google users
+                    .role(Role.PATIENT)
+                    .isActive(true)
+                    .build();
+            return userRepo.save(newUser);
+        });
+
+        String accessToken = jwtUtil.generateToken(user);
+        String refreshToken = createRefreshToken(user);
+
+        auditLogService.log(user.getId(), user.getEmail(),
+                "GOOGLE_LOGIN", "User", user.getId().toString(),
+                "Logged in via Google", ipAddress);
+
+        return new AuthResponse(accessToken, refreshToken, UserDto.from(user));
     }
 
     // ── LOGIN ───────────────────────────────────────────────────────────────
@@ -97,6 +173,9 @@ public class AuthService {
         if (!user.isActive()) {
             auditLogService.logFailure(user.getId(), user.getEmail(),
                     "LOGIN_FAILED", "Account deactivated", ipAddress);
+            if (user.getRole() == Role.PATIENT) {
+                throw AppException.unauthorized("Account pending management approval. Please wait for activation.");
+            }
             throw AppException.unauthorized("Account deactivated. Contact admin.");
         }
 
@@ -157,6 +236,59 @@ public class AuthService {
                     "LOGOUT", "User", rt.getUser().getId().toString(),
                     "All tokens revoked", ipAddress);
         });
+    }
+
+    // ── PENDING SIGNUP APPROVAL ────────────────────────────────────────────
+
+    public List<UserDto> getPendingSignups() {
+        List<User> pending = userRepo.findByRoleAndIsActive(Role.PATIENT, false);
+        return pending.stream()
+                .map(UserDto::from)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public PatientDto approveSignup(Long userId, String ipAddress) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        if (user.getRole() != Role.PATIENT) {
+            throw new AppException("Only patient signups can be approved", HttpStatus.BAD_REQUEST);
+        }
+        if (user.isActive()) {
+            throw new AppException("Signup already approved", HttpStatus.CONFLICT);
+        }
+
+        user.setActive(true);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepo.save(user);
+
+        PatientDto patient = patientService.createPatientFromUser(user);
+
+        auditLogService.log(user.getId(), user.getEmail(),
+                "SIGNUP_APPROVED", "User", user.getId().toString(),
+                "Patient signup approved — patient profile created with ID " + patient.getPatientId(), ipAddress);
+
+        return patient;
+    }
+
+    @Transactional
+    public void rejectSignup(Long userId, String ipAddress) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        if (user.getRole() != Role.PATIENT) {
+            throw new AppException("Only patient signups can be rejected", HttpStatus.BAD_REQUEST);
+        }
+        if (user.isActive()) {
+            throw new AppException("Cannot reject an already approved signup", HttpStatus.CONFLICT);
+        }
+
+        userRepo.delete(user);
+
+        auditLogService.log(user.getId(), user.getEmail(),
+                "SIGNUP_REJECTED", "User", user.getId().toString(),
+                "Patient signup rejected and user deleted", ipAddress);
     }
 
     // ── PRIVATE HELPERS ─────────────────────────────────────────────────────
