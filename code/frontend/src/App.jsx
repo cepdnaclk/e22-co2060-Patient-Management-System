@@ -31,7 +31,7 @@ function App() {
       <AmbientOrbs />
       <div className="app-surface">
         {/* Conditional Navbar Rendering */}
-        {!isAuthPage && (isLandingPage ? <NavbarLanding /> : <Navbar />)}
+        {!isAuthPage && isLandingPage && <NavbarLanding />}
 
         <Routes>
           <Route path="/" element={<Home />} />

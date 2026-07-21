@@ -19,30 +19,22 @@ body {
 	min-height: 100vh;
 	position: relative;
 	overflow: hidden;
-	background: radial-gradient(
-			1200px 800px at 8% -10%,
+	background: radial-gradient(1200px 800px at 8% -10%,
 			rgba(47, 128, 237, 0.18),
-			transparent 60%
-		),
-		radial-gradient(
-			900px 700px at 90% 10%,
+			transparent 60%),
+		radial-gradient(900px 700px at 90% 10%,
 			rgba(99, 179, 237, 0.18),
-			transparent 60%
-		),
+			transparent 60%),
 		linear-gradient(180deg, #f6f9ff 0%, #eef5ff 45%, #ffffff 100%);
 }
 
 html.dark .app-shell {
-	background: radial-gradient(
-			1200px 800px at 8% -10%,
+	background: radial-gradient(1200px 800px at 8% -10%,
 			rgba(47, 128, 237, 0.1),
-			transparent 60%
-		),
-		radial-gradient(
-			900px 700px at 90% 10%,
+			transparent 60%),
+		radial-gradient(900px 700px at 90% 10%,
 			rgba(99, 179, 237, 0.1),
-			transparent 60%
-		),
+			transparent 60%),
 		linear-gradient(180deg, #020617 0%, #0f172a 45%, #1e293b 100%);
 }
 
@@ -110,11 +102,9 @@ html.dark .glass-panel {
 	height: 360px;
 	top: -120px;
 	left: -120px;
-	background: radial-gradient(
-		circle,
-		rgba(59, 130, 246, 0.45),
-		rgba(59, 130, 246, 0) 70%
-	);
+	background: radial-gradient(circle,
+			rgba(59, 130, 246, 0.45),
+			rgba(59, 130, 246, 0) 70%);
 	animation: float-orb 14s ease-in-out infinite;
 }
 
@@ -123,11 +113,9 @@ html.dark .glass-panel {
 	height: 420px;
 	top: 12%;
 	right: -160px;
-	background: radial-gradient(
-		circle,
-		rgba(14, 116, 144, 0.4),
-		rgba(14, 116, 144, 0) 72%
-	);
+	background: radial-gradient(circle,
+			rgba(14, 116, 144, 0.4),
+			rgba(14, 116, 144, 0) 72%);
 	animation: drift-orb 18s ease-in-out infinite;
 }
 
@@ -136,11 +124,9 @@ html.dark .glass-panel {
 	height: 300px;
 	bottom: -120px;
 	left: 12%;
-	background: radial-gradient(
-		circle,
-		rgba(96, 165, 250, 0.45),
-		rgba(96, 165, 250, 0) 70%
-	);
+	background: radial-gradient(circle,
+			rgba(96, 165, 250, 0.45),
+			rgba(96, 165, 250, 0) 70%);
 	animation: float-orb 16s ease-in-out infinite reverse;
 }
 
@@ -168,20 +154,24 @@ html.dark .glass-panel {
 }
 
 @keyframes float-orb {
+
 	0%,
 	100% {
 		transform: translate3d(0, 0, 0);
 	}
+
 	50% {
 		transform: translate3d(20px, 30px, 0);
 	}
 }
 
 @keyframes drift-orb {
+
 	0%,
 	100% {
 		transform: translate3d(0, 0, 0);
 	}
+
 	50% {
 		transform: translate3d(-30px, 20px, 0);
 	}
@@ -191,12 +181,14 @@ html.dark .glass-panel {
 	from {
 		transform: rotate(0deg);
 	}
+
 	to {
 		transform: rotate(360deg);
 	}
 }
 
 @media (max-width: 768px) {
+
 	.orb-1,
 	.orb-2,
 	.orb-3 {

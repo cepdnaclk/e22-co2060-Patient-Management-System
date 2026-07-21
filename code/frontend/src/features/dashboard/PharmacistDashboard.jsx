@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
-import { 
+import {
   LayoutDashboard, Pill, Activity, Menu, X, LogOut, Sun, Moon
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -38,7 +38,7 @@ export default function PharmacistDashboard() {
     <div className="min-h-screen bg-slate-50 flex">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -58,20 +58,6 @@ export default function PharmacistDashboard() {
             <span className="font-bold text-xl text-white tracking-tight">Pharma<span className="text-emerald-400">Core</span></span>
           </div>
           <div className="flex items-center gap-1">
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={handleLogout}
-              className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
-              aria-label="Sign out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
             <button className="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" onClick={() => setIsSidebarOpen(false)}>
               <X className="w-5 h-5" />
             </button>
@@ -91,11 +77,10 @@ export default function PharmacistDashboard() {
                     setSection(item.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${
-                    active 
-                      ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" 
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${active
+                      ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20"
                       : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <Icon className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"}`} />
                   {item.label}
@@ -166,6 +151,14 @@ export default function PharmacistDashboard() {
                 <p className="text-xs text-slate-500 leading-tight">{user?.email}</p>
               </div>
             </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-1"
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </header>
 

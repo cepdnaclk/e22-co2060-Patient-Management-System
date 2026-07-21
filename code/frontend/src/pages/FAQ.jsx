@@ -61,7 +61,7 @@ const FAQ = () => {
   };
 
   return (
-    <main className="px-4 sm:px-8 lg:px-12 py-10 sm:py-12">
+    <main className="px-4 sm:px-8 lg:px-12 pt-28 sm:pt-32 pb-10 sm:pb-12">
       <section className="max-w-4xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-semibold text-slate-800 dark:text-white text-center">
           Frequently Asked Questions

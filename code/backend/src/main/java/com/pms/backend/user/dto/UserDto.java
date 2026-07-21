@@ -5,14 +5,15 @@ import com.pms.backend.user.entity.User;
 import lombok.Builder;
 import lombok.Data;
 
-@Data @Builder
+@Data
+@Builder
 public class UserDto {
-    private Long   id;
+    private Long id;
     private String firstName;
     private String lastName;
     private String mobileNumber;
     private String email;
-    private Role   role;
+    private Role role;
     // Notice: passwordHash is intentionally NOT here.
     // If you return the User entity directly from a controller,
     // the password hash gets sent to the browser — huge security problem.

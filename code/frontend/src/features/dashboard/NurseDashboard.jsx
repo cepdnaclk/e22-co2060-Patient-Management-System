@@ -57,19 +57,28 @@ export default function NurseDashboard() {
             </span>
           </div>
           {!isSidebarOpen && (
-             <button onClick={() => setIsSidebarOpen(false)} className="text-slate-400 lg:hidden">
-               <X className="w-5 h-5" />
-             </button>
+            <button onClick={() => setIsSidebarOpen(false)} className="text-slate-400 lg:hidden">
+              <X className="w-5 h-5" />
+            </button>
           )}
         </div>
-        
+
         {/* Sidebar Content (Patients) */}
         <div className="flex-1 overflow-y-auto">
-          <AssignedPatientsList 
-            patients={mockPatients} 
-            selectedPatient={selectedPatient} 
-            onSelect={setSelectedPatient} 
+          <AssignedPatientsList
+            patients={mockPatients}
+            selectedPatient={selectedPatient}
+            onSelect={setSelectedPatient}
           />
+        </div>
+        <div className="p-4 border-t border-slate-200 bg-white">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </button>
         </div>
       </aside>
 
@@ -83,73 +92,81 @@ export default function NurseDashboard() {
             </button>
             <h1 className="text-xl font-bold text-slate-800 hidden sm:block">Shift Dashboard</h1>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full relative">
-               <Bell className="w-5 h-5" />
-               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
             <button onClick={toggleTheme} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
               {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
             <div className="h-6 w-px bg-slate-200 mx-1"></div>
-            <div className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg pr-3 border border-transparent hover:border-slate-200 transition-colors" onClick={handleLogout}>
+            <div className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-full ${ACCENT.iconBg} flex items-center justify-center font-bold text-teal-700`}>
                 {user?.email?.charAt(0).toUpperCase() || "N"}
               </div>
               <div className="hidden md:block text-left">
-                 <p className="text-sm font-semibold text-slate-700 leading-tight">Nurse {user?.firstName || "Duty"}</p>
-                 <p className="text-xs text-slate-500">Sign Out</p>
+                <p className="text-sm font-semibold text-slate-700 leading-tight">Nurse {user?.firstName || "Duty"}</p>
+                <p className="text-xs text-slate-500">Nurse</p>
               </div>
             </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-1"
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </header>
 
         {/* Dashboard Grid */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-slate-50/50">
           <div className="max-w-7xl mx-auto space-y-6">
-            
+
             {/* Patient Header Banner */}
             {selectedPatient ? (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3 mb-1">
-                     <h2 className="text-2xl font-bold text-slate-900">{selectedPatient.name}</h2>
-                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide
-                        ${selectedPatient.status === 'Critical' ? 'bg-red-100 text-red-700 border border-red-200' : 
-                          selectedPatient.status === 'Needs Attention' ? 'bg-orange-100 text-orange-700 border border-orange-200' : 
+                    <h2 className="text-2xl font-bold text-slate-900">{selectedPatient.name}</h2>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide
+                        ${selectedPatient.status === 'Critical' ? 'bg-red-100 text-red-700 border border-red-200' :
+                        selectedPatient.status === 'Needs Attention' ? 'bg-orange-100 text-orange-700 border border-orange-200' :
                           'bg-emerald-100 text-emerald-700 border border-emerald-200'}
                      `}>
-                        {selectedPatient.status}
-                     </span>
+                      {selectedPatient.status}
+                    </span>
                   </div>
                   <div className="text-slate-500 text-sm flex items-center gap-4 flex-wrap">
-                     <span className="font-medium text-slate-700">{selectedPatient.room}</span>
-                     <span>•</span>
-                     <span>{selectedPatient.age} yrs</span>
-                     <span>•</span>
-                     <span>Dx: <strong className="text-slate-700">{selectedPatient.diagnosis}</strong></span>
+                    <span className="font-medium text-slate-700">{selectedPatient.room}</span>
+                    <span>•</span>
+                    <span>{selectedPatient.age} yrs</span>
+                    <span>•</span>
+                    <span>Dx: <strong className="text-slate-700">{selectedPatient.diagnosis}</strong></span>
                   </div>
                 </div>
-                
+
                 {/* Allergies Inline Alert */}
                 <div className="bg-rose-50 border border-rose-100 rounded-xl p-3 md:min-w-[200px]">
-                   <p className="text-xs font-bold text-rose-800 uppercase tracking-wider mb-1">Allergies</p>
-                   <p className="text-sm text-rose-900 font-medium">
-                     {selectedPatient.allergies}
-                   </p>
+                  <p className="text-xs font-bold text-rose-800 uppercase tracking-wider mb-1">Allergies</p>
+                  <p className="text-sm text-rose-900 font-medium">
+                    {selectedPatient.allergies}
+                  </p>
                 </div>
               </div>
             ) : (
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 text-center text-slate-500">
-                 Select a patient to view details.
+                Select a patient to view details.
               </div>
             )}
 
             {/* Main Grid: Vitals & MAR */}
             {selectedPatient && (
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                
+
                 {/* Left Column: Vitals */}
                 <div className="xl:col-span-1 flex flex-col gap-6">
                   <PatientVitalsCard patient={selectedPatient} />
@@ -159,21 +176,21 @@ export default function NurseDashboard() {
                 {/* Right Column: MAR & Notes */}
                 <div className="xl:col-span-2 flex flex-col gap-6">
                   <MARCard patient={selectedPatient} />
-                  
+
                   {/* Notifications / Quick Notes Panel */}
                   <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-                           <FileText className="w-5 h-5 text-teal-600" /> Handover & Notes
-                        </h3>
-                        <button className="text-sm font-semibold text-teal-600 hover:text-teal-700">Add Note</button>
-                     </div>
-                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-sm text-slate-600">
-                        <p><strong>08:00 AM (Previous Shift):</strong> Patient had a restless night. Complained of mild pain in lower back. Administered PRN medication at 03:00 AM with good effect.</p>
-                     </div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-teal-600" /> Handover & Notes
+                      </h3>
+                      <button className="text-sm font-semibold text-teal-600 hover:text-teal-700">Add Note</button>
+                    </div>
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-sm text-slate-600">
+                      <p><strong>08:00 AM (Previous Shift):</strong> Patient had a restless night. Complained of mild pain in lower back. Administered PRN medication at 03:00 AM with good effect.</p>
+                    </div>
                   </div>
                 </div>
-                
+
               </div>
             )}
           </div>
