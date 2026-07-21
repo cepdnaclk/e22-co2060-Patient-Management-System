@@ -21,8 +21,37 @@ export default function MARCard({ patient }) {
       }
       setLoading(true);
       try {
-        const data = await nurseDashboardService.getPatientMedications(patient.id);
-        setMeds(data || []);
+        const [orders, prescriptions] = await Promise.all([
+          nurseDashboardService.getPatientMedications(patient.id),
+          nurseDashboardService.getPatientPrescriptions(patient.id),
+        ]);
+
+        const orderMeds = (orders || []).map((o) => ({
+          id: `order-${o.id}`,
+          source: "order",
+          medicationName: o.medicationName || o.name,
+          dosage: o.dosage || o.dose,
+          frequency: o.frequency,
+          dueTime: o.dueTime || o.frequency,
+          urgency: o.urgency || "normal",
+          currentStatus: o.currentStatus || "pending",
+          prescriber: null,
+        }));
+
+        const rxMeds = (prescriptions || []).map((r) => ({
+          id: `rx-${r.id}`,
+          source: "prescription",
+          medicationName: r.treatment || r.description?.split("\n")[0] || "Prescription",
+          dosage: "As prescribed",
+          frequency: "As prescribed",
+          dueTime: "—",
+          urgency: "normal",
+          currentStatus: r.isFulfilled ? "given" : "pending",
+          prescriber: r.doctorName || "Doctor",
+          description: r.description,
+        }));
+
+        setMeds([...orderMeds, ...rxMeds]);
       } catch (error) {
         console.error("Failed to fetch meds", error);
       } finally {
@@ -119,11 +148,17 @@ export default function MARCard({ patient }) {
               <tr key={med.id} className={`transition-colors hover:bg-slate-50/50 ${med.currentStatus === 'given' ? 'bg-slate-50/50 opacity-60' : ''}`}>
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
-                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${med.currentStatus === 'given' ? 'bg-slate-200 text-slate-400' : med.urgency === 'high' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
+                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${med.currentStatus === 'given' ? 'bg-slate-200 text-slate-400' : med.source === 'prescription' ? 'bg-purple-100 text-purple-600' : med.urgency === 'high' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
                         <Pill className="w-4 h-4" />
                      </div>
                      <div>
                        <p className={`font-bold ${med.currentStatus === 'given' ? 'text-slate-500 line-through' : 'text-slate-800'}`}>{med.medicationName || med.name}</p>
+                       {med.source === 'prescription' && med.prescriber && (
+                         <span className="text-[10px] text-purple-600 font-medium">Prescribed by Dr. {med.prescriber}</span>
+                       )}
+                       {med.source === 'order' && (
+                         <span className="text-[10px] text-blue-500 font-medium">Nurse-added</span>
+                       )}
                        {med.urgency === 'high' && med.currentStatus === 'pending' && (
                          <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider flex items-center gap-1 mt-0.5">
                            <AlertCircle className="w-3 h-3" /> Overdue
@@ -134,28 +169,36 @@ export default function MARCard({ patient }) {
                 </td>
                 <td className="px-5 py-4">
                   <p className="font-semibold text-slate-700">{med.dosage || med.dose}</p>
-                  <p className="text-xs text-slate-500">PO</p>
+                  <p className="text-xs text-slate-500">{med.source === 'prescription' ? 'Rx' : 'PO'}</p>
                 </td>
                 <td className="px-5 py-4">
                   <p className="font-semibold text-slate-700">{med.dueTime}</p>
                   <p className="text-xs text-slate-500">{med.frequency}</p>
                 </td>
                 <td className="px-5 py-4 text-center">
-                  <button 
-                    onClick={() => toggleAdminister(med.id)}
-                    disabled={med.currentStatus === 'given'}
-                    className={`px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 mx-auto ${
-                      med.currentStatus === 'given' 
-                        ? 'bg-slate-200 text-slate-500 cursor-not-allowed' 
-                        : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:shadow-sm'
-                    }`}
-                  >
-                    {med.currentStatus === 'given' ? (
-                      <>Given <CheckCircle className="w-4 h-4" /></>
-                    ) : (
-                      <>Administer</>
-                    )}
-                  </button>
+                  {med.source === 'order' ? (
+                    <button 
+                      onClick={() => toggleAdminister(med.id)}
+                      disabled={med.currentStatus === 'given'}
+                      className={`px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 mx-auto ${
+                        med.currentStatus === 'given' 
+                          ? 'bg-slate-200 text-slate-500 cursor-not-allowed' 
+                          : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:shadow-sm'
+                      }`}
+                    >
+                      {med.currentStatus === 'given' ? (
+                        <>Given <CheckCircle className="w-4 h-4" /></>
+                      ) : (
+                        <>Administer</>
+                      )}
+                    </button>
+                  ) : (
+                    <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold ${
+                      med.currentStatus === 'given' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {med.currentStatus === 'given' ? 'Fulfilled' : 'Pending'}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}

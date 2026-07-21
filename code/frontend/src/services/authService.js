@@ -21,6 +21,11 @@ export const authService = {
     return data; // { accessToken, refreshToken, user }
   },
 
+  googleLogin: async (idToken) => {
+    const { data } = await api.post("/api/auth/google", { idToken });
+    return data; // { accessToken, refreshToken, user }
+  },
+
   logout: async () => {
     const refreshToken = localStorage.getItem("pms_refresh_token");
     if (refreshToken) {
@@ -54,6 +59,21 @@ export const authService = {
   },
 
   isLoggedIn: () => !!localStorage.getItem("pms_token"),
+
+  // ── Pending Signup Management ──
+  fetchPendingSignups: async () => {
+    const { data } = await api.get("/api/auth/signup/pending");
+    return data;
+  },
+
+  approveSignup: async (userId) => {
+    const { data } = await api.put(`/api/auth/signup/${userId}/approve`);
+    return data;
+  },
+
+  rejectSignup: async (userId) => {
+    await api.put(`/api/auth/signup/${userId}/reject`);
+  },
 
   // Check if access token is expired by reading its payload
   isTokenExpired: () => {

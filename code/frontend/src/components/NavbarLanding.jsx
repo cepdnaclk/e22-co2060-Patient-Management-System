@@ -62,7 +62,7 @@ const NavbarLanding = () => {
     }`}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         
-        {/* Logo matching the professional drafted design */}
+        {/* Logo */}
         <NavLink to="/" className="flex items-center gap-2">
           <div className="p-1.5 bg-blue-600 rounded-lg">
             <img src="/navbarlogo.png" alt="logo" className="w-6 h-6 brightness-0 invert" />
@@ -72,48 +72,52 @@ const NavbarLanding = () => {
           </span>
         </NavLink>
 
-        <nav className="hidden lg:flex items-center gap-8">
-          <NavLink to="/" className={navLinkStyles}>Home</NavLink>
-          {isLoggedIn && (
-            <NavLink to={getDashboardLink()} className={navLinkStyles}>Dashboard</NavLink>
-          )}
-          <NavLink to="/about" className={navLinkStyles}>About</NavLink>
-          <NavLink to="/contact" className={navLinkStyles}>Contact</NavLink>
-          <NavLink to="/faq" className={navLinkStyles}>FAQ</NavLink>
-        </nav>
+        {/* Nav links + actions pushed to far right */}
+        <div className="flex items-center gap-6 ml-auto">
+          <nav className="hidden lg:flex items-center gap-8">
+            <NavLink to="/" className={navLinkStyles}>Home</NavLink>
+            {isLoggedIn && (
+              <NavLink to={getDashboardLink()} className={navLinkStyles}>Dashboard</NavLink>
+            )}
+            <NavLink to="/about" className={navLinkStyles}>About</NavLink>
+            <NavLink to="/contact" className={navLinkStyles}>Contact</NavLink>
+            <NavLink to="/faq" className={navLinkStyles}>FAQ</NavLink>
+          </nav>
 
-        <div className="flex items-center gap-4">
-          <button
-            onClick={toggleTheme}
-            className="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
-            aria-label="Toggle Theme"
-          >
-            {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+              aria-label="Toggle Theme"
+            >
+              {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+            </button>
 
-          {!isLoggedIn ? (
-            <div className="hidden sm:flex items-center gap-3">
-              <NavLink to="/login" className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                Log in
-              </NavLink>
-              <NavLink to="/signup" className="px-5 py-2 text-sm font-bold text-white bg-slate-900 dark:bg-white dark:text-slate-900 rounded-full hover:bg-blue-600 dark:hover:bg-blue-500 transition-all">
-                Sign Up
-              </NavLink>
-            </div>
-          ) : (
-            <div className="hidden sm:flex items-center gap-4">
-              <div className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-                Hi, {user?.firstName}
+            {!isLoggedIn ? (
+              <div className="hidden sm:flex items-center gap-3">
+                <NavLink to="/login" className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  Log in
+                </NavLink>
+                <NavLink to="/signup" className="px-5 py-2 text-sm font-bold text-white bg-slate-900 dark:bg-white dark:text-slate-900 rounded-full hover:bg-blue-600 dark:hover:bg-blue-500 transition-all">
+                  Sign Up
+                </NavLink>
               </div>
-              <button onClick={handleLogout} className="p-2 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition-colors">
-                <LogOut size={20} />
-              </button>
-            </div>
-          )}
-          
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden text-slate-900 dark:text-white">
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+            ) : (
+              <div className="hidden sm:flex items-center gap-4">
+                <div className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                  Hi, {user?.firstName}
+                </div>
+                <button onClick={handleLogout} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20">
+                  <LogOut size={18} />
+                  Sign Out
+                </button>
+              </div>
+            )}
+            
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden text-slate-900 dark:text-white">
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
       </div>
 

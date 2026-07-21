@@ -6,6 +6,7 @@ import {
   User, Mail, Phone, Lock, Eye, EyeOff, ArrowRight,
   Activity, CheckCircle, CheckCircle2
 } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
 
 const ROLE_ROUTES = {
   SUPER_ADMIN: "/dashboard/admin",
@@ -18,6 +19,8 @@ const ROLE_ROUTES = {
   LAB_TECHNICIAN: "/dashboard/labtechnician",
   PATIENT: "/dashboard/patient",
 };
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 /* password strength */
 function strength(pwd) {
@@ -165,14 +168,28 @@ export default function SignupPage() {
               </div>
             )}
 
-            {/* Google SSO */}
-            <button
-              type="button"
-              className="w-full flex items-center justify-center gap-3 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 rounded-xl text-sm font-semibold text-slate-800 dark:text-white shadow-sm hover:shadow-md transition-all mb-6"
-            >
-              <img src="/google-48.png" alt="Google" className="w-4 h-4" />
-              Continue with Google
-            </button>
+            {/* Google Sign-In */}
+            {GOOGLE_CLIENT_ID && (
+              <div className="flex justify-center mb-6">
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    try {
+                      const data = await authService.googleLogin(credentialResponse.credential);
+                      saveLogin(data.accessToken, data.refreshToken, data.user);
+                      navigate(ROLE_ROUTES[data.user.role] || "/dashboard");
+                    } catch (err) {
+                      setError(err.response?.data?.message || "Google sign-up failed.");
+                    }
+                  }}
+                  onError={() => setError("Google sign-up failed. Please try again.")}
+                  theme="outline"
+                  size="large"
+                  text="signup_with"
+                  shape="rectangular"
+                  width="300"
+                />
+              </div>
+            )}
 
             <div className="flex items-center gap-3 mb-6">
               <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800" />
