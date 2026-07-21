@@ -174,20 +174,6 @@ const Home = () => {
         </div>
 
       </section>
-      {/* ── Stats ─────────────────────────────────────────────────── */}
-      <section className="py-16 px-4 border-y border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map(({ value, label }) => (
-            <div key={label} className="text-center">
-              <p className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-                {value}
-              </p>
-              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">{label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* ── Features ──────────────────────────────────────────────── */}
       <section className="py-24 px-4">
         <div className="max-w-6xl mx-auto">
@@ -214,49 +200,6 @@ const Home = () => {
                 </div>
                 <h3 className="font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Testimonials ──────────────────────────────────────────── */}
-      <section className="py-24 px-4 bg-slate-50 dark:bg-slate-900/60">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <p className="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3">
-              Testimonials
-            </p>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-              Trusted by healthcare professionals
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map(({ quote, author, role, initials, color }) => (
-              <div
-                key={author}
-                className="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm"
-              >
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-amber-400 fill-amber-400" />
-                  ))}
-                </div>
-                <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-5">
-                  "{quote}"
-                </p>
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-9 h-9 rounded-full ${color} flex items-center justify-center text-white text-sm font-bold shrink-0`}
-                  >
-                    {initials}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{author}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{role}</p>
-                  </div>
-                </div>
               </div>
             ))}
           </div>

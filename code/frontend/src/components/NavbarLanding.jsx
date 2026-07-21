@@ -72,19 +72,19 @@ const NavbarLanding = () => {
           </span>
         </NavLink>
 
-        {/* Nav links + actions pushed to far right */}
-        <div className="flex items-center gap-6 ml-auto">
-          <nav className="hidden lg:flex items-center gap-8">
-            <NavLink to="/" className={navLinkStyles}>Home</NavLink>
-            {isLoggedIn && (
-              <NavLink to={getDashboardLink()} className={navLinkStyles}>Dashboard</NavLink>
-            )}
-            <NavLink to="/about" className={navLinkStyles}>About</NavLink>
-            <NavLink to="/contact" className={navLinkStyles}>Contact</NavLink>
-            <NavLink to="/faq" className={navLinkStyles}>FAQ</NavLink>
-          </nav>
+        {/* Nav links (Center) */}
+        <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+          <NavLink to="/" className={navLinkStyles}>Home</NavLink>
+          {isLoggedIn && (
+            <NavLink to={getDashboardLink()} className={navLinkStyles}>Dashboard</NavLink>
+          )}
+          <NavLink to="/about" className={navLinkStyles}>About</NavLink>
+          <NavLink to="/contact" className={navLinkStyles}>Contact</NavLink>
+          <NavLink to="/faq" className={navLinkStyles}>FAQ</NavLink>
+        </nav>
 
-          <div className="flex items-center gap-4">
+        {/* Actions (Right) */}
+        <div className="flex items-center gap-4 ml-auto">
             <button
               onClick={toggleTheme}
               className="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -118,7 +118,6 @@ const NavbarLanding = () => {
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
-        </div>
       </div>
 
       {/* Mobile Drawer (Menu Overlay) */}

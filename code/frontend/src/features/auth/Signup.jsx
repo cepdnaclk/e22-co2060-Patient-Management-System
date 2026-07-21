@@ -187,6 +187,7 @@ export default function SignupPage() {
                   text="signup_with"
                   shape="rectangular"
                   width="300"
+                  locale="en"
                 />
               </div>
             )}
