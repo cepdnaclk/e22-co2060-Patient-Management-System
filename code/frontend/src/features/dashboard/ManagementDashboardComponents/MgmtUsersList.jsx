@@ -133,8 +133,8 @@ const MgmtUsersList = ({ roleFilter }) => {
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             {roleFilter === "NURSE" ? "View and manage nurse staff profiles and account details" :
-             roleFilter === "PATIENT" ? "View and manage patient profiles and account details" :
-             "Edit user profiles, change roles, and update contact details (Admin accounts are protected)"}
+              roleFilter === "PATIENT" ? "View and manage patient profiles and account details" :
+                "Edit user profiles, change roles, and update contact details (Admin accounts are protected)"}
           </p>
         </div>
         <div className="relative w-full md:w-72">

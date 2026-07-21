@@ -29,9 +29,9 @@ const ACCENT = {
 
 const menuItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "profile",   label: "My Profile",  icon: UserCircle },
-  { id: "records",   label: "Patients",    icon: Users },
-  { id: "labreports",label: "Lab Reports", icon: FlaskConical },
+  { id: "profile", label: "My Profile", icon: UserCircle },
+  { id: "records", label: "Patients", icon: Users },
+  { id: "labreports", label: "Lab Reports", icon: FlaskConical },
 ];
 
 const sectionLabels = {
@@ -158,20 +158,6 @@ const DoctorDashboard = () => {
           </div>
           <div className="flex items-center gap-1">
             <button
-              onClick={toggleTheme}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={handleLogout}
-              className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
-              aria-label="Sign out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-            <button
               className="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
               onClick={() => setIsSidebarOpen(false)}
             >
@@ -193,11 +179,10 @@ const DoctorDashboard = () => {
                 <button
                   key={item.id}
                   onClick={() => handleSectionChange(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${
-                    active
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${active
                       ? `${ACCENT.activeBg} text-white shadow-md ${ACCENT.shadow}`
                       : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <Icon className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"}`} />
                   {item.label}
@@ -214,9 +199,9 @@ const DoctorDashboard = () => {
               {user?.email?.charAt(0).toUpperCase() || "D"}
             </div>
             <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">
-                  {doctor?.fullName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || (isNurse ? "Nurse" : "Doctor")}
-                </p>
+              <p className="text-sm font-semibold text-white truncate">
+                {doctor?.fullName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || (isNurse ? "Nurse" : "Doctor")}
+              </p>
               <p className="text-xs text-slate-400 truncate">{user?.email}</p>
             </div>
           </div>
@@ -275,6 +260,14 @@ const DoctorDashboard = () => {
                 <p className="text-xs text-slate-500 leading-tight">{isNurse ? "Nurse" : "Doctor"}</p>
               </div>
             </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-1"
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </header>
 

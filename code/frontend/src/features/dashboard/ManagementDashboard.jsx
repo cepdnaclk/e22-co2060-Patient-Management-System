@@ -67,20 +67,6 @@ const ManagementDashboard = () => {
             <span className="font-bold text-xl text-white tracking-tight">Mgmt<span className="text-violet-400">Panel</span></span>
           </div>
           <div className="flex items-center gap-1">
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={handleLogout}
-              className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
-              aria-label="Sign out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
             <button className="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" onClick={() => setIsSidebarOpen(false)}>
               <X className="w-5 h-5" />
             </button>
@@ -100,11 +86,10 @@ const ManagementDashboard = () => {
                     setSection(item.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${
-                    active
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${active
                       ? "bg-violet-500 text-white shadow-md shadow-violet-500/20"
                       : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <Icon className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"}`} />
                   {item.label}
@@ -173,6 +158,14 @@ const ManagementDashboard = () => {
                 <p className="text-xs text-slate-500 leading-tight">{user?.email}</p>
               </div>
             </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-1"
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </header>
 
