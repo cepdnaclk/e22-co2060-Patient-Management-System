@@ -866,8 +866,8 @@ const PatientDashboard = () => {
                     setIsSidebarOpen(false);
                   }}
                   className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${active
-                      ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
-                      : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                    ? "bg-blue-500 text-white shadow-md shadow-blue-500/20"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
                     }`}
                 >
                   <Icon className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"}`} />
@@ -945,10 +945,11 @@ const PatientDashboard = () => {
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all border border-red-100 ml-2 shadow-sm"
+              className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-1"
+              aria-label="Sign out"
+              title="Sign out"
             >
-              <LogOut className="w-4 h-4" />
-              <span>Sign Out</span>
+              <LogOut className="w-5 h-5" />
             </button>
           </div>
         </header>

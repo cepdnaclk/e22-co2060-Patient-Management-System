@@ -79,7 +79,7 @@ public class AuthService {
 
         User saved = userRepo.save(user);
 
-        String accessToken  = jwtUtil.generateToken(saved);
+        String accessToken = jwtUtil.generateToken(saved);
         String refreshToken = createRefreshToken(saved);
 
         auditLogService.log(saved.getId(), saved.getEmail(),
@@ -152,7 +152,7 @@ public class AuthService {
     public AuthResponse login(LoginRequest req, String ipAddress) {
 
         // 1. Find user — use same error message whether email exists or not
-        //    (prevents user enumeration attacks)
+        // (prevents user enumeration attacks)
         User user = userRepo.findByEmail(req.getEmail())
                 .orElseThrow(() -> {
                     auditLogService.logFailure(null, req.getEmail(),
@@ -165,8 +165,8 @@ public class AuthService {
             auditLogService.logFailure(user.getId(), user.getEmail(),
                     "LOGIN_BLOCKED", "Account is temporarily locked", ipAddress);
             throw AppException.unauthorized(
-                "Account is temporarily locked. Try again after " +
-                lockoutDurationMinutes + " minutes.");
+                    "Account is temporarily locked. Try again after " +
+                            lockoutDurationMinutes + " minutes.");
         }
 
         // 3. Check account active
@@ -191,7 +191,7 @@ public class AuthService {
         user.setUpdatedAt(LocalDateTime.now());
         userRepo.save(user);
 
-        String accessToken  = jwtUtil.generateToken(user);
+        String accessToken = jwtUtil.generateToken(user);
         String refreshToken = createRefreshToken(user);
 
         auditLogService.log(user.getId(), user.getEmail(),
@@ -221,7 +221,7 @@ public class AuthService {
         stored.setRevoked(true);
         refreshTokenRepo.save(stored);
 
-        String newAccessToken  = jwtUtil.generateToken(user);
+        String newAccessToken = jwtUtil.generateToken(user);
         String newRefreshToken = createRefreshToken(user);
 
         return new AuthResponse(newAccessToken, newRefreshToken, UserDto.from(user));

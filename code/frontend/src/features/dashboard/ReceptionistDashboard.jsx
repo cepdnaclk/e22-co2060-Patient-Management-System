@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
-import { 
-  LayoutDashboard, UserPlus, Calendar, 
+import {
+  LayoutDashboard, UserPlus, Calendar,
   Menu, X, Building, LogOut, Sun, Moon
 } from "lucide-react";
 
@@ -39,7 +39,7 @@ const ReceptionistDashboard = () => {
     <div className="min-h-screen bg-slate-50 flex">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -78,11 +78,10 @@ const ReceptionistDashboard = () => {
                     setSection(item.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${
-                    active 
-                      ? "bg-sky-500 text-white shadow-md shadow-sky-500/20" 
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${active
+                      ? "bg-sky-500 text-white shadow-md shadow-sky-500/20"
                       : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <Icon className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"}`} />
                   {item.label}
@@ -102,7 +101,7 @@ const ReceptionistDashboard = () => {
               <p className="text-xs text-slate-400 truncate">{user?.email}</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors"
           >
@@ -147,10 +146,11 @@ const ReceptionistDashboard = () => {
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all border border-red-100 ml-2 shadow-sm"
+              className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-1"
+              aria-label="Sign out"
+              title="Sign out"
             >
-              <LogOut className="w-4 h-4" />
-              <span>Sign Out</span>
+              <LogOut className="w-5 h-5" />
             </button>
           </div>
         </header>

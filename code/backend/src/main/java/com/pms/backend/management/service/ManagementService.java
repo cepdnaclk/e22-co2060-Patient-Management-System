@@ -137,9 +137,9 @@ public class ManagementService {
         if (details == null || details.isEmpty()) {
             details = "No changes made.";
         }
-        
+
         User currentUser = com.pms.backend.auth.service.SecurityUtil.getCurrentUser();
-        
+
         ManagementActivityLog log = ManagementActivityLog.builder()
                 .performedBy(currentUser)
                 .targetUser(targetUser)

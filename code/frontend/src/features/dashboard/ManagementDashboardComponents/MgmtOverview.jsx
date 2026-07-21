@@ -36,29 +36,29 @@ const MgmtOverview = () => {
       label: "Total Users",
       value: stats?.totalUsers ?? 0,
       icon: Users,
-      color: "violet",
-      bg: "from-violet-500 to-purple-600",
+      color: "text-blue-600",
+      bg: "bg-blue-50",
     },
     {
       label: "Active Doctors",
       value: stats?.activeDoctors ?? 0,
       icon: Stethoscope,
-      color: "emerald",
-      bg: "from-emerald-500 to-teal-600",
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
     },
     {
       label: "Active Nurses",
       value: stats?.activeNurses ?? 0,
       icon: HeartPulse,
-      color: "blue",
-      bg: "from-blue-500 to-indigo-600",
+      color: "text-purple-600",
+      bg: "bg-purple-50",
     },
     {
       label: "Appointments",
       value: stats?.totalAppointments ?? 0,
       icon: CalendarCheck,
-      color: "amber",
-      bg: "from-amber-500 to-orange-600",
+      color: "text-amber-600",
+      bg: "bg-amber-50",
     },
   ];
 
@@ -98,18 +98,14 @@ const MgmtOverview = () => {
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Card key={card.label} className="border-none shadow-md shadow-slate-200/50 overflow-hidden group hover:shadow-lg transition-shadow">
-              <CardContent className="p-0">
-                <div className={`bg-gradient-to-r ${card.bg} p-4`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-white/80 text-xs font-medium uppercase tracking-wider">{card.label}</p>
-                      <p className="text-3xl font-bold text-white mt-1">{card.value.toLocaleString()}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center">
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                  </div>
+            <Card key={card.label} className="border-none shadow-md shadow-slate-200/50 hover:-translate-y-1 transition-transform duration-300">
+              <CardContent className="p-5 flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${card.bg} ${card.color}`}>
+                  <Icon className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-500">{card.label}</p>
+                  <p className="text-xl font-bold text-slate-900">{card.value.toLocaleString()}</p>
                 </div>
               </CardContent>
             </Card>

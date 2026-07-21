@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader } from "../../../components/ui/Card.jsx";
 import { Badge } from "../../../components/ui/Badge.jsx";
 import { Button } from "../../../components/ui/Button.jsx";
 import { useAuth } from "../../auth/AuthContext.jsx";
-import { 
-  UserCircle, Trash2, Save, AlertCircle, CheckCircle2, UserCog, Mail, Phone 
+import {
+  UserCircle, Trash2, Save, AlertCircle, CheckCircle2, UserCog, Mail, Phone
 } from "lucide-react";
 
 const ROLE_OPTIONS = [
@@ -114,7 +114,7 @@ const UsersList = () => {
           {error}
         </div>
       )}
-      
+
       {actionMsg && (
         <div className="flex items-center gap-2 p-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-medium">
           <CheckCircle2 className="w-5 h-5" />
