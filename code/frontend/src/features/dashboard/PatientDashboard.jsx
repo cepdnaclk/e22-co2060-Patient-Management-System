@@ -71,6 +71,9 @@ const PatientDashboard = () => {
       email: patient?.email === "N/A" ? "" : patient?.email,
       mobileNumber: patient?.mobileNumber === "N/A" ? "" : patient?.mobileNumber,
       address: patient?.address === "N/A" ? "" : patient?.address,
+      emergencyContactName: patient?.emergencyContactName === "N/A" ? "" : patient?.emergencyContactName,
+      emergencyContactPhone: patient?.emergencyContactPhone === "N/A" ? "" : patient?.emergencyContactPhone,
+      emergencyContactRelation: patient?.emergencyContactRelation === "N/A" ? "" : patient?.emergencyContactRelation,
     });
     setIsEditingProfile(true);
     setError("");
@@ -108,9 +111,9 @@ const PatientDashboard = () => {
         respiratoryRate: patient.respiratoryRate !== "N/A" ? patient.respiratoryRate : null,
         height: patient.height !== "N/A" ? patient.height : null,
         weight: patient.weight !== "N/A" ? patient.weight : null,
-        emergencyContactName: patient.emergencyContactName !== "N/A" ? patient.emergencyContactName : null,
-        emergencyContactPhone: patient.emergencyContactPhone !== "N/A" ? patient.emergencyContactPhone : null,
-        emergencyContactRelation: patient.emergencyContactRelation !== "N/A" ? patient.emergencyContactRelation : null,
+        emergencyContactName: profileForm.emergencyContactName || null,
+        emergencyContactPhone: profileForm.emergencyContactPhone || null,
+        emergencyContactRelation: profileForm.emergencyContactRelation || null,
         medicalHistory: patient.medicalHistory !== "No medical history provided." ? patient.medicalHistory : null,
         allergies: patient.allergies !== "None listed" ? patient.allergies : null,
         currentMedications: patient.currentMedications !== "None listed" ? patient.currentMedications : null,
@@ -466,6 +469,24 @@ const PatientDashboard = () => {
                   <div>
                     <label className="block text-slate-500 font-medium mb-1">Home Address</label>
                     <input type="text" name="address" value={profileForm.address} onChange={handleProfileFormChange} className="w-full border border-slate-300 rounded p-1.5 focus:ring-1 focus:ring-indigo-500 bg-white text-slate-900" />
+                  </div>
+                </div>
+                <hr className="border-slate-100" />
+                <h4 className="text-slate-700 font-semibold mb-2">Emergency Contact</h4>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <label className="block text-slate-500 font-medium mb-1">Name</label>
+                    <input type="text" name="emergencyContactName" value={profileForm.emergencyContactName || ""} onChange={handleProfileFormChange} className="w-full border border-slate-300 rounded p-1.5 focus:ring-1 focus:ring-indigo-500 bg-white text-slate-900" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-slate-500 font-medium mb-1">Phone</label>
+                      <input type="text" name="emergencyContactPhone" value={profileForm.emergencyContactPhone || ""} onChange={handleProfileFormChange} className="w-full border border-slate-300 rounded p-1.5 focus:ring-1 focus:ring-indigo-500 bg-white text-slate-900" />
+                    </div>
+                    <div>
+                      <label className="block text-slate-500 font-medium mb-1">Relation</label>
+                      <input type="text" name="emergencyContactRelation" value={profileForm.emergencyContactRelation || ""} onChange={handleProfileFormChange} className="w-full border border-slate-300 rounded p-1.5 focus:ring-1 focus:ring-indigo-500 bg-white text-slate-900" />
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 pt-2 justify-end">
