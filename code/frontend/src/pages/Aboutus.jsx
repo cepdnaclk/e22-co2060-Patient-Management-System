@@ -20,39 +20,53 @@ const Aboutus = () => {
 	];
 
 	return (
-		<main className="px-4 sm:px-8 lg:px-12 pt-28 sm:pt-32 pb-10 sm:pb-12">
-			<section className="max-w-5xl mx-auto">
-				<h1 className="text-3xl md:text-4xl font-semibold text-slate-800 dark:text-white text-center">
-					About Our Patient Management System
-				</h1>
-				<p className="mt-4 text-center text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-					Our platform helps healthcare teams manage appointments, records,
-					communication, and reporting in one streamlined environment.
-				</p>
-			</section>
+		<div className="min-h-screen bg-white/80" >
+			<main className="relative overflow-hidden px-4 sm:px-8 lg:px-12 pt-28 sm:pt-32 pb-10 sm:pb-12 min-h-screen">
+				{/* Subtle dot/grid background */}
+				<div
+					className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.06]"
+					style={{
+						backgroundImage: `linear-gradient(to right, #64748b 1px, transparent 1px),
+									  linear-gradient(to bottom, #64748b 1px, transparent 1px)`,
+						backgroundSize: "48px 48px",
+					}}
+				/>
+				{/* Glow spot */}
+				<div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-500/10 dark:bg-blue-400/8 rounded-full blur-[120px]" />
 
-			<section className="max-w-5xl mx-auto mt-10 grid gap-6 md:grid-cols-3">
-				{values.map((value) => (
-					<article
-						key={value.title}
-						className="rounded-2xl glass-card p-6 lift-hover"
-					>
-						<h2 className="text-lg font-semibold text-slate-800 dark:text-white">{value.title}</h2>
-						<p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{value.description}</p>
-					</article>
-				))}
-			</section>
+				<section className="relative max-w-5xl mx-auto">
+					<h1 className="text-3xl md:text-4xl font-semibold text-slate-800 dark:text-white text-center">
+						About Our Patient Management System
+					</h1>
+					<p className="mt-4 text-center text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+						Our platform helps healthcare teams manage appointments, records,
+						communication, and reporting in one streamlined environment.
+					</p>
+				</section>
 
-			<section className="max-w-5xl mx-auto mt-10 rounded-2xl glass-panel p-6 md:p-8">
-				<h2 className="text-2xl font-semibold text-slate-800 dark:text-white">What We Support</h2>
-				<ul className="mt-4 grid gap-3 text-gray-700 dark:text-gray-300 sm:grid-cols-2">
-					<li>• Patient registration and profile management</li>
-					<li>• Doctor workflows and dashboard tracking</li>
-					<li>• Medical record visibility with role-based access</li>
-					<li>• Unified experience for care and administration teams</li>
-				</ul>
-			</section>
-		</main>
+				<section className="max-w-5xl mx-auto mt-10 grid gap-6 md:grid-cols-3">
+					{values.map((value) => (
+						<article
+							key={value.title}
+							className="rounded-2xl glass-card p-6 lift-hover"
+						>
+							<h2 className="text-lg font-semibold text-slate-800 dark:text-white">{value.title}</h2>
+							<p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{value.description}</p>
+						</article>
+					))}
+				</section>
+
+				<section className="max-w-5xl mx-auto mt-10 rounded-2xl glass-panel p-6 md:p-8">
+					<h2 className="text-2xl font-semibold text-slate-800 dark:text-white">What We Support</h2>
+					<ul className="mt-4 grid gap-3 text-gray-700 dark:text-gray-300 sm:grid-cols-2">
+						<li>• Patient registration and profile management</li>
+						<li>• Doctor workflows and dashboard tracking</li>
+						<li>• Medical record visibility with role-based access</li>
+						<li>• Unified experience for care and administration teams</li>
+					</ul>
+				</section>
+			</main>
+		</div>
 	);
 };
 
