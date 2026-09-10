@@ -1,10 +1,10 @@
 import React from "react";
 
-export function Card({ children, className = "", noPadding = false, hover = false }) {
+export function Card({ children, className = "", noPadding = false, hover = false, ...props }) {
   const hoverStyles = hover ? "hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-0.5 transition-all duration-300" : "";
   
   return (
-    <div className={`bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden ${hoverStyles} ${className}`}>
+    <div className={`bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden ${hoverStyles} ${className}`} {...props}>
       {noPadding ? children : <div className="p-6">{children}</div>}
     </div>
   );

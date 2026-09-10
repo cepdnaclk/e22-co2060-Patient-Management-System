@@ -91,5 +91,12 @@ export const doctorDashboardService = {
   async updateAppointmentStatus(appointmentId, status) {
     const { data } = await api.put(`/api/appointments/${appointmentId}`, { status });
     return data;
+  },
+
+  async updateDoctorAvailability(doctorId, isAvailable) {
+    const { data: currentDoctor } = await api.get(`/api/doctors/${doctorId}`);
+    currentDoctor.isAvailable = isAvailable;
+    const { data } = await api.put(`/api/doctors/${doctorId}`, currentDoctor);
+    return data;
   }
 };
