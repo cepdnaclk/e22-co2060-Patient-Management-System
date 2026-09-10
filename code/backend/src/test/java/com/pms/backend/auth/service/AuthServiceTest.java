@@ -49,8 +49,8 @@ class AuthServiceTest {
     @Test
     void testLogin_IncorrectPassword_ThrowsException() {
         // Arrange
-        String email = "user@test.com";
-        String password = "wrongpassword";
+        String email = "test@hospital.com";
+        String password = "12345678";
         User mockUser = new User();
         mockUser.setEmail(email);
         mockUser.setPasswordHash("hashedpassword");
