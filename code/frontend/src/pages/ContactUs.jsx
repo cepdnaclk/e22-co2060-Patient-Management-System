@@ -21,97 +21,111 @@ const ContactUs = () => {
 	};
 
 	return (
-		<main className="px-4 sm:px-8 lg:px-12 pt-28 sm:pt-32 pb-10 sm:pb-12">
-			<section className="max-w-6xl mx-auto grid gap-8 lg:grid-cols-2">
-				<article className="rounded-2xl glass-card p-6 md:p-8">
-					<h1 className="text-3xl md:text-4xl font-semibold text-slate-800 dark:text-white">
-						Contact Us
-					</h1>
-					<p className="mt-3 text-gray-600 dark:text-gray-400">
-						Have questions about the system, onboarding, or support? Send us a
-						message and our team will get back to you.
-					</p>
+		<div className="min-h-screen bg-white/80">
+			<main className="relative overflow-hidden px-4 sm:px-8 lg:px-12 pt-28 sm:pt-32 pb-10 sm:pb-12 min-h-screen">
+				{/* Subtle dot/grid background */}
+				{/* <div
+					className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.01]"
+					style={{
+						backgroundImage: `linear-gradient(to right, #64748b 1px, transparent 1px),
+									  linear-gradient(to bottom, #64748b 1px, transparent 1px)`,
+						backgroundSize: "48px 48px",
+					}}
+				/> */}
+				{/* Glow spot */}
+				<div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-500/3 dark:bg-blue-400/4 rounded-full blur-[500px]" />
 
-					<div className="mt-6 space-y-4 text-sm text-gray-700 dark:text-gray-300">
-						<p>
-							<span className="font-semibold text-slate-800 dark:text-white">Email:</span>{" "}
-							support@pmscare.com
+				<section className="relative max-w-6xl mx-auto grid gap-8 lg:grid-cols-2">
+					<article className="rounded-2xl glass-card p-6 md:p-8">
+						<h1 className="text-3xl md:text-4xl font-semibold text-slate-800 dark:text-white">
+							Contact Us
+						</h1>
+						<p className="mt-3 text-gray-600 dark:text-gray-400">
+							Have questions about the system, onboarding, or support? Send us a
+							message and our team will get back to you.
 						</p>
-						<p>
-							<span className="font-semibold text-slate-800 dark:text-white">Phone:</span> +94
-							11 234 5678
-						</p>
-						<p>
-							<span className="font-semibold text-slate-800 dark:text-white">Office:</span> 120
-							Health Avenue, Kandy
-						</p>
-						<p>
-							<span className="font-semibold text-slate-800 dark:text-white">Hours:</span>
-							Monday - Friday, 8:30 AM - 5:30 PM
-						</p>
-					</div>
-				</article>
 
-				<form
-					onSubmit={handleSubmit}
-					className="rounded-2xl glass-card p-6 md:p-8"
-				>
-					<h2 className="text-xl font-semibold text-slate-800 dark:text-white">Send a Message</h2>
+						<div className="mt-6 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+							<p>
+								<span className="font-semibold text-slate-800 dark:text-white">Email:</span>{" "}
+								support@pmscare.com
+							</p>
+							<p>
+								<span className="font-semibold text-slate-800 dark:text-white">Phone:</span> +94
+								11 234 5678
+							</p>
+							<p>
+								<span className="font-semibold text-slate-800 dark:text-white">Office:</span> 120
+								Health Avenue, Kandy
+							</p>
+							<p>
+								<span className="font-semibold text-slate-800 dark:text-white">Hours:</span>
+								Monday - Friday, 8:30 AM - 5:30 PM
+							</p>
+						</div>
+					</article>
 
-					<div className="mt-5 space-y-4">
-						<input
-							type="text"
-							name="fullName"
-							value={formData.fullName}
-							onChange={handleChange}
-							placeholder="Full Name"
-							required
-							className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/50 px-4 py-2.5 outline-none focus:border-blue-500 dark:text-white dark:placeholder-slate-400"
-						/>
-						<input
-							type="email"
-							name="email"
-							value={formData.email}
-							onChange={handleChange}
-							placeholder="Email Address"
-							required
-							className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/50 px-4 py-2.5 outline-none focus:border-blue-500 dark:text-white dark:placeholder-slate-400"
-						/>
-						<input
-							type="text"
-							name="subject"
-							value={formData.subject}
-							onChange={handleChange}
-							placeholder="Subject"
-							required
-							className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/50 px-4 py-2.5 outline-none focus:border-blue-500 dark:text-white dark:placeholder-slate-400"
-						/>
-						<textarea
-							name="message"
-							value={formData.message}
-							onChange={handleChange}
-							placeholder="Your Message"
-							rows="5"
-							required
-							className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/50 px-4 py-2.5 outline-none focus:border-blue-500 dark:text-white dark:placeholder-slate-400"
-						/>
-					</div>
-
-					<button
-						type="submit"
-						className="mt-5 w-full rounded-md bg-blue-600 px-5 py-2.5 text-white font-medium hover:bg-blue-700 transition"
+					<form
+						onSubmit={handleSubmit}
+						className="rounded-2xl glass-card p-6 md:p-8"
 					>
-						Submit
-					</button>
+						<h2 className="text-xl font-semibold text-slate-800 dark:text-white">Send a Message</h2>
 
-					{isSubmitted && (
-						<p className="mt-4 rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 px-4 py-2 text-sm">
-							Thanks for contacting us. We will respond shortly.
-						</p>
-					)}
-				</form>
-			</section>
-		</main>
+						<div className="mt-5 space-y-4">
+							<input
+								type="text"
+								name="fullName"
+								value={formData.fullName}
+								onChange={handleChange}
+								placeholder="Full Name"
+								required
+								className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/50 px-4 py-2.5 outline-none focus:border-blue-500 dark:text-white dark:placeholder-slate-400"
+							/>
+							<input
+								type="email"
+								name="email"
+								value={formData.email}
+								onChange={handleChange}
+								placeholder="Email Address"
+								required
+								className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/50 px-4 py-2.5 outline-none focus:border-blue-500 dark:text-white dark:placeholder-slate-400"
+							/>
+							<input
+								type="text"
+								name="subject"
+								value={formData.subject}
+								onChange={handleChange}
+								placeholder="Subject"
+								required
+								className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/50 px-4 py-2.5 outline-none focus:border-blue-500 dark:text-white dark:placeholder-slate-400"
+							/>
+							<textarea
+								name="message"
+								value={formData.message}
+								onChange={handleChange}
+								placeholder="Your Message"
+								rows="5"
+								required
+								className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/50 px-4 py-2.5 outline-none focus:border-blue-500 dark:text-white dark:placeholder-slate-400"
+							/>
+						</div>
+
+						<button
+							type="submit"
+							className="mt-5 w-full rounded-md bg-blue-600 px-5 py-2.5 text-white font-medium hover:bg-blue-700 transition"
+						>
+							Submit
+						</button>
+
+						{isSubmitted && (
+							<p className="mt-4 rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-400 px-4 py-2 text-sm">
+								Thanks for contacting us. We will respond shortly.
+							</p>
+						)}
+					</form>
+				</section>
+			</main>
+		</div>
 	);
 };
 
