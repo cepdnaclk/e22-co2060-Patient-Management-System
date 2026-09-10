@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { profileChangeService } from "../../../services/profileChangeService";
+import { doctorDashboardService } from "../../../services/doctorDashboardService";
 import { useAuth } from "../../auth/AuthContext";
 import { Pencil, X, Save, Clock, CheckCircle2, AlertCircle, Loader2, FileText } from "lucide-react";
 
@@ -19,12 +20,13 @@ const statusBadge = (status) => {
   }
 };
 
-const Profile = ({ doctor, loading, error }) => {
+const Profile = ({ doctor, loading, error, onUpdate }) => {
   const { isNurse } = useAuth();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
   const [myRequests, setMyRequests] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [togglingAvailability, setTogglingAvailability] = useState(false);
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
@@ -66,6 +68,21 @@ const Profile = ({ doctor, loading, error }) => {
       setMsg(err.response?.data?.message || "Failed to submit change.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const toggleAvailability = async () => {
+    if (!doctor) return;
+    setTogglingAvailability(true);
+    setMsg("");
+    try {
+      await doctorDashboardService.updateDoctorAvailability(doctor.id, !doctor.isAvailable);
+      setMsg(`Status marked as ${!doctor.isAvailable ? 'Available' : 'Unavailable'}.`);
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      setMsg(err.response?.data?.message || "Failed to update availability.");
+    } finally {
+      setTogglingAvailability(false);
     }
   };
 
@@ -204,12 +221,22 @@ const Profile = ({ doctor, loading, error }) => {
               <h2 className="text-lg font-bold text-slate-800">Contact</h2>
               <p className="text-sm text-slate-600"><span className="font-medium">Email:</span> {doctor?.email || "N/A"}</p>
               <p className="text-sm text-slate-600"><span className="font-medium">Mobile:</span> {doctor?.mobileNumber || "N/A"}</p>
-              <p className="text-sm text-slate-600">
-                <span className="font-medium">Availability:</span>{" "}
-                <span className={doctor?.isAvailable ? "text-emerald-600" : "text-red-500"}>
-                  {doctor?.isAvailable ? "Available" : "Unavailable"}
-                </span>
-              </p>
+              <div className="flex items-center gap-4 mt-1">
+                <p className="text-sm text-slate-600">
+                  <span className="font-medium">Availability:</span>{" "}
+                  <span className={doctor?.isAvailable ? "text-emerald-600 font-semibold" : "text-red-500 font-semibold"}>
+                    {doctor?.isAvailable ? "Available" : "Unavailable"}
+                  </span>
+                </p>
+                <button
+                  onClick={toggleAvailability}
+                  disabled={togglingAvailability}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {togglingAvailability && <Loader2 className="w-3 h-3 animate-spin" />}
+                  {doctor?.isAvailable ? "Mark as Unavailable" : "Mark as Available"}
+                </button>
+              </div>
             </div>
             {!isNurse && (
               <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-3">

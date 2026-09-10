@@ -11,6 +11,9 @@ const AppointmentScheduling = () => {
   const [patients, setPatients] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState("list");
+  const [filterDoctor, setFilterDoctor] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   // Calendar state
   const [calYear, setCalYear] = useState(new Date().getFullYear());
@@ -52,6 +55,17 @@ const AppointmentScheduling = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  const getFilteredAppointments = () => {
+    let filtered = [...appointments];
+    if (filterDoctor) {
+      filtered = filtered.filter(a => String(a.doctorId) === filterDoctor || String(a.doctorName) === filterDoctor);
+    }
+    if (filterDate) {
+      filtered = filtered.filter(a => a.appointmentDateTime && a.appointmentDateTime.startsWith(filterDate));
+    }
+    return filtered.sort((a, b) => new Date(b.appointmentDateTime) - new Date(a.appointmentDateTime));
+  };
 
   // --- Calendar helpers ---
   const daysInMonth = (y, m) => new Date(y, m + 1, 0).getDate();
@@ -294,12 +308,54 @@ const AppointmentScheduling = () => {
         <div className="lg:col-span-2">
           {viewMode === "list" ? (
             <div className="bg-white border border-slate-200 rounded-lg shadow-sm">
-              <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 rounded-t-lg">
-                <h2 className="text-lg font-semibold text-slate-800">Upcoming Appointments</h2>
+              <div className="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:justify-between sm:items-center bg-slate-50 rounded-t-lg gap-4">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-semibold text-slate-800">Upcoming Appointments</h2>
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="text-xs border border-slate-200 rounded-md py-1.5 px-3 bg-white text-slate-600 focus:ring-1 focus:ring-indigo-500 hover:bg-slate-50 outline-none cursor-pointer font-medium"
+                  >
+                    {showFilters ? "Hide Filters" : "Filter"}
+                  </button>
+                </div>
                 <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                   {appointments.length} Total
                 </span>
               </div>
+              {showFilters && (
+                <div className="p-4 border-b border-slate-200 bg-white flex flex-wrap gap-6 items-end">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Doctor</label>
+                    <select
+                      value={filterDoctor}
+                      onChange={(e) => setFilterDoctor(e.target.value)}
+                      className="text-sm border border-slate-200 rounded-md py-1.5 px-2 bg-white text-slate-700 outline-none focus:border-indigo-500"
+                    >
+                      <option value="">All Doctors</option>
+                      {doctors.map(d => (
+                        <option key={d.id} value={d.id}>Dr. {d.firstName} {d.lastName}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">Date</label>
+                    <input
+                      type="date"
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
+                      className="text-sm border border-slate-200 rounded-md py-1 px-2 bg-white text-slate-700 outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  {(filterDoctor || filterDate) && (
+                    <button
+                      onClick={() => { setFilterDoctor(""); setFilterDate(""); }}
+                      className="text-xs text-indigo-600 hover:text-indigo-800 font-medium mb-1.5 underline underline-offset-2"
+                    >
+                      Clear Filters
+                    </button>
+                  )}
+                </div>
+              )}
               <div className="p-0 overflow-x-auto">
                 {isLoading ? (
                   <div className="p-8 text-center text-slate-500">Loading appointments...</div>
@@ -317,7 +373,7 @@ const AppointmentScheduling = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
-                      {appointments.map((appt) => {
+                      {getFilteredAppointments().map((appt) => {
                         const dateObj = new Date(appt.appointmentDateTime);
                         const isInvalidDate = isNaN(dateObj.getTime());
                         const dateDisplay = isInvalidDate ? "Invalid Date" : dateObj.toLocaleDateString();
