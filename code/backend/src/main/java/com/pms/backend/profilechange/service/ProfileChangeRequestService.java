@@ -1,6 +1,8 @@
 package com.pms.backend.profilechange.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.pms.backend.notification.service.NotificationService;
+import com.pms.backend.notification.entity.NotificationType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pms.backend.common.exception.AppException;
@@ -29,6 +31,7 @@ public class ProfileChangeRequestService {
     private final ProfileChangeRequestRepository repository;
     private final UserRepository userRepository;
     private final DoctorRepository doctorRepository;
+    private final NotificationService notificationService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ProfileChangeRequestDto submitChange(Long userId, SubmitProfileChangeRequest request) {
@@ -47,6 +50,18 @@ public class ProfileChangeRequestService {
                 .build();
 
         ProfileChangeRequest saved = repository.save(changeRequest);
+
+        List<User> managers = userRepository.findByRole(Role.MANAGEMENT);
+        for (User manager : managers) {
+            notificationService.createNotification(
+                    manager.getId(),
+                    "Profile Change Request",
+                    user.getFirstName() + " " + user.getLastName() + " has submitted a profile change request.",
+                    NotificationType.SYSTEM_ALERT,
+                    saved.getId()
+            );
+        }
+
         return convertToDto(saved);
     }
 

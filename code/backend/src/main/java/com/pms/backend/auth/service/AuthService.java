@@ -1,6 +1,8 @@
 package com.pms.backend.auth.service;
 
 import com.pms.backend.audit.service.AuditLogService;
+import com.pms.backend.notification.service.NotificationService;
+import com.pms.backend.notification.entity.NotificationType;
 import com.pms.backend.auth.dto.AuthResponse;
 import com.pms.backend.auth.dto.GoogleAuthRequest;
 import com.pms.backend.auth.dto.LoginRequest;
@@ -43,6 +45,7 @@ public class AuthService {
     private final RefreshTokenRepository  refreshTokenRepo;
     private final AuditLogService         auditLogService;
     private final PatientService          patientService;
+    private final NotificationService     notificationService;
 
     @Value("${app.jwt.refresh-expiration-ms:604800000}")
     private long refreshExpirationMs;
@@ -85,6 +88,17 @@ public class AuthService {
         auditLogService.log(saved.getId(), saved.getEmail(),
                 "SIGNUP", "User", saved.getId().toString(),
                 "New patient account created", ipAddress);
+
+        List<User> managers = userRepo.findByRole(Role.MANAGEMENT);
+        for (User manager : managers) {
+            notificationService.createNotification(
+                    manager.getId(),
+                    "New Patient Signup",
+                    "A new patient (" + saved.getFirstName() + " " + saved.getLastName() + ") has signed up and is awaiting approval.",
+                    NotificationType.SYSTEM_ALERT,
+                    saved.getId()
+            );
+        }
 
         return new AuthResponse(accessToken, refreshToken, UserDto.from(saved));
     }
