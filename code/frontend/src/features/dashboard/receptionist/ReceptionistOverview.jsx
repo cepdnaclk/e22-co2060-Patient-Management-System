@@ -31,6 +31,13 @@ const ReceptionistOverview = ({ setActiveSection }) => {
   // Detailed appointment view modal
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [cancelling, setCancelling] = useState(false);
+  
+  // Patients list modal
+  const [showPatientsModal, setShowPatientsModal] = useState(false);
+  
+  // Today's Appointments and Available Doctors modals
+  const [showTodayModal, setShowTodayModal] = useState(false);
+  const [showDoctorsModal, setShowDoctorsModal] = useState(false);
 
   // Live Clock effect
   useEffect(() => {
@@ -110,7 +117,11 @@ const ReceptionistOverview = ({ setActiveSection }) => {
     return appointments.filter((a) => isToday(a.appointmentDateTime));
   }, [appointments]);
   const todayCount = todayAppointments.length;
-  const doctorsCount = doctors.length;
+  
+  const availableDoctors = useMemo(() => {
+    return doctors.filter(d => d.isAvailable !== false);
+  }, [doctors]);
+  const availableDoctorsCount = availableDoctors.length;
 
   const handleCancelAppointment = async (id) => {
     if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
@@ -166,12 +177,12 @@ const ReceptionistOverview = ({ setActiveSection }) => {
     },
     {
       id: "doctors",
-      label: "Total Doctors",
-      value: doctorsCount,
+      label: "Available Doctors",
+      value: availableDoctorsCount,
       icon: Stethoscope,
       color: "text-amber-600",
       bg: "bg-amber-100",
-      targetSection: "appointments"
+      targetSection: "doctors"
     }
   ];
 
@@ -221,7 +232,17 @@ const ReceptionistOverview = ({ setActiveSection }) => {
         {statsConfig.map((s) => (
           <Card
             key={s.id}
-            onClick={() => setActiveSection && setActiveSection(s.targetSection)}
+            onClick={() => {
+              if (s.id === "patients") {
+                setShowPatientsModal(true);
+              } else if (s.id === "today") {
+                setShowTodayModal(true);
+              } else if (s.id === "doctors") {
+                setShowDoctorsModal(true);
+              } else {
+                setActiveSection && setActiveSection(s.targetSection);
+              }
+            }}
             className="border border-slate-100 shadow-md shadow-slate-200/50 cursor-pointer transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:border-slate-200"
           >
             <CardContent className="p-6 flex items-center gap-4">
@@ -446,6 +467,138 @@ const ReceptionistOverview = ({ setActiveSection }) => {
 
           </div>
         )}
+      </Modal>
+
+      {/* Patients Directory Modal */}
+      <Modal
+        isOpen={showPatientsModal}
+        onClose={() => setShowPatientsModal(false)}
+        title="Patient Directory & Appointments"
+        maxWidth="max-w-4xl"
+      >
+        <div className="max-h-[65vh] overflow-y-auto pr-2 space-y-4">
+          {patients.length === 0 ? (
+            <p className="text-slate-500 text-center py-8">No patients found in the system.</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4">
+              {patients.map(p => {
+                const patAppts = appointments.filter(a => a.patientId === p.id);
+                return (
+                  <div key={p.id} className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm">
+                    <div className="flex justify-between items-center mb-2">
+                      <div>
+                        <h3 className="font-bold text-slate-800 text-lg">{p.firstName} {p.lastName}</h3>
+                        <p className="text-xs text-slate-500 font-medium">ID: {p.patientId || p.id} &bull; {p.email || "No email provided"}</p>
+                      </div>
+                      <Badge variant="neutral" className="text-xs font-semibold">{patAppts.length} Appointments</Badge>
+                    </div>
+                    {patAppts.length > 0 ? (
+                      <div className="space-y-2 mt-3 border-t border-slate-100 pt-3">
+                        {patAppts.sort((a, b) => new Date(b.appointmentDateTime) - new Date(a.appointmentDateTime)).map(a => (
+                          <div key={a.id} className="flex flex-wrap sm:flex-nowrap justify-between items-center bg-slate-50 p-2.5 rounded-lg text-sm border border-slate-100 gap-3">
+                            <div className="flex items-center gap-2 text-slate-700 min-w-0">
+                              <CalendarCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                              <span className="font-semibold truncate">
+                                {a.appointmentDateTime ? new Date(a.appointmentDateTime).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : "TBD"}
+                              </span>
+                            </div>
+                            <div className="text-slate-600 flex items-center gap-2 min-w-0">
+                              <Stethoscope className="w-4 h-4 text-amber-500 shrink-0" />
+                              <span className="truncate">Dr. {a.doctorName}</span>
+                            </div>
+                            <Badge 
+                              variant={
+                                a.status === 'SCHEDULED' ? 'info' : 
+                                a.status === 'COMPLETED' ? 'success' : 
+                                a.status === 'CANCELLED' ? 'error' : 'neutral'
+                              }
+                              className="text-[10px] shrink-0 font-bold"
+                            >
+                              {a.status}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic mt-2 border-t border-slate-100 pt-3">No appointments on record.</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* Today's Appointments Modal */}
+      <Modal
+        isOpen={showTodayModal}
+        onClose={() => setShowTodayModal(false)}
+        title="Today's Appointments"
+        maxWidth="max-w-4xl"
+      >
+        <div className="max-h-[65vh] overflow-y-auto pr-2 space-y-4">
+          {todayAppointments.length === 0 ? (
+            <p className="text-slate-500 text-center py-8">No appointments scheduled for today.</p>
+          ) : (
+            <div className="grid grid-cols-1 gap-3">
+              {todayAppointments.sort((a, b) => new Date(a.appointmentDateTime) - new Date(b.appointmentDateTime)).map(a => (
+                <div key={a.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center border border-slate-200 p-4 rounded-xl bg-white shadow-sm gap-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="bg-indigo-100 p-2.5 rounded-full text-indigo-700 shrink-0">
+                      <Clock className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-slate-800 truncate">{a.patientName}</h4>
+                      <p className="text-xs text-slate-500 truncate">{new Date(a.appointmentDateTime).toLocaleTimeString([], {timeStyle: 'short'})} &bull; Dr. {a.doctorName}</p>
+                    </div>
+                  </div>
+                  <Badge 
+                    variant={a.status === 'SCHEDULED' ? 'info' : a.status === 'COMPLETED' ? 'success' : a.status === 'CANCELLED' ? 'error' : 'neutral'}
+                    className="font-bold text-[10px] shrink-0"
+                  >
+                    {a.status}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* Available Doctors Modal */}
+      <Modal
+        isOpen={showDoctorsModal}
+        onClose={() => setShowDoctorsModal(false)}
+        title="Available Doctors Today"
+        maxWidth="max-w-3xl"
+      >
+        <div className="max-h-[65vh] overflow-y-auto pr-2 space-y-4">
+          {availableDoctors.length === 0 ? (
+            <p className="text-slate-500 text-center py-8">No available doctors found for today.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {availableDoctors.map(d => {
+                const docsAppts = todayAppointments.filter(a => String(a.doctorId) === String(d.id));
+                return (
+                  <div key={d.id} className="border border-slate-200 rounded-xl p-4 bg-white shadow-sm flex items-start gap-3 transition-colors hover:border-amber-200">
+                    <div className="bg-amber-100 p-3 rounded-full text-amber-700 shrink-0">
+                      <Stethoscope className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-slate-800 truncate">Dr. {d.firstName} {d.lastName}</h4>
+                      <p className="text-xs text-slate-500 mb-2 truncate">{d.specialization || "General"}</p>
+                      <div className="flex items-center justify-between">
+                        <Badge variant="success" className="text-[10px]">Available</Badge>
+                        <span className="text-[10px] text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded">{docsAppts.length} Appts Today</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </Modal>
 
     </div>

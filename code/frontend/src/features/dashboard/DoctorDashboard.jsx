@@ -286,6 +286,7 @@ const DoctorDashboard = () => {
               doctor={doctor}
               loading={loadingDashboard}
               error={dashboardError}
+              onUpdate={loadDashboardData}
             />
           )}
           {section === "records" && <PatientProfile onUpdate={loadDashboardData} initialPatient={targetPatient} />}
