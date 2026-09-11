@@ -54,8 +54,8 @@ public class MedicalRecordService {
 
         MedicalRecord savedRecord = medicalRecordRepository.save(medicalRecord);
         
-        // Notify the doctor if a lab report is created/uploaded
-        if ("LAB_REPORT".equalsIgnoreCase(savedRecord.getRecordType()) && doctor != null) {
+        // Notify the doctor if a lab report is created/uploaded (if doctor creates it themselves with results)
+        if ("LAB_RESULT".equalsIgnoreCase(savedRecord.getRecordType()) && doctor != null && (savedRecord.getTestResult() != null || savedRecord.getAttachmentUrl() != null)) {
             notificationService.createNotification(
                     doctor.getUser().getId(),
                     "New Lab Report",
@@ -66,7 +66,7 @@ public class MedicalRecordService {
         }
 
         // Notify all lab technicians if a lab test is ordered
-        if ("LAB_TEST".equalsIgnoreCase(savedRecord.getRecordType())) {
+        if ("LAB_RESULT".equalsIgnoreCase(savedRecord.getRecordType()) && savedRecord.getTestResult() == null && savedRecord.getAttachmentUrl() == null) {
             List<User> labTechs = userRepository.findByRoleAndIsActive(Role.LAB_TECHNICIAN, true);
             String doctorName = doctor != null ? "Dr. " + doctor.getUser().getFirstName() : "A doctor";
             for (User tech : labTechs) {
@@ -144,8 +144,8 @@ public class MedicalRecordService {
 
         MedicalRecord updatedRecord = medicalRecordRepository.save(medicalRecord);
 
-        // Notify doctor if test results/attachments are updated for a LAB_REPORT
-        if ("LAB_REPORT".equalsIgnoreCase(updatedRecord.getRecordType()) && updatedRecord.getDoctor() != null) {
+        // Notify doctor if test results/attachments are updated for a LAB_RESULT
+        if ("LAB_RESULT".equalsIgnoreCase(updatedRecord.getRecordType()) && updatedRecord.getDoctor() != null) {
             notificationService.createNotification(
                     updatedRecord.getDoctor().getUser().getId(),
                     "Lab Report Updated",
