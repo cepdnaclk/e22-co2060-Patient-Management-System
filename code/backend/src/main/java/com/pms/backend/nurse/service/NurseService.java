@@ -12,8 +12,11 @@ import com.pms.backend.nurse.repository.ClinicalOrderRepository;
 import com.pms.backend.nurse.repository.MedAdministrationRepository;
 import com.pms.backend.nurse.repository.MedicationOrderRepository;
 import com.pms.backend.nurse.repository.VitalsRecordRepository;
+import com.pms.backend.notification.entity.NotificationType;
+import com.pms.backend.notification.service.NotificationService;
 import com.pms.backend.patient.entity.Patient;
 import com.pms.backend.patient.repository.PatientRepository;
+import com.pms.backend.role.entity.Role;
 import com.pms.backend.user.entity.User;
 import com.pms.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +39,7 @@ public class NurseService {
     private final ClinicalOrderRepository clinicalOrderRepository;
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     // --- VITALS ---
     
@@ -64,6 +68,37 @@ public class NurseService {
                 .build();
                 
         record = vitalsRecordRepository.save(record);
+
+        // Alert ALL doctors if vitals are critically abnormal
+        String patientName = patient.getUser().getFirstName() + " " + patient.getUser().getLastName();
+        boolean abnormal = false;
+        StringBuilder alertMsg = new StringBuilder("Abnormal vitals recorded for patient " + patientName + ": ");
+        if (dto.getHeartRate() != null && (dto.getHeartRate() < 50 || dto.getHeartRate() > 120)) {
+            alertMsg.append("HR=").append(dto.getHeartRate()).append("bpm ");
+            abnormal = true;
+        }
+        if (dto.getOxygenSaturation() != null && dto.getOxygenSaturation() < 92) {
+            alertMsg.append("O2Sat=").append(dto.getOxygenSaturation()).append("% ");
+            abnormal = true;
+        }
+        if (dto.getTemperature() != null && (dto.getTemperature() < 35.0 || dto.getTemperature() > 39.5)) {
+            alertMsg.append("Temp=").append(dto.getTemperature()).append("°C ");
+            abnormal = true;
+        }
+        if (abnormal) {
+            final String msg = alertMsg.toString().trim();
+            final Long patientId = patient.getId();
+            userRepository.findByRoleAndIsActive(Role.DOCTOR, true).forEach(doc ->
+                notificationService.createNotification(
+                        doc.getId(),
+                        "⚠️ Abnormal Vitals Alert",
+                        msg,
+                        NotificationType.CRITICAL_ALERT,
+                        patientId
+                )
+            );
+        }
+
         return mapToVitalsDto(record);
     }
 
