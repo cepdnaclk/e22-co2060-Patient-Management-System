@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "../../../components/ui/Card.jsx";
 import { Button } from "../../../components/ui/Button.jsx";
-import { UserPlus, CheckCircle2, AlertCircle, FileText, User, KeyRound } from "lucide-react";
+import { UserPlus, CheckCircle2, AlertCircle, FileText, User, KeyRound, Printer } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { receptionistService } from "../../../services/receptionistService";
 
 const PatientRegistration = () => {
@@ -42,16 +43,58 @@ const PatientRegistration = () => {
       setRegisteredEmail(created.email || formData.email);
       setSubmitted(true);
       setFormData({
-        firstName: "", lastName: "", email: "", mobileNumber: "", gender: "", 
-        dateOfBirth: "", bloodType: "", address: "", 
+        firstName: "", lastName: "", email: "", mobileNumber: "", gender: "",
+        dateOfBirth: "", bloodType: "", address: "",
         emergencyContactName: "", emergencyContactPhone: "", emergencyContactRelation: ""
       });
-      setTimeout(() => setSubmitted(false), 10000);
+      setTimeout(() => setSubmitted(false), 30000);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to register patient. Please try again.");
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handlePrintQRCode = () => {
+    const svg = document.getElementById("patient-qr-code");
+    if (!svg) return;
+
+    const printWindow = window.open('', '', 'width=600,height=600');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Patient QR Code</title>
+          <style>
+            body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; text-align: center; }
+            .container { padding: 30px; border: 2px dashed #cbd5e1; border-radius: 16px; }
+            h2 { margin-top: 0; color: #0f172a; font-size: 24px; }
+            .info { color: #475569; margin-bottom: 24px; font-size: 16px; }
+            .qr-wrapper { margin: 0 auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); display: inline-block; }
+            .footer { margin-top: 24px; color: #64748b; font-size: 14px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>Patient Registration</h2>
+            <div class="info">
+              <strong>Name:</strong> ${formData.firstName} ${formData.lastName}<br/>
+              <strong>ID:</strong> ${registeredPatientId}<br/>
+            </div>
+            <div class="qr-wrapper">
+              ${svg.outerHTML}
+            </div>
+            <div class="footer">Scan to View Patient Profile</div>
+          </div>
+          <script>
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 250);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   const inputStyles = "w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-shadow text-slate-800 text-sm";
@@ -68,12 +111,28 @@ const PatientRegistration = () => {
       </div>
 
       {submitted && (
-        <div className="flex items-start gap-3 p-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-medium animate-in fade-in zoom-in-95 duration-300">
-          <CheckCircle2 className="w-6 h-6 shrink-0 mt-0.5" />
-          <div>
-            <p className="font-bold text-lg">Registration Successful!</p>
-            <p className="text-sm mt-1">Patient ID: <span className="font-bold bg-emerald-100 px-2 py-0.5 rounded">{registeredPatientId}</span></p>
-            <p className="text-sm mt-2 flex items-center gap-1"><KeyRound className="w-4 h-4" /> Login: <span className="font-bold">{registeredEmail}</span> / Password: <span className="font-bold">P@tient@123</span></p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-medium animate-in fade-in zoom-in-95 duration-300">
+          <div className="flex items-start gap-3">
+            <CheckCircle2 className="w-6 h-6 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-lg">Registration Successful!</p>
+              <p className="text-sm mt-1">Patient ID: <span className="font-bold bg-emerald-100 px-2 py-0.5 rounded">{registeredPatientId}</span></p>
+              <p className="text-sm mt-2 flex items-center gap-1"><KeyRound className="w-4 h-4" /> Login: <span className="font-bold">{registeredEmail}</span> / Password: <span className="font-bold">P@tient@123</span></p>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-3 border-l border-emerald-200 pl-4">
+            <div className="bg-white p-2 rounded-lg shadow-sm border border-emerald-100">
+              <QRCodeSVG
+                id="patient-qr-code"
+                value={`${window.location.origin}/login?email=${encodeURIComponent(registeredEmail)}&id=${registeredPatientId}`}
+                size={80}
+                level="H"
+              />
+            </div>
+            <Button size="sm" onClick={handlePrintQRCode} className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 text-xs w-full h-8 shadow-sm">
+              <Printer className="w-3.5 h-3.5" />
+              Print QR
+            </Button>
           </div>
         </div>
       )}
@@ -89,7 +148,7 @@ const PatientRegistration = () => {
         <div className="bg-sky-500 h-2 w-full"></div>
         <CardContent className="p-6 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-8">
-            
+
             {/* Personal Details */}
             <div>
               <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
@@ -177,8 +236,8 @@ const PatientRegistration = () => {
 
             <div className="flex gap-4 pt-4 border-t border-slate-100">
               <Button type="button" variant="outline" className="px-8" onClick={() => setFormData({
-                firstName: "", lastName: "", email: "", mobileNumber: "", gender: "", 
-                dateOfBirth: "", bloodType: "", address: "", 
+                firstName: "", lastName: "", email: "", mobileNumber: "", gender: "",
+                dateOfBirth: "", bloodType: "", address: "",
                 emergencyContactName: "", emergencyContactPhone: "", emergencyContactRelation: ""
               })}>
                 Clear Form
