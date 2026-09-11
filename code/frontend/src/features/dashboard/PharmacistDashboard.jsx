@@ -9,7 +9,11 @@ import { useNavigate } from "react-router-dom";
 import PharmacistOverview from "./pharmacist/PharmacistOverview.jsx";
 import InventoryManager from "./pharmacist/InventoryManager.jsx";
 import PrescriptionQueue from "./pharmacist/PrescriptionQueue.jsx";
+
+import NotificationBell from "../../components/NotificationBell.jsx";
+
 import PharmacyBilling from "./pharmacist/PharmacyBilling.jsx";
+
 
 const sectionLabels = {
   dashboard: "Overview",
@@ -138,6 +142,7 @@ export default function PharmacistDashboard() {
           </div>
           {/* Right */}
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
               <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm">
                 {user?.email?.charAt(0).toUpperCase() || "P"}

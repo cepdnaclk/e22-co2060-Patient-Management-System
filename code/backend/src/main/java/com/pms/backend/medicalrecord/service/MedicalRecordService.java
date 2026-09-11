@@ -6,8 +6,13 @@ import com.pms.backend.doctor.repository.DoctorRepository;
 import com.pms.backend.medicalrecord.dto.MedicalRecordDto;
 import com.pms.backend.medicalrecord.entity.MedicalRecord;
 import com.pms.backend.medicalrecord.repository.MedicalRecordRepository;
+import com.pms.backend.notification.service.NotificationService;
+import com.pms.backend.notification.entity.NotificationType;
 import com.pms.backend.patient.entity.Patient;
 import com.pms.backend.patient.repository.PatientRepository;
+import com.pms.backend.role.entity.Role;
+import com.pms.backend.user.entity.User;
+import com.pms.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,6 +26,8 @@ public class MedicalRecordService {
     private final MedicalRecordRepository medicalRecordRepository;
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     public MedicalRecordDto createMedicalRecord(MedicalRecordDto medicalRecordDto) {
         Patient patient = patientRepository.findById(medicalRecordDto.getPatientId())
@@ -46,6 +53,33 @@ public class MedicalRecordService {
                 .build();
 
         MedicalRecord savedRecord = medicalRecordRepository.save(medicalRecord);
+        
+        // Notify the doctor if a lab report is created/uploaded
+        if ("LAB_REPORT".equalsIgnoreCase(savedRecord.getRecordType()) && doctor != null) {
+            notificationService.createNotification(
+                    doctor.getUser().getId(),
+                    "New Lab Report",
+                    "A new lab report has been uploaded for patient " + patient.getUser().getFirstName() + " " + patient.getUser().getLastName(),
+                    NotificationType.LAB_RESULT,
+                    savedRecord.getId()
+            );
+        }
+
+        // Notify all lab technicians if a lab test is ordered
+        if ("LAB_TEST".equalsIgnoreCase(savedRecord.getRecordType())) {
+            List<User> labTechs = userRepository.findByRoleAndIsActive(Role.LAB_TECHNICIAN, true);
+            String doctorName = doctor != null ? "Dr. " + doctor.getUser().getFirstName() : "A doctor";
+            for (User tech : labTechs) {
+                notificationService.createNotification(
+                        tech.getId(),
+                        "New Lab Test Ordered",
+                        doctorName + " has ordered a new lab test for patient " + patient.getUser().getFirstName() + " " + patient.getUser().getLastName(),
+                        NotificationType.SYSTEM_ALERT,
+                        savedRecord.getId()
+                );
+            }
+        }
+
         return convertToDto(savedRecord);
     }
 
@@ -109,6 +143,18 @@ public class MedicalRecordService {
         }
 
         MedicalRecord updatedRecord = medicalRecordRepository.save(medicalRecord);
+
+        // Notify doctor if test results/attachments are updated for a LAB_REPORT
+        if ("LAB_REPORT".equalsIgnoreCase(updatedRecord.getRecordType()) && updatedRecord.getDoctor() != null) {
+            notificationService.createNotification(
+                    updatedRecord.getDoctor().getUser().getId(),
+                    "Lab Report Updated",
+                    "The lab report for patient " + updatedRecord.getPatient().getUser().getFirstName() + " has been updated with results.",
+                    NotificationType.LAB_RESULT,
+                    updatedRecord.getId()
+            );
+        }
+
         return convertToDto(updatedRecord);
     }
 
