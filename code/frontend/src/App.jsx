@@ -134,11 +134,89 @@ function App() {
             <Route
               path="/unauthorized"
               element={
-                <div className="text-center p-16">
-                  <h1 className="text-2xl font-bold text-red-600">
-                    Access Denied
-                  </h1>
-                  <p>You do not have permission to view this page.</p>
+                <div className="w-screen h-screen bg-white flex flex-col items-center justify-center p-4">
+                  <div className="relative w-full max-w-md h-64 flex justify-center items-end mb-8">
+                    {/* SVG Graphic */}
+                    <svg viewBox="0 0 400 200" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                      {/* Background Buildings (Grey) */}
+                      <rect x="60" y="100" width="40" height="80" fill="#f0f0f0" />
+                      <rect x="80" y="120" width="60" height="60" fill="#e8e8e8" />
+                      <rect x="160" y="60" width="50" height="120" fill="#f0f0f0" />
+                      <rect x="230" y="40" width="60" height="140" fill="#f0f0f0" />
+                      <rect x="280" y="80" width="40" height="100" fill="#e8e8e8" />
+                      <rect x="300" y="110" width="50" height="70" fill="#f0f0f0" />
+                      
+                      {/* Floating Pink Lines */}
+                      <line x1="70" y1="70" x2="110" y2="70" stroke="#ff8da1" strokeWidth="2" strokeLinecap="round" />
+                      <line x1="90" y1="120" x2="130" y2="120" stroke="#ff8da1" strokeWidth="2" strokeLinecap="round" />
+                      <line x1="260" y1="50" x2="280" y2="50" stroke="#ff8da1" strokeWidth="2" strokeLinecap="round" />
+                      <line x1="290" y1="70" x2="310" y2="70" stroke="#ff8da1" strokeWidth="2" strokeLinecap="round" />
+                      <line x1="300" y1="30" x2="340" y2="30" stroke="#ff8da1" strokeWidth="2" strokeLinecap="round" />
+                      <line x1="280" y1="100" x2="320" y2="100" stroke="#ff8da1" strokeWidth="2" strokeLinecap="round" />
+
+                      {/* Ground Line */}
+                      <line x1="40" y1="180" x2="360" y2="180" stroke="#ff8da1" strokeWidth="2" />
+
+                      {/* No Entry Sign */}
+                      <line x1="200" y1="180" x2="200" y2="80" stroke="#ff8da1" strokeWidth="4" />
+                      <circle cx="200" cy="70" r="15" fill="white" stroke="#ff8da1" strokeWidth="2" />
+                      <text x="200" y="68" fontSize="6" fill="#ff8da1" textAnchor="middle" fontWeight="bold">NO</text>
+                      <text x="200" y="75" fontSize="5" fill="#ff8da1" textAnchor="middle" fontWeight="bold">ENTRY</text>
+                      
+                      <path d="M190 180 L210 180 L205 175 L195 175 Z" fill="#ff8da1" />
+
+                      {/* Left Barrier */}
+                      <rect x="130" y="140" width="60" height="15" fill="#ffe0e6" stroke="#ff8da1" strokeWidth="1.5" />
+                      <rect x="130" y="160" width="60" height="15" fill="#ffe0e6" stroke="#ff8da1" strokeWidth="1.5" />
+                      {/* Barrier legs */}
+                      <line x1="140" y1="140" x2="140" y2="180" stroke="#ff8da1" strokeWidth="2.5" />
+                      <line x1="180" y1="140" x2="180" y2="180" stroke="#ff8da1" strokeWidth="2.5" />
+                      <line x1="140" y1="135" x2="140" y2="140" stroke="#ff8da1" strokeWidth="2.5" />
+                      <line x1="180" y1="135" x2="180" y2="140" stroke="#ff8da1" strokeWidth="2.5" />
+                      {/* Barrier stripes */}
+                      <line x1="135" y1="155" x2="145" y2="140" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="145" y1="155" x2="155" y2="140" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="155" y1="155" x2="165" y2="140" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="165" y1="155" x2="175" y2="140" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="175" y1="155" x2="185" y2="140" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="135" y1="175" x2="145" y2="160" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="145" y1="175" x2="155" y2="160" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="155" y1="175" x2="165" y2="160" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="165" y1="175" x2="175" y2="160" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="175" y1="175" x2="185" y2="160" stroke="#ff8da1" strokeWidth="1" />
+                      <circle cx="140" cy="135" r="2" fill="#ff8da1" />
+                      <circle cx="180" cy="135" r="2" fill="#ff8da1" />
+
+                      {/* Right Barrier */}
+                      <rect x="210" y="140" width="60" height="15" fill="#ffe0e6" stroke="#ff8da1" strokeWidth="1.5" />
+                      <rect x="210" y="160" width="60" height="15" fill="#ffe0e6" stroke="#ff8da1" strokeWidth="1.5" />
+                      {/* Barrier legs */}
+                      <line x1="220" y1="140" x2="220" y2="180" stroke="#ff8da1" strokeWidth="2.5" />
+                      <line x1="260" y1="140" x2="260" y2="180" stroke="#ff8da1" strokeWidth="2.5" />
+                      <line x1="220" y1="135" x2="220" y2="140" stroke="#ff8da1" strokeWidth="2.5" />
+                      <line x1="260" y1="135" x2="260" y2="140" stroke="#ff8da1" strokeWidth="2.5" />
+                      {/* Barrier stripes */}
+                      <line x1="215" y1="155" x2="225" y2="140" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="225" y1="155" x2="235" y2="140" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="235" y1="155" x2="245" y2="140" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="245" y1="155" x2="255" y2="140" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="255" y1="155" x2="265" y2="140" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="215" y1="175" x2="225" y2="160" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="225" y1="175" x2="235" y2="160" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="235" y1="175" x2="245" y2="160" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="245" y1="175" x2="255" y2="160" stroke="#ff8da1" strokeWidth="1" />
+                      <line x1="255" y1="175" x2="265" y2="160" stroke="#ff8da1" strokeWidth="1" />
+                      <circle cx="220" cy="135" r="2" fill="#ff8da1" />
+                      <circle cx="260" cy="135" r="2" fill="#ff8da1" />
+                    </svg>
+                  </div>
+                  <div className="text-center">
+                    <h1 className="text-3xl font-semibold mb-3" style={{ color: '#ff708d' }}>
+                      Access Denied
+                    </h1>
+                    <p className="text-gray-400 text-base mb-1">You currently does not have access to this page.</p>
+                    <p className="text-gray-400 text-base">Please try again later.</p>
+                  </div>
                 </div>
               }
             />
