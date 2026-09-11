@@ -14,6 +14,7 @@
     "@stomp/stompjs": "^7.3.0",
     "axios": "^1.13.5",
     "lucide-react": "^1.14.0",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router": "^7.13.0",

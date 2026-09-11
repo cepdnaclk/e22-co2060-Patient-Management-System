@@ -2,19 +2,24 @@ import React, { useState } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
 import {
-  LayoutDashboard, Pill, Activity, Menu, X, LogOut, Sun, Moon
+  LayoutDashboard, Pill, Activity, Menu, X, LogOut, Sun, Moon, Receipt
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import PharmacistOverview from "./pharmacist/PharmacistOverview.jsx";
 import InventoryManager from "./pharmacist/InventoryManager.jsx";
 import PrescriptionQueue from "./pharmacist/PrescriptionQueue.jsx";
+
 import NotificationBell from "../../components/NotificationBell.jsx";
+
+import PharmacyBilling from "./pharmacist/PharmacyBilling.jsx";
+
 
 const sectionLabels = {
   dashboard: "Overview",
   queue: "Prescriptions",
   inventory: "Inventory",
+  billing: "Billing",
 };
 
 export default function PharmacistDashboard() {
@@ -33,6 +38,7 @@ export default function PharmacistDashboard() {
     { id: "dashboard", label: "Overview", icon: LayoutDashboard },
     { id: "queue", label: "Prescriptions", icon: Activity },
     { id: "inventory", label: "Inventory", icon: Pill },
+    { id: "billing", label: "Billing", icon: Receipt },
   ];
 
   return (
@@ -162,6 +168,7 @@ export default function PharmacistDashboard() {
           {section === "dashboard" && <PharmacistOverview onNavigate={setSection} />}
           {section === "queue" && <PrescriptionQueue />}
           {section === "inventory" && <InventoryManager />}
+          {section === "billing" && <PharmacyBilling />}
         </div>
       </main>
     </div>
