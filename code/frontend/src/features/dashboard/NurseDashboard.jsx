@@ -11,6 +11,7 @@ import PatientVitalsCard from "./NurseDashboardComponents/PatientVitalsCard.jsx"
 import MARCard from "./NurseDashboardComponents/MARCard.jsx";
 import ClinicalOrdersCard from "./NurseDashboardComponents/ClinicalOrdersCard.jsx";
 import { patientRecordService } from "../../services/patientRecordService";
+import NotificationBell from "../../components/NotificationBell.jsx";
 
 // ── Accent theme (teal) for the Nurse dashboard ──────────────────
 const ACCENT = {
@@ -337,6 +338,7 @@ export default function NurseDashboard() {
 
           {/* Right: user info + sign out */}
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
               <div
                 className={`w-8 h-8 rounded-full ${ACCENT.iconBg} flex items-center justify-center ${ACCENT.text} font-bold text-sm border ${ACCENT.border}`}

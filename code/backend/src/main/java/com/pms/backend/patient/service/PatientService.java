@@ -11,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.pms.backend.common.exception.AppException;
+import com.pms.backend.notification.entity.NotificationType;
+import com.pms.backend.notification.service.NotificationService;
 import com.pms.backend.patient.dto.PatientDto;
 import com.pms.backend.patient.dto.PatientRegistrationRequest;
 import com.pms.backend.patient.entity.Patient;
@@ -27,6 +29,7 @@ public class PatientService {
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationService notificationService;
 
     public PatientDto registerPatient(PatientRegistrationRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -246,7 +249,22 @@ public class PatientService {
             patient.setCurrentMedications(patientDto.getCurrentMedications());
         }
         if (patientDto.getCriticalStatus() != null) {
+            boolean wasAlreadyCritical = Boolean.TRUE.equals(patient.getCriticalStatus());
             patient.setCriticalStatus(patientDto.getCriticalStatus());
+
+            // Notify all active doctors when a patient is flagged as critical
+            if (patientDto.getCriticalStatus() && !wasAlreadyCritical) {
+                String patientFullName = patient.getUser().getFirstName() + " " + patient.getUser().getLastName();
+                userRepository.findByRoleAndIsActive(Role.DOCTOR, true).forEach(doc ->
+                    notificationService.createNotification(
+                            doc.getId(),
+                            "⚠️ Critical Patient Alert",
+                            "Patient " + patientFullName + " has been flagged as CRITICAL. Immediate attention required.",
+                            NotificationType.CRITICAL_ALERT,
+                            patient.getId()
+                    )
+                );
+            }
         }
 
         Patient updatedPatient = patientRepository.save(patient);

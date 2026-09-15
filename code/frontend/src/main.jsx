@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import { AuthProvider } from "./features/auth/AuthContext.jsx";
 import { ThemeProvider } from "./features/theme/ThemeContext.jsx";
+import { NotificationProvider } from "./features/notifications/NotificationContext.jsx";
 
 import { ToastProvider } from "./components/ui/ToastContext.jsx";
 
@@ -15,7 +16,9 @@ createRoot(document.getElementById("root")).render(
       <ToastProvider>
         <ThemeProvider>
           <AuthProvider>
-            <App />
+            <NotificationProvider>
+              <App />
+            </NotificationProvider>
           </AuthProvider>
         </ThemeProvider>
       </ToastProvider>

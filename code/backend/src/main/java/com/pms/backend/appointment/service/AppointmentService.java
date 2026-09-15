@@ -6,6 +6,8 @@ import com.pms.backend.appointment.repository.AppointmentRepository;
 import com.pms.backend.common.exception.AppException;
 import com.pms.backend.doctor.entity.Doctor;
 import com.pms.backend.doctor.repository.DoctorRepository;
+import com.pms.backend.notification.entity.NotificationType;
+import com.pms.backend.notification.service.NotificationService;
 import com.pms.backend.patient.entity.Patient;
 import com.pms.backend.patient.repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
+    private final NotificationService notificationService;
 
     public AppointmentDto createAppointment(AppointmentDto appointmentDto) {
         Patient patient = patientRepository.findById(appointmentDto.getPatientId())
@@ -45,6 +48,29 @@ public class AppointmentService {
                 .build();
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
+
+        String patientName = patient.getUser().getFirstName() + " " + patient.getUser().getLastName();
+        String doctorFullName = "Dr. " + doctor.getUser().getFirstName() + " " + doctor.getUser().getLastName();
+
+        // Notify the doctor about new appointment
+        notificationService.createNotification(
+                doctor.getUser().getId(),
+                "New Appointment Scheduled",
+                "Patient " + patientName + " has booked an appointment with you" +
+                        (appointmentDto.getReason() != null ? " for: " + appointmentDto.getReason() : "") + ".",
+                NotificationType.APPOINTMENT,
+                savedAppointment.getId()
+        );
+
+        // Notify the patient about their confirmed appointment
+        notificationService.createNotification(
+                patient.getUser().getId(),
+                "Appointment Confirmed",
+                "Your appointment with " + doctorFullName + " has been scheduled successfully.",
+                NotificationType.APPOINTMENT,
+                savedAppointment.getId()
+        );
+
         return convertToDto(savedAppointment);
     }
 
@@ -94,11 +120,33 @@ public class AppointmentService {
         if (appointmentDto.getNotes() != null) {
             appointment.setNotes(appointmentDto.getNotes());
         }
+        String previousStatus = appointment.getStatus();
         if (appointmentDto.getStatus() != null) {
             appointment.setStatus(appointmentDto.getStatus());
         }
 
         Appointment updatedAppointment = appointmentRepository.save(appointment);
+
+        // Notify patient if their appointment is confirmed, rescheduled or cancelled
+        if (appointmentDto.getStatus() != null && !appointmentDto.getStatus().equals(previousStatus)) {
+            String patientName = updatedAppointment.getPatient().getUser().getFirstName();
+            String docName = "Dr. " + updatedAppointment.getDoctor().getUser().getFirstName() + " " + updatedAppointment.getDoctor().getUser().getLastName();
+            String statusMsg = switch (appointmentDto.getStatus().toUpperCase()) {
+                case "CONFIRMED"   -> "Your appointment with " + docName + " has been confirmed.";
+                case "CANCELLED"   -> "Your appointment with " + docName + " has been cancelled.";
+                case "COMPLETED"   -> "Your appointment with " + docName + " is marked as completed.";
+                case "RESCHEDULED" -> "Your appointment with " + docName + " has been rescheduled.";
+                default            -> "Your appointment status has been updated to: " + appointmentDto.getStatus();
+            };
+            notificationService.createNotification(
+                    updatedAppointment.getPatient().getUser().getId(),
+                    "Appointment Update",
+                    statusMsg,
+                    NotificationType.APPOINTMENT,
+                    updatedAppointment.getId()
+            );
+        }
+
         return convertToDto(updatedAppointment);
     }
 
@@ -107,6 +155,25 @@ public class AppointmentService {
                 .orElseThrow(() -> new AppException("Appointment not found", HttpStatus.NOT_FOUND));
         appointment.setStatus("CANCELLED");
         appointmentRepository.save(appointment);
+
+        // Notify both doctor and patient
+        String patientName = appointment.getPatient().getUser().getFirstName() + " " + appointment.getPatient().getUser().getLastName();
+        String doctorFullName = "Dr. " + appointment.getDoctor().getUser().getFirstName() + " " + appointment.getDoctor().getUser().getLastName();
+
+        notificationService.createNotification(
+                appointment.getDoctor().getUser().getId(),
+                "Appointment Cancelled",
+                "Appointment with patient " + patientName + " has been cancelled.",
+                NotificationType.APPOINTMENT,
+                appointment.getId()
+        );
+        notificationService.createNotification(
+                appointment.getPatient().getUser().getId(),
+                "Appointment Cancelled",
+                "Your appointment with " + doctorFullName + " has been cancelled.",
+                NotificationType.APPOINTMENT,
+                appointment.getId()
+        );
     }
 
     public void deleteAppointment(Long id) {
@@ -156,4 +223,3 @@ public class AppointmentService {
                 .build();
     }
 }
-

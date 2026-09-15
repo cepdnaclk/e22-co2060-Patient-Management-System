@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 import LabOverview from "./labtechnician/LabOverview.jsx";
 import LabTestQueue from "./labtechnician/LabTestQueue.jsx";
+import NotificationBell from "../../components/NotificationBell.jsx";
 
 const sectionLabels = {
   overview: "Overview",
@@ -124,6 +125,7 @@ export default function LabTechnicianDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
               <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-700 font-bold text-sm">
                 {user?.email?.charAt(0).toUpperCase() || "L"}
