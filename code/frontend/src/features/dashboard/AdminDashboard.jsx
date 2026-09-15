@@ -13,6 +13,7 @@ import Dashboard from "./AdminDAshboardComponents/Dashboard";
 import UsersList from "./AdminDAshboardComponents/UsersList";
 import PatientsManager from "./AdminDAshboardComponents/PatientsManager";
 import AllTables from "./AdminDAshboardComponents/AllTables";
+import NotificationBell from "../../components/NotificationBell.jsx";
 
 const sectionLabels = {
   dashboard: "Overview",
@@ -145,6 +146,7 @@ const AdminDashboard = () => {
           </div>
           {/* Right: theme toggle + user info */}
           <div className="flex items-center gap-2">
+            <NotificationBell />
             <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200 ml-1">
               <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">
                 {user?.email?.charAt(0).toUpperCase() || "A"}

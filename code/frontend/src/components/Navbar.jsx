@@ -3,6 +3,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom"; // 1. Impo
 import { useAuth } from "../features/auth/AuthContext.jsx";
 import { useTheme } from "../features/theme/ThemeContext.jsx";
 import { Menu, X, LogOut, Sun, Moon } from "lucide-react";
+import NotificationBell from "./NotificationBell.jsx";
 
 const Navbar = () => {
   const { isLoggedIn, user, logout, isDoctor, isPatient, isAdmin, isNurse } = useAuth();
@@ -90,6 +91,8 @@ const Navbar = () => {
           >
             {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
           </button>
+
+          {isLoggedIn && <NotificationBell />}
 
           {!isLoggedIn ? (
             <div className="hidden sm:flex items-center gap-3">
