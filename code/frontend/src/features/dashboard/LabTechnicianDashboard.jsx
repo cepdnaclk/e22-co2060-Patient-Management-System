@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
 import {
-  LayoutDashboard, Microscope, Menu, X, LogOut, FlaskRoundIcon as Flask
+  LayoutDashboard, Microscope, Menu, X, LogOut, FlaskRoundIcon as Flask, Receipt
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import LabOverview from "./labtechnician/LabOverview.jsx";
 import LabTestQueue from "./labtechnician/LabTestQueue.jsx";
+import LabBilling from "./labtechnician/LabBilling.jsx";
 
 const sectionLabels = {
   overview: "Overview",
   queue: "Lab Test Queue",
+  billing: "Billing",
 };
 
 export default function LabTechnicianDashboard() {
@@ -27,6 +29,7 @@ export default function LabTechnicianDashboard() {
   const menuItems = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "queue", label: "Lab Test Queue", icon: Microscope },
+    { id: "billing", label: "Billing", icon: Receipt },
   ];
 
   return (
@@ -133,12 +136,21 @@ export default function LabTechnicianDashboard() {
                 <p className="text-xs text-slate-500 leading-tight">{user?.email}</p>
               </div>
             </div>
+            <button
+              onClick={handleLogout}
+              className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-1"
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </header>
 
         <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto">
           {section === "overview" && <LabOverview onNavigate={setSection} />}
           {section === "queue" && <LabTestQueue />}
+          {section === "billing" && <LabBilling />}
         </div>
       </main>
     </div>

@@ -176,6 +176,9 @@ public class PatientService {
         if (patientDto.getPatientId() != null) {
             patient.setPatientId(patientDto.getPatientId());
         }
+        if (patientDto.getProfilePictureUrl() != null) {
+            patient.setProfilePictureUrl(patientDto.getProfilePictureUrl());
+        }
         if (patientDto.getAddress() != null) {
             patient.setAddress(patientDto.getAddress());
         }
@@ -285,6 +288,7 @@ public class PatientService {
                 .id(patient.getId())
             .patientId(patient.getPatientId())
                 .userId(patient.getUser().getId())
+                .profilePictureUrl(patient.getProfilePictureUrl())
                 .firstName(patient.getUser().getFirstName())
                 .lastName(patient.getUser().getLastName())
                 .email(patient.getUser().getEmail())

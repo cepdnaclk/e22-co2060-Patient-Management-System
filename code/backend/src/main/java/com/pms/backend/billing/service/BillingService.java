@@ -2,9 +2,13 @@ package com.pms.backend.billing.service;
 
 import com.pms.backend.audit.service.AuditLogService;
 import com.pms.backend.billing.dto.CreateInvoiceRequest;
+import com.pms.backend.billing.dto.CreatePendingItemRequest;
+import com.pms.backend.billing.dto.PendingBillItemDto;
 import com.pms.backend.billing.entity.Invoice;
 import com.pms.backend.billing.entity.InvoiceItem;
+import com.pms.backend.billing.entity.PendingBillItem;
 import com.pms.backend.billing.repository.InvoiceRepository;
+import com.pms.backend.billing.repository.PendingBillItemRepository;
 import com.pms.backend.common.exception.AppException;
 import com.pms.backend.patient.entity.Patient;
 import com.pms.backend.patient.repository.PatientRepository;
@@ -27,6 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class BillingService {
 
     private final InvoiceRepository invoiceRepo;
+    private final PendingBillItemRepository pendingBillItemRepo;
     private final PatientRepository patientRepo;
     private final AuditLogService   auditLogService;
 
@@ -74,12 +79,69 @@ public class BillingService {
         invoice.recalculateTotal();
 
         Invoice saved = invoiceRepo.save(invoice);
+        
+        // Mark pending items as BILLED if they match the patient
+        List<PendingBillItem> pendingItems = pendingBillItemRepo.findByPatientIdAndStatusOrderByCreatedAtDesc(patient.getId(), "PENDING");
+        for (PendingBillItem p : pendingItems) {
+            p.setStatus("BILLED");
+            pendingBillItemRepo.save(p);
+        }
 
         auditLogService.log(currentUser.getId(), currentUser.getEmail(),
                 "CREATE_INVOICE", "Invoice", saved.getId().toString(),
                 "Invoice " + invoiceNumber + " for patient " + patient.getId(), null);
 
         return saved;
+    }
+
+    // ── PENDING BILL ITEMS ────────────────────────────────────────────────────
+    @Transactional
+    public List<PendingBillItemDto> addPendingItems(List<CreatePendingItemRequest> requests) {
+        if (requests == null || requests.isEmpty()) {
+            return List.of();
+        }
+        
+        List<PendingBillItem> savedItems = requests.stream().map(req -> {
+            Patient patient = patientRepo.findById(req.getPatientId())
+                    .orElseThrow(() -> AppException.notFound("Patient not found"));
+
+            PendingBillItem item = PendingBillItem.builder()
+                    .patient(patient)
+                    .department(req.getDepartment())
+                    .description(req.getDescription())
+                    .quantity(req.getQuantity())
+                    .unitPrice(req.getUnitPrice())
+                    .status("PENDING")
+                    .build();
+            return pendingBillItemRepo.save(item);
+        }).toList();
+
+        return savedItems.stream().map(this::mapToPendingDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PendingBillItemDto> getPendingItemsByPatient(Long patientId) {
+        return pendingBillItemRepo.findByPatientIdAndStatusOrderByCreatedAtDesc(patientId, "PENDING")
+                .stream().map(this::mapToPendingDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> getPatientsWithPendingItems() {
+        return pendingBillItemRepo.findDistinctPatientIdsWithPendingItems();
+    }
+    
+    private PendingBillItemDto mapToPendingDto(PendingBillItem entity) {
+        PendingBillItemDto dto = new PendingBillItemDto();
+        dto.setId(entity.getId());
+        dto.setPatientId(entity.getPatient().getId());
+        dto.setDepartment(entity.getDepartment());
+        dto.setDescription(entity.getDescription());
+        dto.setQuantity(entity.getQuantity());
+        dto.setUnitPrice(entity.getUnitPrice());
+        dto.setTotalPrice(entity.getTotalPrice());
+        dto.setStatus(entity.getStatus());
+        dto.setCreatedAt(entity.getCreatedAt());
+        return dto;
     }
 
     // ── RECORD PAYMENT ────────────────────────────────────────────────────────

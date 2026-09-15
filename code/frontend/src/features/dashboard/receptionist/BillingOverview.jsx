@@ -56,12 +56,9 @@ export default function BillingOverview() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Billing & Invoicing</h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Invoices & Revenue</h1>
           <p className="text-sm text-slate-500 mt-1">Manage hospital revenue, invoices, and payments.</p>
         </div>
-        <Button onClick={() => setView("create")} icon={Plus} className="bg-sky-600 hover:bg-sky-700">
-          Create New Invoice
-        </Button>
       </div>
 
       {/* Summary Cards */}
@@ -147,13 +144,13 @@ export default function BillingOverview() {
                         {new Date(inv.createdAt).toLocaleDateString()}
                       </td>
                       <td className="p-4 text-slate-600">
-                        PMS-{String(inv.patientId).padStart(5, '0')}
+                        PMS-{String(inv.patient?.id || inv.patientId || "0").padStart(5, '0')}
                       </td>
                       <td className="p-4 font-semibold text-slate-900">
                         Rs. {inv.totalAmount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
                       <td className="p-4 font-semibold text-amber-600">
-                        Rs. {inv.balanceDue?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        Rs. {inv.dueAmount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
                       <td className="p-4">
                         {inv.status === "PAID" ? (

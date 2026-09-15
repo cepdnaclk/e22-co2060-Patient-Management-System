@@ -16,6 +16,7 @@ public class PatientDto {
     private Long id;
     private String patientId;
     private Long userId;
+    private String profilePictureUrl;
     private String firstName;
     private String lastName;
     private String email;

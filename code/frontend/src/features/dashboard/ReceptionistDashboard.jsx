@@ -3,20 +3,20 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
 import {
   LayoutDashboard, UserPlus, Calendar, CreditCard,
-  Menu, X, Building, LogOut, Sun, Moon
+  Menu, X, Building, LogOut, Sun, Moon, FileText
 } from "lucide-react";
 
 import ReceptionistOverview from "./receptionist/ReceptionistOverview.jsx";
 import PatientRegistration from "./receptionist/PatientRegistration.jsx";
 import AppointmentScheduling from "./receptionist/AppointmentScheduling.jsx";
-import BillingOverview from "./receptionist/BillingOverview.jsx";
+import ReceptionistBilling from "./receptionist/ReceptionistBilling.jsx";
 import { useNavigate } from "react-router-dom";
 
 const sectionLabels = {
   overview: "Overview",
   register: "Patient Registration",
   appointments: "Scheduling",
-  billing: "Billing & Invoicing",
+  mainBilling: "Main Billing",
 };
 
 const ReceptionistDashboard = () => {
@@ -35,7 +35,7 @@ const ReceptionistDashboard = () => {
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "register", label: "Patient Registration", icon: UserPlus },
     { id: "appointments", label: "Scheduling", icon: Calendar },
-    { id: "billing", label: "Billing & Invoicing", icon: CreditCard },
+    { id: "mainBilling", label: "Main Billing", icon: CreditCard },
   ];
 
   return (
@@ -163,7 +163,7 @@ const ReceptionistDashboard = () => {
           {section === "overview" && <ReceptionistOverview setActiveSection={setSection} />}
           {section === "register" && <PatientRegistration />}
           {section === "appointments" && <AppointmentScheduling />}
-          {section === "billing" && <BillingOverview />}
+          {section === "mainBilling" && <ReceptionistBilling setActiveSection={setSection} />}
         </div>
       </main>
     </div>
