@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { ClipboardList, CheckSquare, Square, Loader2 } from "lucide-react";
+import { ClipboardList, CheckSquare, Square, Loader2, FileText } from "lucide-react";
 import { nurseDashboardService } from "../../../services/nurseDashboardService";
+import { patientRecordService } from "../../../services/patientRecordService";
 import { useAuth } from "../../auth/AuthContext.jsx";
 
-export default function ClinicalOrdersCard({ patient }) {
+export default function ClinicalOrdersCard({ patient, isInline = false }) {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+  
+  const [isAddingOrder, setIsAddingOrder] = useState(false);
+  const [newOrderText, setNewOrderText] = useState("");
 
   // Load clinical orders from the backend API
   useEffect(() => {
@@ -17,8 +21,27 @@ export default function ClinicalOrdersCard({ patient }) {
       }
       setLoading(true);
       try {
-        const data = await nurseDashboardService.getPatientClinicalOrders(patient.id);
-        setOrders(data || []);
+        const [ordersData, recordsData] = await Promise.all([
+          nurseDashboardService.getPatientClinicalOrders(patient.id).catch(() => []),
+          patientRecordService.getPatientRecords(patient.id).catch(() => [])
+        ]);
+
+        const notes = recordsData.filter(r => 
+          r.recordType === "NOTE" || 
+          r.recordType === "CLINICAL_NOTE" || 
+          r.type === "Note" || 
+          r.type === "Clinical Note"
+        );
+
+        const noteOrders = notes.map(n => ({
+          id: `note-${n.id}`,
+          description: n.description || n.title,
+          type: "DOCTOR'S NOTE",
+          status: "NOTE",
+          doctor: n.doctor
+        }));
+
+        setOrders([...(ordersData || []), ...noteOrders]);
       } catch (error) {
         console.error("Failed to fetch clinical orders", error);
         // Fallback to empty — nurse will see "No active orders"
@@ -54,19 +77,60 @@ export default function ClinicalOrdersCard({ patient }) {
     }
   };
 
+  const handleAddOrder = () => {
+    if (!newOrderText.trim()) return;
+    const newOrder = {
+      id: Date.now(),
+      description: newOrderText,
+      type: "CLINICAL",
+      status: "PENDING"
+    };
+    setOrders(prev => [newOrder, ...prev]);
+    setNewOrderText("");
+    setIsAddingOrder(false);
+  };
+
   const pendingCount = orders.filter((o) => o.status === "PENDING").length;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col flex-1">
-      <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-5 py-4 border-b border-orange-100 flex items-center justify-between">
-        <h3 className="font-bold text-orange-900 flex items-center gap-2">
-          <ClipboardList className="w-5 h-5 text-orange-600" />
+    <div className={isInline ? "flex flex-col h-full" : "bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col flex-1"}>
+      <div className={isInline ? "px-3 py-3 border-b border-slate-100 flex items-center justify-between" : "bg-gradient-to-r from-blue-50 to-indigo-50 px-5 py-4 border-b border-blue-100 flex items-center justify-between"}>
+        <h3 className={`font-bold flex items-center gap-2 ${isInline ? "text-slate-800 text-sm" : "text-blue-900"}`}>
+          <ClipboardList className={isInline ? "w-4 h-4 text-blue-600" : "w-5 h-5 text-blue-600"} />
           Clinical Orders
         </h3>
-        <span className="text-xs font-bold bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full uppercase tracking-wider">
-          {pendingCount} Pending
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={isInline ? "text-[10px] font-bold bg-slate-200/50 text-slate-600 px-2 py-0.5 rounded-full uppercase tracking-wider" : "text-xs font-bold bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full uppercase tracking-wider"}>
+            {pendingCount} Pending
+          </span>
+          <button 
+            onClick={() => setIsAddingOrder(!isAddingOrder)}
+            className="text-[10px] font-bold bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors px-2 py-1 rounded-full uppercase tracking-wider"
+          >
+            {isAddingOrder ? "Cancel" : "+ Add"}
+          </button>
+        </div>
       </div>
+
+      {isAddingOrder && (
+        <div className="p-3 bg-blue-50/50 border-b border-blue-100 flex flex-col gap-2">
+          <input
+            type="text"
+            value={newOrderText}
+            onChange={(e) => setNewOrderText(e.target.value)}
+            placeholder="Type new clinical order..."
+            className="w-full border border-slate-200 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <div className="flex justify-end">
+            <button 
+              onClick={handleAddOrder}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-1.5 px-3 rounded-lg transition-colors"
+            >
+              Save Order
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="p-2 flex-1 overflow-y-auto">
         {loading ? (
@@ -83,16 +147,18 @@ export default function ClinicalOrdersCard({ patient }) {
             <div
               key={order.id}
               onClick={() => toggleOrder(order.id)}
-              className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors group"
+              className={`flex items-start gap-3 p-3 rounded-xl transition-colors group ${order.type !== "DOCTOR'S NOTE" ? "hover:bg-slate-50 cursor-pointer" : "bg-indigo-50/50 hover:bg-indigo-100/50 mb-2 border border-indigo-100/50 cursor-pointer"}`}
             >
-              <button className="mt-0.5 text-slate-400 group-hover:text-orange-500 transition-colors">
+              <div className="mt-0.5 text-slate-400 group-hover:text-blue-500 transition-colors">
                 {order.status === "COMPLETED" ? (
-                  <CheckSquare className="w-5 h-5 text-orange-500" />
+                  <CheckSquare className="w-5 h-5 text-blue-500" />
+                ) : order.type === "DOCTOR'S NOTE" ? (
+                  <FileText className="w-5 h-5 text-indigo-400" />
                 ) : (
                   <Square className="w-5 h-5" />
                 )}
-              </button>
-              <div>
+              </div>
+              <div className="flex-1">
                 <p
                   className={`font-semibold text-sm ${
                     order.status === "COMPLETED"
@@ -103,7 +169,7 @@ export default function ClinicalOrdersCard({ patient }) {
                   {order.description || order.orderDescription || "Clinical Order"}
                 </p>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  {order.type || order.orderType || "ORDER"} ORDER
+                  {order.type || order.orderType || "ORDER"} {order.doctor && order.doctor !== "System" ? `• BY ${order.doctor}` : ""}
                 </span>
               </div>
             </div>
