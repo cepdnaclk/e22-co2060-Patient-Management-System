@@ -856,12 +856,17 @@ const PatientDashboard = () => {
                         <Badge
                           variant={
                             (app.status || "SCHEDULED") === "COMPLETED" ? "success" :
-                              (app.status || "SCHEDULED") === "SCHEDULED" ? "info" :
+                              (app.status || "SCHEDULED") === "SCHEDULED" || app.status === "CONFIRMED" ? "info" :
+                              app.status === "PENDING" ? "warning" :
+                              app.status === "REJECTED" || app.status === "CANCELLED" ? "error" :
                                 "neutral"
                           }
                         >
                           {app.status || "SCHEDULED"}
                         </Badge>
+                        {app.status === "REJECTED" && app.declineReason && (
+                          <p className="text-xs text-red-600 mt-1 font-medium bg-red-50 p-1 rounded">Reason: {app.declineReason}</p>
+                        )}
                       </td>
                     </tr>
                   ))}
