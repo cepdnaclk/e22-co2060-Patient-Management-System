@@ -31,5 +31,22 @@ export const billingService = {
   async getInvoiceById(invoiceId) {
     const { data } = await api.get(`/api/invoices/${invoiceId}`);
     return data;
+  },
+
+  // ── PENDING BILL ITEMS ──────────────────────────────────────────────────
+  async addPendingItems(payload) {
+    // payload: Array of { patientId, department, description, quantity, unitPrice }
+    const { data } = await api.post("/api/billing/pending-items", payload);
+    return data;
+  },
+
+  async getPatientsWithPendingItems() {
+    const { data } = await api.get("/api/billing/pending-items/patients");
+    return data;
+  },
+
+  async getPendingItemsByPatient(patientId) {
+    const { data } = await api.get(`/api/billing/pending-items/patient/${patientId}`);
+    return data;
   }
 };

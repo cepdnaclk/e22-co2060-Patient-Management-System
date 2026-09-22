@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
 import { patientDashboardService } from "../../services/patientDashboardService";
@@ -9,7 +9,7 @@ import {
   LayoutDashboard, UserCircle, FileText, Pill,
   Menu, X, Activity, Droplet, Ruler, Weight, Calendar, Clock, ChevronRight,
   CreditCard, CheckCircle2, AlertCircle, Receipt, Sun, Moon, LogOut,
-  FileIcon, FileImage, FlaskConical, Hourglass, Plus
+  FileIcon, FileImage, FlaskConical, Hourglass, Plus, Camera
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { fileUploadService } from "../../services/fileUploadService";
@@ -53,8 +53,12 @@ const PatientDashboard = () => {
   const [profileForm, setProfileForm] = useState({});
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
+  const fileInputRef = useRef(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+
   // Booking Modal State
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isMedsModalOpen, setIsMedsModalOpen] = useState(false);
   const [doctorsList, setDoctorsList] = useState([]);
   const [loadingDoctors, setLoadingDoctors] = useState(false);
   const [bookingForm, setBookingForm] = useState({
@@ -206,6 +210,29 @@ const PatientDashboard = () => {
     }
   };
 
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploadingPhoto(true);
+    try {
+      const url = await fileUploadService.uploadFile(file, "profile-pictures");
+      const payload = {
+        patientId: patient.patientId !== "N/A" ? patient.patientId : null,
+        userId: user?.id,
+        profilePictureUrl: url,
+      };
+      await patientDashboardService.updatePatientProfile(patient.id, payload);
+      const data = await patientDashboardService.getDashboardData(user);
+      setPatient(data.patient);
+    } catch (err) {
+      console.error("Failed to upload profile picture:", err);
+      alert("Failed to upload profile picture");
+    } finally {
+      setIsUploadingPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -304,7 +331,7 @@ const PatientDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-md shadow-emerald-900/5 hover:-translate-y-1 transition-transform duration-300">
+        <Card className="border-none shadow-md shadow-emerald-900/5 hover:-translate-y-1 transition-transform duration-300 cursor-pointer" onClick={() => setIsMedsModalOpen(true)}>
           <CardContent className="p-5 flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
               <Pill className="w-6 h-6" />
@@ -464,8 +491,31 @@ const PatientDashboard = () => {
       <Card className="border-none shadow-md shadow-slate-200/50 overflow-hidden">
         <div className="h-32 bg-gradient-to-r from-blue-600 to-sky-500"></div>
         <div className="px-6 pb-6 relative">
-          <div className="w-24 h-24 bg-white rounded-2xl shadow-lg border-4 border-white flex items-center justify-center text-4xl font-bold text-blue-600 absolute -top-12">
-            {patient?.fullName?.charAt(0).toUpperCase() || "P"}
+          <div 
+            className="w-24 h-24 bg-white rounded-2xl shadow-lg border-4 border-white flex items-center justify-center text-4xl font-bold text-blue-600 absolute -top-12 cursor-pointer group relative overflow-hidden"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {patient?.profilePictureUrl ? (
+              <img src={patient.profilePictureUrl} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              patient?.fullName?.charAt(0).toUpperCase() || "P"
+            )}
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
+              <Camera className="w-6 h-6 mb-1" />
+              <span className="text-[10px] font-medium text-center">Change<br/>Photo</span>
+            </div>
+            {isUploadingPhoto && (
+              <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                <Hourglass className="w-6 h-6 text-blue-600 animate-spin" />
+              </div>
+            )}
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept="image/*" 
+              onChange={handlePhotoUpload} 
+            />
           </div>
           <div className="pt-16 flex justify-between items-start">
             <div>
@@ -841,8 +891,8 @@ const PatientDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
+      <div className="grid grid-cols-1 gap-6">
+        <div className="col-span-1">
           <Card className="border-none shadow-md shadow-slate-200/50">
             <CardHeader title="Invoice History" />
             <CardContent className="p-0">
@@ -872,8 +922,8 @@ const PatientDashboard = () => {
                             <span className="text-sm font-bold text-slate-900">{formatCurrency(inv.totalAmount)}</span>
                           </td>
                           <td className="py-4 px-6">
-                            <Badge variant={inv.paymentStatus === "PAID" ? "success" : "warning"}>
-                              {inv.paymentStatus}
+                            <Badge variant={inv.status === "PAID" ? "success" : inv.status === "CANCELLED" ? "error" : "warning"}>
+                              {inv.status || "ISSUED"}
                             </Badge>
                           </td>
                         </tr>
@@ -890,30 +940,6 @@ const PatientDashboard = () => {
                   <p className="text-slate-500 mt-1 max-w-sm">You have no invoices on your record.</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="md:col-span-1">
-          <Card className="border-none shadow-md shadow-slate-200/50 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-slate-300 mb-6 flex items-center gap-2">
-                <CreditCard className="w-5 h-5" /> Account Balance
-              </h3>
-
-              <div className="mb-8">
-                <p className="text-slate-400 text-sm mb-1">Total Outstanding</p>
-                <p className="text-4xl font-bold text-white tracking-tight">
-                  {formatCurrency(invoices.filter(i => i.paymentStatus !== "PAID").reduce((sum, i) => sum + i.totalAmount, 0))}
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/50 border-none">
-                  Pay Now Online
-                </Button>
-                <p className="text-xs text-slate-400 text-center">Secure payments powered by Stripe</p>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -1178,6 +1204,35 @@ const PatientDashboard = () => {
           </div>
         )}
       </main>
+      {/* Active Meds Modal */}
+      {isMedsModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setIsMedsModalOpen(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-6 border-b border-slate-100">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <Pill className="w-5 h-5 text-emerald-500" /> Current Medications
+              </h2>
+              <button onClick={() => setIsMedsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors bg-slate-50 hover:bg-slate-100 rounded-full p-2">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              {patient?.currentMedications && patient.currentMedications !== "None listed" ? (
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-emerald-800">
+                  <p className="whitespace-pre-wrap leading-relaxed">{patient.currentMedications}</p>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Pill className="w-8 h-8 text-slate-300" />
+                  </div>
+                  <p className="text-slate-500">You are not currently taking any medications.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
