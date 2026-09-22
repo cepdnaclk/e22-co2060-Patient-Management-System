@@ -10,6 +10,9 @@ import com.pms.backend.notification.entity.NotificationType;
 import com.pms.backend.notification.service.NotificationService;
 import com.pms.backend.patient.entity.Patient;
 import com.pms.backend.patient.repository.PatientRepository;
+import com.pms.backend.role.entity.Role;
+import com.pms.backend.user.entity.User;
+import com.pms.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class AppointmentService {
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
     private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     public AppointmentDto createAppointment(AppointmentDto appointmentDto) {
         Patient patient = patientRepository.findById(appointmentDto.getPatientId())
@@ -44,7 +48,7 @@ public class AppointmentService {
                 .durationMinutes(appointmentDto.getDurationMinutes() != null ? appointmentDto.getDurationMinutes() : 30)
                 .reason(appointmentDto.getReason())
                 .notes(appointmentDto.getNotes())
-                .status("SCHEDULED")
+                .status("PENDING")
                 .build();
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
@@ -52,24 +56,36 @@ public class AppointmentService {
         String patientName = patient.getUser().getFirstName() + " " + patient.getUser().getLastName();
         String doctorFullName = "Dr. " + doctor.getUser().getFirstName() + " " + doctor.getUser().getLastName();
 
-        // Notify the doctor about new appointment
+        // Notify the doctor about new appointment request
         notificationService.createNotification(
                 doctor.getUser().getId(),
-                "New Appointment Scheduled",
-                "Patient " + patientName + " has booked an appointment with you" +
-                        (appointmentDto.getReason() != null ? " for: " + appointmentDto.getReason() : "") + ".",
+                "New Appointment Request",
+                "Patient " + patientName + " has requested an appointment with you" +
+                        (appointmentDto.getReason() != null ? " for: " + appointmentDto.getReason() : "") + ". Waiting for receptionist confirmation.",
                 NotificationType.APPOINTMENT,
                 savedAppointment.getId()
         );
 
-        // Notify the patient about their confirmed appointment
+        // Notify the patient about their pending appointment
         notificationService.createNotification(
                 patient.getUser().getId(),
-                "Appointment Confirmed",
-                "Your appointment with " + doctorFullName + " has been scheduled successfully.",
+                "Appointment Pending",
+                "Your appointment request with " + doctorFullName + " has been received and is pending confirmation from the receptionist.",
                 NotificationType.APPOINTMENT,
                 savedAppointment.getId()
         );
+
+        // Notify receptionists
+        List<User> receptionists = userRepository.findByRoleAndIsActive(Role.RECEPTIONIST, true);
+        for (User receptionist : receptionists) {
+            notificationService.createNotification(
+                    receptionist.getId(),
+                    "New Appointment Request",
+                    "Patient " + patientName + " has requested an appointment with Dr. " + doctor.getUser().getLastName() + ". Pending confirmation.",
+                    NotificationType.APPOINTMENT,
+                    savedAppointment.getId()
+            );
+        }
 
         return convertToDto(savedAppointment);
     }
@@ -120,6 +136,9 @@ public class AppointmentService {
         if (appointmentDto.getNotes() != null) {
             appointment.setNotes(appointmentDto.getNotes());
         }
+        if (appointmentDto.getDeclineReason() != null) {
+            appointment.setDeclineReason(appointmentDto.getDeclineReason());
+        }
         String previousStatus = appointment.getStatus();
         if (appointmentDto.getStatus() != null) {
             appointment.setStatus(appointmentDto.getStatus());
@@ -127,7 +146,7 @@ public class AppointmentService {
 
         Appointment updatedAppointment = appointmentRepository.save(appointment);
 
-        // Notify patient if their appointment is confirmed, rescheduled or cancelled
+        // Notify patient if their appointment is confirmed, rescheduled, rejected, or cancelled
         if (appointmentDto.getStatus() != null && !appointmentDto.getStatus().equals(previousStatus)) {
             String patientName = updatedAppointment.getPatient().getUser().getFirstName();
             String docName = "Dr. " + updatedAppointment.getDoctor().getUser().getFirstName() + " " + updatedAppointment.getDoctor().getUser().getLastName();
@@ -136,6 +155,7 @@ public class AppointmentService {
                 case "CANCELLED"   -> "Your appointment with " + docName + " has been cancelled.";
                 case "COMPLETED"   -> "Your appointment with " + docName + " is marked as completed.";
                 case "RESCHEDULED" -> "Your appointment with " + docName + " has been rescheduled.";
+                case "REJECTED"    -> "Your appointment request with " + docName + " has been declined. Reason: " + (updatedAppointment.getDeclineReason() != null ? updatedAppointment.getDeclineReason() : "No reason provided.");
                 default            -> "Your appointment status has been updated to: " + appointmentDto.getStatus();
             };
             notificationService.createNotification(
@@ -216,6 +236,7 @@ public class AppointmentService {
                 .appointmentDateTime(appointment.getAppointmentDateTime())
                 .durationMinutes(appointment.getDurationMinutes())
                 .reason(appointment.getReason())
+                .declineReason(appointment.getDeclineReason())
                 .notes(appointment.getNotes())
                 .status(appointment.getStatus())
                 .createdAt(appointment.getCreatedAt())

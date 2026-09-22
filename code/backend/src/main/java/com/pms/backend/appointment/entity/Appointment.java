@@ -39,6 +39,9 @@ public class Appointment {
     @Column
     private String reason;
 
+    @Column
+    private String declineReason;
+
     @Column(length = 1000)
     private String notes;
 
