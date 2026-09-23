@@ -67,6 +67,7 @@ public class User implements UserDetails {
     private Role role;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isActive = true;
 
     @Column(nullable = false, columnDefinition = "integer default 0")
@@ -77,6 +78,7 @@ public class User implements UserDetails {
     private LocalDateTime lockedUntil;
 
     @Column(updatable = false)
+    @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column

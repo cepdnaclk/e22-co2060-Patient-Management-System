@@ -30,7 +30,7 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    @Value("${FRONTEND_URL:https://e22-2yp-co2060-pms-frontend.vercel.app}")
+    @Value("${FRONTEND_URL:https://e22-co2060-patient-management-syste-three.vercel.app}")
     private String frontendUrl;
 
     @Bean

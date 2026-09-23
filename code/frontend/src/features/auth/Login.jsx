@@ -35,9 +35,11 @@ const ROLE_ROUTES = {
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const benefits = [
+
   { icon: HeartPulse, text: "Real-time patient triage & vitals tracking" },
   { icon: Microscope, text: "Integrated lab test management" },
   { icon: Receipt, text: "Automated billing and invoice generation" },
+
 ];
 
 export default function LoginPage() {
@@ -95,9 +97,7 @@ export default function LoginPage() {
 
           {/* Main copy */}
           <div className="flex-1 flex flex-col justify-center">
-            <div className="mb-6 inline-flex">
-              <span className="px-3 py-1 text-xs font-semibold text-blue-400 bg-blue-500/15 border border-blue-500/25 rounded-full uppercase tracking-wider"></span>
-            </div>
+            
             <h2 className="text-4xl xl:text-5xl font-black text-white tracking-tighter leading-[1.08] mb-5">
               Smarter
               <br />
