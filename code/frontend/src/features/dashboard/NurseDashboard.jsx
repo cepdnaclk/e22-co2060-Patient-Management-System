@@ -391,6 +391,10 @@ export default function NurseDashboard() {
               setFilterStatus={setFilterStatus}
               onToggleCritical={handleToggleCritical}
               onSaveVitals={handleSaveVitals}
+              onNavigateToPatients={(filter) => {
+                setFilterStatus(filter);
+                setSection("patients");
+              }}
             />
           )}
 
@@ -411,6 +415,8 @@ export default function NurseDashboard() {
               selectedPatient={selectedPatient}
               onSelectPatient={handleSelectPatient}
               listLoading={listLoading}
+              filterStatus={filterStatus}
+              setFilterStatus={setFilterStatus}
             />
           )}
 
@@ -440,6 +446,7 @@ function ShiftOverview({
   setFilterStatus,
   onToggleCritical,
   onSaveVitals,
+  onNavigateToPatients,
 }) {
   const [isEditingVitals, setIsEditingVitals] = useState(false);
   const [editedVitals, setEditedVitals] = useState({});
@@ -485,7 +492,7 @@ function ShiftOverview({
           value={totalPatients}
           color="blue"
           isActive={filterStatus === "ALL"}
-          onClick={() => setFilterStatus("ALL")}
+          onClick={() => onNavigateToPatients("ALL")}
         />
         <StatCard
           icon={AlertTriangle}
@@ -493,7 +500,7 @@ function ShiftOverview({
           value={criticalCount}
           color="red"
           isActive={filterStatus === "CRITICAL"}
-          onClick={() => setFilterStatus("CRITICAL")}
+          onClick={() => onNavigateToPatients("CRITICAL")}
         />
         <StatCard
           icon={Heart}
@@ -501,7 +508,7 @@ function ShiftOverview({
           value={stableCount}
           color="emerald"
           isActive={filterStatus === "STABLE"}
-          onClick={() => setFilterStatus("STABLE")}
+          onClick={() => onNavigateToPatients("STABLE")}
         />
       </div>
 
@@ -715,20 +722,30 @@ function AllPatientsSection({
   selectedPatient,
   onSelectPatient,
   listLoading,
+  filterStatus,
+  setFilterStatus,
 }) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filtered = patientsList.filter((p) =>
-    p.name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filtered = patientsList.filter((p) => {
+    if (filterStatus === "CRITICAL" && p.status !== "Critical") return false;
+    if (filterStatus === "STABLE" && p.status === "Critical") return false;
+    return p.name?.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-black">All Patients</h2>
         <span className="text-sm text-slate-500">
-          {patientsList.length} patients total
+          {filtered.length} {filterStatus !== "ALL" ? filterStatus.toLowerCase() : ""} patients total
         </span>
+      </div>
+
+      <div className="flex gap-2">
+        <button onClick={() => setFilterStatus("ALL")} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${filterStatus === "ALL" ? "bg-blue-600 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>All</button>
+        <button onClick={() => setFilterStatus("CRITICAL")} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${filterStatus === "CRITICAL" ? "bg-red-600 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>Critical</button>
+        <button onClick={() => setFilterStatus("STABLE")} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${filterStatus === "STABLE" ? "bg-emerald-600 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>Stable</button>
       </div>
 
       {/* Search */}
