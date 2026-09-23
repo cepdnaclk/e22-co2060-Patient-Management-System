@@ -33,7 +33,7 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 const benefits = [
   { icon: ShieldCheck, text: "HIPAA-compliant & fully encrypted" },
   { icon: Users, text: "Role-based access for every team member" },
-  { icon: Clock, text: "Real-time data, 99.9% uptime guaranteed" },
+  
 ];
 
 export default function LoginPage() {
@@ -91,9 +91,7 @@ export default function LoginPage() {
 
           {/* Main copy */}
           <div className="flex-1 flex flex-col justify-center">
-            <div className="mb-6 inline-flex">
-              <span className="px-3 py-1 text-xs font-semibold text-blue-400 bg-blue-500/15 border border-blue-500/25 rounded-full uppercase tracking-wider"></span>
-            </div>
+            
             <h2 className="text-4xl xl:text-5xl font-black text-white tracking-tighter leading-[1.08] mb-5">
               Your patients,
               <br />
@@ -118,15 +116,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Footer quote */}
-          <div className="border-t border-slate-800 pt-8">
-            <p className="text-slate-500 text-sm italic leading-relaxed">
-              "PatientMS cut our admin time in half. It's now indispensable."
-            </p>
-            <p className="text-slate-600 text-xs mt-2 font-medium">
-              — Dr. Kumari Silva, Chief of Medicine
-            </p>
-          </div>
         </div>
       </div>
 
