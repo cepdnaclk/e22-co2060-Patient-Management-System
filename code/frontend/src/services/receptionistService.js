@@ -26,6 +26,10 @@ export const receptionistService = {
     return api.put(`/api/appointments/${id}/cancel`);
   },
 
+  updateAppointment(id, data) {
+    return api.put(`/api/appointments/${id}`, data);
+  },
+
   listDoctors() {
     return api.get("/api/doctors");
   },

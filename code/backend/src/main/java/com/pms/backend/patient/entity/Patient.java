@@ -71,6 +71,9 @@ public class Patient {
     @Column
     private String patientId;
 
+    @Column(length = 500)
+    private String profilePictureUrl;
+
     @Column
     private String primaryDoctor;
 

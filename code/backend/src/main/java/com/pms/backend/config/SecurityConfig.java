@@ -30,7 +30,7 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
-    @Value("${FRONTEND_URL:https://e22-2yp-co2060-pms-frontend.vercel.app}")
+    @Value("${FRONTEND_URL:https://e22-co2060-patient-management-syste-three.vercel.app}")
     private String frontendUrl;
 
     @Bean
@@ -67,6 +67,8 @@ public class SecurityConfig {
                     // Public endpoints
                     .requestMatchers(
                         "/api/auth/signup",
+                        "/api/auth/signup/verify-otp",
+                        "/api/auth/signup/resend-otp",
                         "/api/auth/login",
                         "/api/auth/google",
                         "/api/auth/refresh"

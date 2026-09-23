@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { receptionistService } from "../../../services/receptionistService";
-import { Calendar, User, Clock, Trash2, AlertCircle, CheckCircle, List, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, User, Clock, Trash2, AlertCircle, CheckCircle, List, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -193,6 +193,31 @@ const AppointmentScheduling = () => {
       await loadData();
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to cancel appointment.");
+    }
+  };
+
+  const handleApprove = async (id) => {
+    setError(""); setSuccess("");
+    try {
+      await receptionistService.updateAppointment(id, { status: "CONFIRMED" });
+      setSuccess("Appointment confirmed successfully.");
+      await loadData();
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to confirm appointment.");
+    }
+  };
+
+  const handleDecline = async (id) => {
+    const reason = window.prompt("Please enter a reason for declining this appointment:");
+    if (reason === null) return; // User cancelled prompt
+    
+    setError(""); setSuccess("");
+    try {
+      await receptionistService.updateAppointment(id, { status: "REJECTED", declineReason: reason.trim() });
+      setSuccess("Appointment declined successfully.");
+      await loadData();
+    } catch (err) {
+      setError(err?.response?.data?.message || "Failed to decline appointment.");
     }
   };
 
@@ -397,21 +422,35 @@ const AppointmentScheduling = () => {
                             <td className="px-6 py-4 text-slate-700">Dr. {appt.doctorName || appt.doctorId}</td>
                             <td className="px-6 py-4">
                               <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
-                                appt.status === 'SCHEDULED' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                appt.status === 'SCHEDULED' || appt.status === 'CONFIRMED' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                                 appt.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border-green-200' :
-                                appt.status === 'CANCELLED' ? 'bg-red-50 text-red-700 border-red-200' :
+                                appt.status === 'CANCELLED' || appt.status === 'REJECTED' ? 'bg-red-50 text-red-700 border-red-200' :
+                                appt.status === 'PENDING' ? 'bg-amber-50 text-amber-700 border-amber-200' :
                                 'bg-slate-50 text-slate-700 border-slate-200'}`}>
                                 {appt.status || "SCHEDULED"}
                               </span>
                             </td>
                             <td className="px-6 py-4 text-right">
-                              {appt.status === 'SCHEDULED' && (
+                              {appt.status === 'PENDING' ? (
+                                <div className="flex items-center justify-end gap-3">
+                                  <button onClick={() => handleApprove(appt.id)}
+                                    className="text-emerald-600 hover:text-emerald-800 text-sm font-medium flex items-center gap-1"
+                                    title="Approve Appointment">
+                                    <CheckCircle className="w-4 h-4" /> Approve
+                                  </button>
+                                  <button onClick={() => handleDecline(appt.id)}
+                                    className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1"
+                                    title="Decline Appointment">
+                                    <X className="w-4 h-4" /> Decline
+                                  </button>
+                                </div>
+                              ) : (appt.status === 'SCHEDULED' || appt.status === 'CONFIRMED') ? (
                                 <button onClick={() => handleCancel(appt.id)}
                                   className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center justify-end gap-1 w-full"
                                   title="Cancel Appointment">
                                   <Trash2 className="w-4 h-4" /> Cancel
                                 </button>
-                              )}
+                              ) : null}
                             </td>
                           </tr>
                         );

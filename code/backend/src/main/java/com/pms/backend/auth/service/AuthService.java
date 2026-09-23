@@ -1,10 +1,14 @@
 package com.pms.backend.auth.service;
 
 import com.pms.backend.audit.service.AuditLogService;
+import com.pms.backend.notification.service.NotificationService;
+import com.pms.backend.notification.entity.NotificationType;
 import com.pms.backend.auth.dto.AuthResponse;
 import com.pms.backend.auth.dto.GoogleAuthRequest;
 import com.pms.backend.auth.dto.LoginRequest;
 import com.pms.backend.auth.dto.SignupRequest;
+import com.pms.backend.auth.dto.SignupResponse;
+import com.pms.backend.auth.dto.VerifyOtpRequest;
 import com.pms.backend.auth.entity.RefreshToken;
 import com.pms.backend.auth.repository.RefreshTokenRepository;
 import com.pms.backend.common.exception.AppException;
@@ -43,6 +47,9 @@ public class AuthService {
     private final RefreshTokenRepository  refreshTokenRepo;
     private final AuditLogService         auditLogService;
     private final PatientService          patientService;
+    private final NotificationService     notificationService;
+
+    private final OtpService              otpService;
 
     @Value("${app.jwt.refresh-expiration-ms:604800000}")
     private long refreshExpirationMs;
@@ -56,9 +63,9 @@ public class AuthService {
     @Value("${app.google.client-id}")
     private String googleClientId;
 
-    // ── SIGNUP ──────────────────────────────────────────────────────────────
+    // ── SIGNUP (Phase 1: Create user + Send OTP) ────────────────────────────
     @Transactional
-    public AuthResponse signup(SignupRequest req, String ipAddress) {
+    public SignupResponse signup(SignupRequest req, String ipAddress) {
 
         if (userRepo.existsByEmail(req.getEmail())) {
             throw AppException.conflict("This email is already registered");
@@ -74,19 +81,79 @@ public class AuthService {
                 .mobileNumber(req.getMobileNumber())
                 .passwordHash(passwordEncoder.encode(req.getPassword()))
                 .role(Role.PATIENT)
-                .isActive(false)
+                .isActive(false)          // Awaiting management approval
+                .emailVerified(false)     // Awaiting OTP verification
                 .build();
 
-        User saved = userRepo.save(user);
+        userRepo.save(user);
 
-        String accessToken = jwtUtil.generateToken(saved);
-        String refreshToken = createRefreshToken(saved);
+        // Generate and send OTP to the user's email
+        otpService.generateAndSendOtp(req.getEmail(), req.getFirstName());
 
-        auditLogService.log(saved.getId(), saved.getEmail(),
-                "SIGNUP", "User", saved.getId().toString(),
-                "New patient account created", ipAddress);
+        auditLogService.log(user.getId(), user.getEmail(),
+                "SIGNUP", "User", user.getId().toString(),
+                "New patient account created — OTP sent for email verification", ipAddress);
 
-        return new AuthResponse(accessToken, refreshToken, UserDto.from(saved));
+        return new SignupResponse(
+                "A verification code has been sent to your email address.",
+                req.getEmail()
+        );
+    }
+
+    // ── VERIFY OTP (Phase 2: Verify email + Return tokens) ──────────────────
+    @Transactional
+    public AuthResponse verifySignupOtp(VerifyOtpRequest req, String ipAddress) {
+
+        // Verify the OTP
+        otpService.verifyOtp(req.getEmail(), req.getOtp());
+
+        // Find the user and mark email as verified
+        User user = userRepo.findByEmail(req.getEmail())
+                .orElseThrow(() -> AppException.notFound("User not found"));
+
+        user.setEmailVerified(true);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepo.save(user);
+
+        // Generate tokens
+        String accessToken = jwtUtil.generateToken(user);
+        String refreshToken = createRefreshToken(user);
+
+        auditLogService.log(user.getId(), user.getEmail(),
+                "EMAIL_VERIFIED", "User", user.getId().toString(),
+                "Email verified via OTP", ipAddress);
+
+        // Notify management about new signup
+        List<User> managers = userRepo.findByRole(Role.MANAGEMENT);
+        for (User manager : managers) {
+            notificationService.createNotification(
+                    manager.getId(),
+                    "New Patient Signup",
+                    "A new patient (" + user.getFirstName() + " " + user.getLastName() + ") has signed up and is awaiting approval.",
+                    NotificationType.SYSTEM_ALERT,
+                    user.getId()
+            );
+        }
+
+        return new AuthResponse(accessToken, refreshToken, UserDto.from(user));
+    }
+
+    // ── RESEND OTP ──────────────────────────────────────────────────────────
+    @Transactional
+    public SignupResponse resendSignupOtp(String email) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> AppException.notFound("No account found with this email"));
+
+        if (user.isEmailVerified()) {
+            throw AppException.conflict("Email is already verified");
+        }
+
+        otpService.generateAndSendOtp(email, user.getFirstName());
+
+        return new SignupResponse(
+                "A new verification code has been sent to your email address.",
+                email
+        );
     }
 
     // ── GOOGLE SIGN-IN ────────────────────────────────────────────────────────

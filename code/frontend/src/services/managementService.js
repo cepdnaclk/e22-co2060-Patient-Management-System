@@ -58,4 +58,10 @@ export const managementService = {
     const { data } = await api.get("/api/v1/admin/role-counts");
     return data;
   },
+
+  // ── Appointment Management ──
+  fetchAllAppointments: async () => {
+    const { data } = await api.get("/api/appointments");
+    return data;
+  },
 };

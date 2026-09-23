@@ -5,7 +5,7 @@ import {
   Users, Stethoscope, HeartPulse, CalendarCheck, TrendingUp, Shield
 } from "lucide-react";
 
-const MgmtOverview = () => {
+const MgmtOverview = ({ setSection }) => {
   const [stats, setStats] = useState(null);
   const [roleCounts, setRoleCounts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +38,7 @@ const MgmtOverview = () => {
       icon: Users,
       color: "text-blue-600",
       bg: "bg-blue-50",
+      sectionId: "users",
     },
     {
       label: "Active Doctors",
@@ -45,6 +46,7 @@ const MgmtOverview = () => {
       icon: Stethoscope,
       color: "text-emerald-600",
       bg: "bg-emerald-50",
+      sectionId: "doctors",
     },
     {
       label: "Active Nurses",
@@ -52,6 +54,7 @@ const MgmtOverview = () => {
       icon: HeartPulse,
       color: "text-purple-600",
       bg: "bg-purple-50",
+      sectionId: "nurses",
     },
     {
       label: "Appointments",
@@ -59,6 +62,7 @@ const MgmtOverview = () => {
       icon: CalendarCheck,
       color: "text-amber-600",
       bg: "bg-amber-50",
+      sectionId: "appointments",
     },
   ];
 
@@ -98,7 +102,13 @@ const MgmtOverview = () => {
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Card key={card.label} className="border-none shadow-md shadow-slate-200/50 hover:-translate-y-1 transition-transform duration-300">
+            <Card 
+              key={card.label} 
+              className={`border-none shadow-md shadow-slate-200/50 hover:-translate-y-1 transition-transform duration-300 ${card.sectionId ? "cursor-pointer" : ""}`}
+              onClick={() => {
+                if (card.sectionId) setSection(card.sectionId);
+              }}
+            >
               <CardContent className="p-5 flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${card.bg} ${card.color}`}>
                   <Icon className="w-6 h-6" />
@@ -124,7 +134,13 @@ const MgmtOverview = () => {
             {managedRoles.map((item) => (
               <div
                 key={item.role}
-                className="bg-slate-50 rounded-xl p-4 text-center border border-slate-100 hover:border-violet-200 hover:bg-violet-50/30 transition-all"
+                onClick={() => {
+                  if (item.role === 'DOCTOR') setSection('doctors');
+                  else if (item.role === 'NURSE') setSection('nurses');
+                  else if (item.role === 'PATIENT') setSection('patients');
+                  else setSection(item.role);
+                }}
+                className="bg-slate-50 rounded-xl p-4 text-center border border-slate-100 hover:border-violet-200 hover:bg-violet-50/30 transition-all cursor-pointer"
               >
                 <div className="text-2xl mb-1">{getRoleIcon(item.role)}</div>
                 <p className="text-2xl font-bold text-slate-900">{item.count}</p>

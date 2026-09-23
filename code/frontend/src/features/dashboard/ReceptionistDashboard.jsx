@@ -1,23 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { useTheme } from "../theme/ThemeContext.jsx";
 import {
   LayoutDashboard, UserPlus, Calendar, CreditCard,
-  Menu, X, Building, LogOut, Sun, Moon
+  Menu, X, Building, LogOut, Sun, Moon, FileText
 } from "lucide-react";
 
 import ReceptionistOverview from "./receptionist/ReceptionistOverview.jsx";
 import PatientRegistration from "./receptionist/PatientRegistration.jsx";
 import AppointmentScheduling from "./receptionist/AppointmentScheduling.jsx";
-import BillingOverview from "./receptionist/BillingOverview.jsx";
+import ReceptionistBilling from "./receptionist/ReceptionistBilling.jsx";
 import { useNavigate } from "react-router-dom";
 import NotificationBell from "../../components/NotificationBell.jsx";
+import { receptionistService } from "../../services/receptionistService.js";
 
 const sectionLabels = {
   overview: "Overview",
   register: "Patient Registration",
   appointments: "Scheduling",
-  billing: "Billing & Invoicing",
+  mainBilling: "Main Billing",
 };
 
 const ReceptionistDashboard = () => {
@@ -26,6 +27,23 @@ const ReceptionistDashboard = () => {
   const navigate = useNavigate();
   const [section, setSection] = useState("overview");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    const fetchPending = async () => {
+      try {
+        const res = await receptionistService.listAppointments();
+        const appts = res.data || res.data?.content || [];
+        const count = appts.filter(a => a.status === "PENDING").length;
+        setPendingCount(count);
+      } catch (err) {
+        console.error("Failed to fetch pending appointments:", err);
+      }
+    };
+    fetchPending();
+    const interval = setInterval(fetchPending, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -36,7 +54,7 @@ const ReceptionistDashboard = () => {
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "register", label: "Patient Registration", icon: UserPlus },
     { id: "appointments", label: "Scheduling", icon: Calendar },
-    { id: "billing", label: "Billing & Invoicing", icon: CreditCard },
+    { id: "mainBilling", label: "Main Billing", icon: CreditCard },
   ];
 
   return (
@@ -82,13 +100,20 @@ const ReceptionistDashboard = () => {
                     setSection(item.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium transition-all ${active
+                  className={`w-full flex items-center justify-between px-3 py-3 rounded-xl font-medium transition-all ${active
                       ? "bg-sky-500 text-white shadow-md shadow-sky-500/20"
                       : "text-slate-400 hover:bg-slate-800 hover:text-white"
                     }`}
                 >
-                  <Icon className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"}`} />
-                  {item.label}
+                  <div className="flex items-center gap-3">
+                    <Icon className={`w-5 h-5 ${active ? "text-white" : "text-slate-400"}`} />
+                    {item.label}
+                  </div>
+                  {item.id === "appointments" && pendingCount > 0 && (
+                    <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      {pendingCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -165,7 +190,7 @@ const ReceptionistDashboard = () => {
           {section === "overview" && <ReceptionistOverview setActiveSection={setSection} />}
           {section === "register" && <PatientRegistration />}
           {section === "appointments" && <AppointmentScheduling />}
-          {section === "billing" && <BillingOverview />}
+          {section === "mainBilling" && <ReceptionistBilling setActiveSection={setSection} />}
         </div>
       </main>
     </div>

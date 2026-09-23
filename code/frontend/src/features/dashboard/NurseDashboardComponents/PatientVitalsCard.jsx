@@ -72,17 +72,17 @@ export default function PatientVitalsCard({ patient }) {
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-      <div className="bg-gradient-to-r from-teal-50 to-emerald-50 px-5 py-4 border-b border-teal-100 flex items-center justify-between">
+      <div className="bg-gradient-to-r from-blue-50 to-emerald-50 px-5 py-4 border-b border-blue-100 flex items-center justify-between">
         <div>
-          <h3 className="font-bold text-teal-900 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-teal-600" />
+          <h3 className="font-bold text-blue-900 flex items-center gap-2">
+            <Activity className="w-5 h-5 text-blue-600" />
             Current Vitals
           </h3>
-          <p className="text-xs text-teal-700 mt-1 font-medium">
+          <p className="text-xs text-blue-700 mt-1 font-medium">
              {patient ? `${patient.firstName} ${patient.lastName}` : "No patient selected"}
           </p>
         </div>
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-100/50 px-2.5 py-1 rounded-full border border-teal-200/50">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-100/50 px-2.5 py-1 rounded-full border border-blue-200/50">
            <Clock className="w-3.5 h-3.5" />
            {latest?.recordedAt ? getTimeAgo(latest.recordedAt) : "—"}
         </div>
@@ -115,7 +115,7 @@ export default function PatientVitalsCard({ patient }) {
         <button 
           onClick={() => setIsHistoryModalOpen(true)}
           disabled={!patient || allVitals.length === 0}
-          className="flex-1 py-2.5 bg-white border border-teal-200 text-teal-700 font-bold rounded-xl hover:bg-teal-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 py-2.5 bg-white border border-blue-200 text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
            <History className="w-4 h-4" />
            History
@@ -123,7 +123,7 @@ export default function PatientVitalsCard({ patient }) {
         <button 
           onClick={() => setIsRecordModalOpen(true)}
           disabled={!patient}
-          className="flex-1 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm shadow-teal-600/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm shadow-blue-600/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
            <Activity className="w-4 h-4" />
            Record New
@@ -144,33 +144,33 @@ export default function PatientVitalsCard({ patient }) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Blood Pressure (mmHg)</label>
-                  <input required type="text" placeholder="120/80" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                  <input required type="text" placeholder="120/80" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                     value={formData.bloodPressure} onChange={e => setFormData({...formData, bloodPressure: e.target.value})} />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Heart Rate (bpm)</label>
-                  <input required type="number" placeholder="72" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                  <input required type="number" placeholder="72" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                     value={formData.heartRate} onChange={e => setFormData({...formData, heartRate: e.target.value})} />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Temperature (°F)</label>
-                  <input required type="number" step="0.1" placeholder="98.6" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                  <input required type="number" step="0.1" placeholder="98.6" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                     value={formData.temperature} onChange={e => setFormData({...formData, temperature: e.target.value})} />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1">SpO2 (%)</label>
-                  <input required type="number" placeholder="98" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                  <input required type="number" placeholder="98" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                     value={formData.oxygenSaturation} onChange={e => setFormData({...formData, oxygenSaturation: e.target.value})} />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-slate-600 mb-1">Respiratory Rate (bpm)</label>
-                  <input required type="number" placeholder="16" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-teal-500 font-medium"
+                  <input required type="number" placeholder="16" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                     value={formData.respiratoryRate} onChange={e => setFormData({...formData, respiratoryRate: e.target.value})} />
                 </div>
               </div>
               <div className="mt-2 flex justify-end gap-3">
                 <button type="button" onClick={() => setIsRecordModalOpen(false)} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
-                <button type="submit" className="px-4 py-2 text-sm font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl">Save Vitals</button>
+                <button type="submit" className="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl">Save Vitals</button>
               </div>
             </form>
           </div>
@@ -183,7 +183,7 @@ export default function PatientVitalsCard({ patient }) {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
               <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                <Activity className="w-5 h-5 text-teal-600" />
+                <Activity className="w-5 h-5 text-blue-600" />
                 Vitals History — {patient?.firstName} {patient?.lastName}
               </h3>
               <button onClick={() => setIsHistoryModalOpen(false)} className="text-slate-400 hover:text-slate-600">

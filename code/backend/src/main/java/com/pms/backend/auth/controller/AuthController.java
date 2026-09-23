@@ -3,7 +3,10 @@ package com.pms.backend.auth.controller;
 import com.pms.backend.auth.dto.AuthResponse;
 import com.pms.backend.auth.dto.GoogleAuthRequest;
 import com.pms.backend.auth.dto.LoginRequest;
+import com.pms.backend.auth.dto.ResendOtpRequest;
 import com.pms.backend.auth.dto.SignupRequest;
+import com.pms.backend.auth.dto.SignupResponse;
+import com.pms.backend.auth.dto.VerifyOtpRequest;
 import com.pms.backend.auth.service.AuthService;
 import com.pms.backend.patient.dto.PatientDto;
 import com.pms.backend.user.dto.UserDto;
@@ -25,12 +28,38 @@ public class AuthController {
 
     private final AuthService authService;
 
+    /**
+     * Phase 1: Create account + send OTP to email.
+     * Returns a message (no tokens yet).
+     */
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> signup(
+    public ResponseEntity<SignupResponse> signup(
             @Valid @RequestBody SignupRequest request,
             HttpServletRequest httpRequest) {
-        AuthResponse response = authService.signup(request, getClientIp(httpRequest));
+        SignupResponse response = authService.signup(request, getClientIp(httpRequest));
         return ResponseEntity.status(201).body(response);
+    }
+
+    /**
+     * Phase 2: Verify OTP code from email.
+     * Returns JWT tokens + user info on success.
+     */
+    @PostMapping("/signup/verify-otp")
+    public ResponseEntity<AuthResponse> verifySignupOtp(
+            @Valid @RequestBody VerifyOtpRequest request,
+            HttpServletRequest httpRequest) {
+        AuthResponse response = authService.verifySignupOtp(request, getClientIp(httpRequest));
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Resend OTP to the same email address.
+     */
+    @PostMapping("/signup/resend-otp")
+    public ResponseEntity<SignupResponse> resendOtp(
+            @Valid @RequestBody ResendOtpRequest request) {
+        SignupResponse response = authService.resendSignupOtp(request.getEmail());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")

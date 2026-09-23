@@ -5,6 +5,10 @@
 import api from "./axiosClient";
 
 export const authService = {
+  /**
+   * Phase 1: Create account + send OTP.
+   * Returns { message, email } — no tokens yet.
+   */
   signup: async (firstName, lastName, email, password, mobileNumber) => {
     const { data } = await api.post("/api/auth/signup", {
       firstName,
@@ -13,7 +17,27 @@ export const authService = {
       password,
       mobileNumber,
     });
+    return data; // { message, email }
+  },
+
+  /**
+   * Phase 2: Verify OTP code from email.
+   * Returns { accessToken, refreshToken, user } on success.
+   */
+  verifySignupOtp: async (email, otp) => {
+    const { data } = await api.post("/api/auth/signup/verify-otp", {
+      email,
+      otp,
+    });
     return data; // { accessToken, refreshToken, user }
+  },
+
+  /**
+   * Resend OTP to the same email address.
+   */
+  resendSignupOtp: async (email) => {
+    const { data } = await api.post("/api/auth/signup/resend-otp", { email });
+    return data; // { message, email }
   },
 
   login: async (email, password) => {

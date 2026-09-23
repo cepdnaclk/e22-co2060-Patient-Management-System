@@ -24,6 +24,7 @@ public class AppointmentDto {
     private LocalDateTime appointmentDateTime;
     private Integer durationMinutes;
     private String reason;
+    private String declineReason;
     private String notes;
     private String status;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")

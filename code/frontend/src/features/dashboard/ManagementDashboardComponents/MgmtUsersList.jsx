@@ -49,10 +49,13 @@ const MgmtUsersList = ({ roleFilter }) => {
   }, []);
 
   useEffect(() => {
-    let list = users;
+    let list = [...users];
     if (roleFilter) {
       list = list.filter((u) => u.role === roleFilter);
+    } else {
+      list.sort((a, b) => (a.role || "").localeCompare(b.role || ""));
     }
+
     if (!search.trim()) {
       setFiltered(list);
     } else {
