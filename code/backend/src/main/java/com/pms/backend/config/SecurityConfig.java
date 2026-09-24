@@ -67,6 +67,8 @@ public class SecurityConfig {
                     // Public endpoints
                     .requestMatchers(
                         "/api/auth/signup",
+                        "/api/auth/signup/verify-otp",
+                        "/api/auth/signup/resend-otp",
                         "/api/auth/login",
                         "/api/auth/google",
                         "/api/auth/refresh"

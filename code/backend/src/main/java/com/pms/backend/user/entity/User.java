@@ -70,6 +70,10 @@ public class User implements UserDetails {
     @Builder.Default
     private boolean isActive = true;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private boolean emailVerified = false;
+
     @Column(nullable = false, columnDefinition = "integer default 0")
     @Builder.Default
     private int failedLoginAttempts = 0;
