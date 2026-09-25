@@ -37,7 +37,11 @@ public class DatabaseUrlProcessor implements EnvironmentPostProcessor {
             String query    = uri.getQuery();
 
             String jdbcUrl  = "jdbc:postgresql://" + host + ":" + port + "/" + dbName;
-            if (query != null && !query.isEmpty()) {
+            
+            // If connecting externally to Render, force sslmode=require to prevent hang
+            if (host.contains(".render.com")) {
+                jdbcUrl += "?sslmode=require";
+            } else if (query != null && !query.isEmpty()) {
                 jdbcUrl += "?" + query;
             }
 
