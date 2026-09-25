@@ -48,6 +48,7 @@ const PatientDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({});
@@ -912,13 +913,14 @@ const PatientDashboard = () => {
                         <th className="py-4 px-6">Date</th>
                         <th className="py-4 px-6">Amount</th>
                         <th className="py-4 px-6">Status</th>
+                        <th className="py-4 px-6 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {invoices.map((inv) => (
                         <tr key={inv.id} className="hover:bg-slate-50/80 transition-colors">
                           <td className="py-4 px-6 whitespace-nowrap">
-                            <span className="text-sm font-medium text-slate-700">{inv.invoiceNumber}</span>
+                            <span className="text-sm font-semibold text-blue-600">{inv.invoiceNumber}</span>
                           </td>
                           <td className="py-4 px-6">
                             <span className="text-sm text-slate-600">{new Date(inv.createdAt).toLocaleDateString()}</span>
@@ -927,9 +929,17 @@ const PatientDashboard = () => {
                             <span className="text-sm font-bold text-slate-900">{formatCurrency(inv.totalAmount)}</span>
                           </td>
                           <td className="py-4 px-6">
-                            <Badge variant={inv.status === "PAID" ? "success" : inv.status === "CANCELLED" ? "error" : "warning"}>
+                            <Badge variant={inv.status === "PAID" ? "success" : inv.status === "PARTIALLY_PAID" ? "warning" : inv.status === "CANCELLED" ? "error" : "neutral"}>
                               {inv.status || "ISSUED"}
                             </Badge>
+                          </td>
+                          <td className="py-4 px-6 text-right">
+                            <button
+                              onClick={() => setSelectedInvoice(inv)}
+                              className="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold text-xs rounded-lg transition-colors cursor-pointer"
+                            >
+                              View Breakdown
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -949,6 +959,120 @@ const PatientDashboard = () => {
           </Card>
         </div>
       </div>
+
+      {/* Itemized Departmental Breakdown Modal */}
+      {selectedInvoice && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start border-b border-slate-100 pb-4 mb-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-xl font-bold text-slate-900">{selectedInvoice.invoiceNumber}</h3>
+                  <Badge variant={selectedInvoice.status === "PAID" ? "success" : selectedInvoice.status === "PARTIALLY_PAID" ? "warning" : "neutral"}>
+                    {selectedInvoice.status || "ISSUED"}
+                  </Badge>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Issued on: {new Date(selectedInvoice.createdAt).toLocaleString()}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedInvoice(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Department Breakdown Table */}
+            <div className="mb-6">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Itemized Departmental Breakdown</h4>
+              <div className="border border-slate-200 rounded-xl overflow-hidden">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-xs font-semibold text-slate-600 uppercase border-b border-slate-200">
+                    <tr>
+                      <th className="py-2.5 px-3">Department</th>
+                      <th className="py-2.5 px-3">Description</th>
+                      <th className="py-2.5 px-3 text-center">Qty</th>
+                      <th className="py-2.5 px-3 text-right">Unit Price</th>
+                      <th className="py-2.5 px-3 text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {(selectedInvoice.items || []).length > 0 ? (
+                      selectedInvoice.items.map((item, idx) => {
+                        const dept = item.itemType === "MEDICINE" || item.description?.includes("[PHARMACY]") ? "Pharmacy"
+                          : item.itemType === "LAB_TEST" || item.description?.includes("[LAB]") ? "Laboratory"
+                          : item.itemType === "CONSULTATION" || item.description?.includes("[RECEPTION]") ? "Consultation"
+                          : "Clinical";
+                        return (
+                          <tr key={idx} className="hover:bg-slate-50/50">
+                            <td className="py-2.5 px-3 font-semibold text-xs">
+                              <span className={`px-2 py-0.5 rounded-full ${
+                                dept === "Pharmacy" ? "bg-emerald-100 text-emerald-800"
+                                : dept === "Laboratory" ? "bg-purple-100 text-purple-800"
+                                : "bg-sky-100 text-sky-800"
+                              }`}>
+                                {dept}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-slate-800">{item.description}</td>
+                            <td className="py-2.5 px-3 text-center text-slate-600">{item.quantity}</td>
+                            <td className="py-2.5 px-3 text-right text-slate-600">{formatCurrency(item.unitPrice)}</td>
+                            <td className="py-2.5 px-3 text-right font-medium text-slate-900">{formatCurrency(item.totalPrice || (item.quantity * item.unitPrice))}</td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="py-4 text-center text-slate-500">General Consultation Service</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Financial Totals */}
+            <div className="bg-slate-50 rounded-xl p-4 space-y-2 text-sm border border-slate-100">
+              <div className="flex justify-between text-slate-600">
+                <span>Subtotal:</span>
+                <span>{formatCurrency(selectedInvoice.totalAmount + (selectedInvoice.discount || 0) - (selectedInvoice.tax || 0))}</span>
+              </div>
+              {selectedInvoice.discount > 0 && (
+                <div className="flex justify-between text-emerald-600">
+                  <span>Discount:</span>
+                  <span>- {formatCurrency(selectedInvoice.discount)}</span>
+                </div>
+              )}
+              {selectedInvoice.tax > 0 && (
+                <div className="flex justify-between text-slate-600">
+                  <span>Tax:</span>
+                  <span>+ {formatCurrency(selectedInvoice.tax)}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-bold text-base text-slate-900 border-t border-slate-200 pt-2">
+                <span>Total Amount:</span>
+                <span>{formatCurrency(selectedInvoice.totalAmount)}</span>
+              </div>
+              <div className="flex justify-between text-emerald-700 font-semibold pt-1">
+                <span>Paid Amount:</span>
+                <span>{formatCurrency(selectedInvoice.paidAmount || 0)}</span>
+              </div>
+              <div className="flex justify-between text-amber-700 font-semibold">
+                <span>Remaining Balance Due:</span>
+                <span>{formatCurrency(selectedInvoice.balanceDue != null ? selectedInvoice.balanceDue : (selectedInvoice.totalAmount - (selectedInvoice.paidAmount || 0)))}</span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <Button onClick={() => setSelectedInvoice(null)} className="px-5">
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
