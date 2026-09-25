@@ -7,12 +7,12 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import BillingOverview from "./receptionist/BillingOverview.jsx";
-import CreateInvoice from "./receptionist/CreateInvoice.jsx";
+import MainBillingPanel from "./billingstaff/MainBillingPanel.jsx";
 import NotificationBell from "../../components/NotificationBell.jsx";
 
 const sectionLabels = {
   billing: "Billing & Invoices",
-  create: "Generate Invoice",
+  process: "Process Pending Bills",
 };
 
 export default function BillingStaffDashboard() {
@@ -29,7 +29,7 @@ export default function BillingStaffDashboard() {
 
   const menuItems = [
     { id: "billing", label: "Billing & Invoices", icon: CreditCard },
-    { id: "create", label: "Create Invoice", icon: PlusCircle },
+    { id: "process", label: "Process Pending Bills", icon: PlusCircle },
   ];
 
   return (
@@ -158,7 +158,7 @@ export default function BillingStaffDashboard() {
         {/* Dynamic Content */}
         <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto">
           {section === "billing" && <BillingOverview />}
-          {section === "create" && <CreateInvoice onBack={() => setSection("billing")} />}
+          {section === "process" && <MainBillingPanel />}
         </div>
       </main>
     </div>

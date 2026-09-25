@@ -18,7 +18,7 @@ const sectionLabels = {
   overview: "Overview",
   register: "Patient Registration",
   appointments: "Scheduling",
-  mainBilling: "Main Billing",
+  mainBilling: "Consultation Fees",
 };
 
 const ReceptionistDashboard = () => {
@@ -54,7 +54,7 @@ const ReceptionistDashboard = () => {
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "register", label: "Patient Registration", icon: UserPlus },
     { id: "appointments", label: "Scheduling", icon: Calendar },
-    { id: "mainBilling", label: "Main Billing", icon: CreditCard },
+    { id: "mainBilling", label: "Consultation Fees", icon: CreditCard },
   ];
 
   return (

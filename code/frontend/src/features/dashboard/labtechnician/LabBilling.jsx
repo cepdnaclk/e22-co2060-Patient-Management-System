@@ -83,7 +83,7 @@ export default function LabBilling() {
     ]);
   };
 
-  const handleSendToReception = async () => {
+  const handleSendToBilling = async () => {
     if (!selectedTest || billItems.length === 0) return;
     setIsSending(true);
     try {
@@ -95,14 +95,14 @@ export default function LabBilling() {
         unitPrice: item.unitPrice
       }));
       await billingService.addPendingItems(payload);
-      setActionMsg("Costs sent to reception successfully!");
+      setActionMsg("Costs sent to billing successfully!");
       setTimeout(() => {
         setActionMsg("");
         setSelectedTest(null);
       }, 2000);
     } catch (err) {
-      console.error("Failed to send to reception", err);
-      alert("Failed to send costs to reception.");
+      console.error("Failed to send to billing", err);
+      alert("Failed to send costs to billing staff.");
     } finally {
       setIsSending(false);
     }
@@ -125,7 +125,7 @@ export default function LabBilling() {
             <Receipt className="w-7 h-7 text-cyan-600" />
             Lab Test Billing
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Calculate and send costs to reception for laboratory tests.</p>
+          <p className="text-sm text-slate-500 mt-1">Calculate and send costs to billing staff for laboratory tests.</p>
         </div>
       </div>
 
@@ -288,12 +288,12 @@ export default function LabBilling() {
 
                   <div className="mt-8 flex justify-end">
                     <button 
-                      onClick={handleSendToReception}
+                      onClick={handleSendToBilling}
                       disabled={isSending}
                       className="px-6 py-2.5 bg-cyan-600 text-white rounded-xl font-medium hover:bg-cyan-700 transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50"
                     >
                       {isSending ? <Loader2 className="w-4 h-4 animate-spin"/> : <Receipt className="w-4 h-4"/>}
-                      {isSending ? "Sending..." : "Send to Reception"}
+                      {isSending ? "Sending..." : "Send to Billing Staff"}
                     </button>
                   </div>
                 </div>

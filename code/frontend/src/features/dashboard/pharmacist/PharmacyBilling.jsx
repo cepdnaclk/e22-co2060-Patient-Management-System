@@ -121,7 +121,7 @@ export default function PharmacyBilling() {
     ]);
   };
 
-  const handleSendToReception = async () => {
+  const handleSendToBilling = async () => {
     if (!selectedRx || billItems.length === 0) return;
     setIsSending(true);
     try {
@@ -133,14 +133,14 @@ export default function PharmacyBilling() {
         unitPrice: item.unitPrice
       }));
       await billingService.addPendingItems(payload);
-      setActionMsg("Costs sent to reception successfully!");
+      setActionMsg("Costs sent to billing successfully!");
       setTimeout(() => {
         setActionMsg("");
         setSelectedRx(null);
       }, 2000);
     } catch (err) {
-      console.error("Failed to send to reception", err);
-      alert("Failed to send costs to reception.");
+      console.error("Failed to send to billing", err);
+      alert("Failed to send costs to billing staff.");
     } finally {
       setIsSending(false);
     }
@@ -160,7 +160,7 @@ export default function PharmacyBilling() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Prescription Billing</h1>
-          <p className="text-sm text-slate-500 mt-1">Calculate and send costs to reception for issued medicines.</p>
+          <p className="text-sm text-slate-500 mt-1">Calculate and send costs to billing staff for issued medicines.</p>
         </div>
       </div>
       
@@ -324,12 +324,12 @@ export default function PharmacyBilling() {
 
                   <div className="mt-8 flex justify-end">
                     <button 
-                      onClick={handleSendToReception}
+                      onClick={handleSendToBilling}
                       disabled={isSending}
                       className="px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50"
                     >
                       {isSending ? <Loader2 className="w-4 h-4 animate-spin"/> : <Receipt className="w-4 h-4"/>}
-                      {isSending ? "Sending..." : "Send to Reception"}
+                      {isSending ? "Sending..." : "Send to Billing Staff"}
                     </button>
                   </div>
                 </div>

@@ -18,7 +18,7 @@ public class PendingBillItemController {
     private final BillingService billingService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','PHARMACIST','LAB_TECHNICIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','PHARMACIST','LAB_TECHNICIAN','RECEPTIONIST')")
     public ResponseEntity<List<PendingBillItemDto>> addPendingItems(@RequestBody List<CreatePendingItemRequest> requests) {
         return ResponseEntity.ok(billingService.addPendingItems(requests));
     }

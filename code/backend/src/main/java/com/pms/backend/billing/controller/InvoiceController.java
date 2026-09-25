@@ -67,7 +67,7 @@ public class InvoiceController {
     public ResponseEntity<Map<String, Object>> getSummary() {
         return ResponseEntity.ok(Map.of(
                 "totalRevenue",       billingService.getTotalRevenue(),
-                "outstandingInvoices", billingService.getOutstandingCount()
+                "completedInvoices",  billingService.getCompletedCount()
         ));
     }
 }
