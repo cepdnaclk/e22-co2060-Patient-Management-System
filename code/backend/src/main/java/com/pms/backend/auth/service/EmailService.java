@@ -1,69 +1,94 @@
 package com.pms.backend.auth.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 
 /**
- * Sends HTML-formatted OTP verification emails.
+ * Sends HTML-formatted OTP verification emails via Resend HTTP API.
+ * 
+ * Render's free tier blocks SMTP ports (25, 465, 587), so we use Resend's
+ * REST API over HTTPS (port 443) which is always allowed.
+ * 
  * Emails are sent asynchronously so the API response is not delayed.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private static final String RESEND_API_URL = "https://api.resend.com/emails";
 
-    @Value("${spring.mail.host:NOT_SET}")
-    private String mailHost;
+    @Value("${RESEND_API_KEY:}")
+    private String resendApiKey;
 
-    @Value("${spring.mail.port:NOT_SET}")
-    private String mailPort;
-
-    @Value("${spring.mail.username:noreply@pms.local}")
+    @Value("${RESEND_FROM_EMAIL:onboarding@resend.dev}")
     private String fromEmail;
 
-    @Value("${spring.mail.password:}")
-    private String mailPassword;
+    private HttpClient httpClient;
 
     @PostConstruct
-    public void logSmtpConfig() {
-        boolean hasPassword = mailPassword != null && !mailPassword.isBlank();
-        log.info("========== SMTP CONFIG ==========");
-        log.info("  Host     : {}", mailHost);
-        log.info("  Port     : {}", mailPort);
-        log.info("  Username : {}", fromEmail);
-        log.info("  Password : {}", hasPassword ? "SET (" + mailPassword.length() + " chars)" : "*** EMPTY ***");
-        log.info("==================================");
-        if (!hasPassword) {
-            log.error("MAIL_PASSWORD is empty! OTP emails will NOT be sent.");
+    public void init() {
+        httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(15))
+                .build();
+
+        boolean hasKey = resendApiKey != null && !resendApiKey.isBlank();
+        log.info("========== EMAIL CONFIG (Resend) ==========");
+        log.info("  API Key  : {}", hasKey ? "SET (" + resendApiKey.length() + " chars)" : "*** NOT SET ***");
+        log.info("  From     : {}", fromEmail);
+        log.info("============================================");
+        if (!hasKey) {
+            log.error("RESEND_API_KEY is not set! OTP emails will NOT be sent.");
         }
     }
 
     @Async
     public void sendOtpEmail(String toEmail, String otp, String firstName) {
         log.info("Dispatching OTP email to {} [OTP={}]", toEmail, otp);
+
+        if (resendApiKey == null || resendApiKey.isBlank()) {
+            log.error("❌ Cannot send email: RESEND_API_KEY is not configured.");
+            return;
+        }
+
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            String htmlContent = buildOtpEmailHtml(otp, firstName)
+                    .replace("\"", "\\\"")
+                    .replace("\n", "\\n")
+                    .replace("\r", "");
 
-            String senderEmail = (fromEmail == null || fromEmail.isBlank()) ? "noreply@pms.local" : fromEmail;
-            helper.setFrom(senderEmail);
-            helper.setTo(toEmail);
-            helper.setSubject("PatientMS — Verify Your Email Address");
-            helper.setText(buildOtpEmailHtml(otp, firstName), true);
+            String jsonBody = """
+                    {
+                      "from": "%s",
+                      "to": ["%s"],
+                      "subject": "PatientMS — Verify Your Email Address",
+                      "html": "%s"
+                    }
+                    """.formatted(fromEmail, toEmail, htmlContent);
 
-            mailSender.send(message);
-            log.info("✅ OTP email SENT successfully to {}", toEmail);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(RESEND_API_URL))
+                    .header("Authorization", "Bearer " + resendApiKey)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .timeout(Duration.ofSeconds(30))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                log.info("✅ OTP email SENT successfully to {} | Response: {}", toEmail, response.body());
+            } else {
+                log.error("❌ Resend API returned HTTP {}: {}", response.statusCode(), response.body());
+            }
         } catch (Exception e) {
             log.error("❌ FAILED to send OTP email to {}: {}", toEmail, e.getMessage(), e);
         }
@@ -104,7 +129,7 @@ public class EmailService {
                             </p>
                         </div>
                         <p style="color:#64748b;font-size:13px;line-height:1.6;margin:0 0 8px;">
-                            ⏱️ This code expires in <strong>5 minutes</strong>.
+                            This code expires in <strong>5 minutes</strong>.
                         </p>
                         <p style="color:#64748b;font-size:13px;line-height:1.6;margin:0;">
                             If you did not create an account, please ignore this email.
