@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     -- Types: INFO, WARNING, APPOINTMENT, PRESCRIPTION, BILLING, SYSTEM
     is_read      BOOLEAN      NOT NULL DEFAULT FALSE,
     link_url     VARCHAR(500),
+    related_entity_id BIGINT,
     -- Optional deep link (e.g., /dashboard/doctor?section=records&id=42)
     created_at   TIMESTAMP    NOT NULL DEFAULT NOW(),
     read_at      TIMESTAMP

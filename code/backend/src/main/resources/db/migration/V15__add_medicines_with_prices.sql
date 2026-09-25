@@ -1,3 +1,15 @@
+CREATE TABLE IF NOT EXISTS medicines (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    generic_name VARCHAR(255),
+    manufacturer VARCHAR(255),
+    stock_quantity INTEGER NOT NULL DEFAULT 0,
+    unit_price NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+    expiry_date DATE,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
+);
+
 INSERT INTO medicines (name, generic_name, manufacturer, stock_quantity, unit_price, created_at, updated_at) VALUES 
 ('Paracetamol (Panadol) 500mg', 'Paracetamol', 'SL Pharma', 500, 3.00, NOW(), NOW()),
 ('Amoxicillin 250mg', 'Amoxicillin', 'SL Pharma', 500, 2.00, NOW(), NOW()),

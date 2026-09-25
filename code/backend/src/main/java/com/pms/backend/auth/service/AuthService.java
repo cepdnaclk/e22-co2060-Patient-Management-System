@@ -18,7 +18,7 @@ import com.pms.backend.role.entity.Role;
 import com.pms.backend.user.dto.UserDto;
 import com.pms.backend.user.entity.User;
 import com.pms.backend.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -116,7 +116,7 @@ public class AuthService {
     }
 
     // ── VERIFY OTP (Phase 2: Verify email + Return tokens) ──────────────────
-    @Transactional
+    @Transactional(noRollbackFor = AppException.class)
     public AuthResponse verifySignupOtp(VerifyOtpRequest req, String ipAddress) {
 
         // Verify the OTP
