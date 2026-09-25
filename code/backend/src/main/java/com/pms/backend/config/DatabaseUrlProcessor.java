@@ -49,6 +49,9 @@ public class DatabaseUrlProcessor implements EnvironmentPostProcessor {
             props.put("spring.datasource.url",      jdbcUrl);
             props.put("spring.datasource.username", user);
             props.put("spring.datasource.password", password);
+            props.put("spring.flyway.url",          jdbcUrl);
+            props.put("spring.flyway.user",         user);
+            props.put("spring.flyway.password",     password);
 
             environment.getPropertySources()
                     .addFirst(new MapPropertySource("renderDatabaseUrl", props));

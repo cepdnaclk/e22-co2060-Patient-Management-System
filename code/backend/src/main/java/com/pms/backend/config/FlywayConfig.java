@@ -19,6 +19,9 @@ public class FlywayConfig {
     @Value("${spring.flyway.baseline-on-migrate:true}")
     private boolean baselineOnMigrate;
 
+    @Value("${spring.flyway.baseline-version:0}")
+    private String baselineVersion;
+
     @Bean
     public Flyway flyway(DataSource dataSource) {
         if (!flywayEnabled) {
@@ -28,8 +31,10 @@ public class FlywayConfig {
                 .dataSource(dataSource)
                 .locations(flywayLocations)
                 .baselineOnMigrate(baselineOnMigrate)
+                .baselineVersion(baselineVersion)
                 .load();
-        flyway.migrate();
+        var result = flyway.migrate();
+        System.out.println("[FlywayConfig] Migrations executed successfully: " + result.migrationsExecuted);
         return flyway;
     }
 }

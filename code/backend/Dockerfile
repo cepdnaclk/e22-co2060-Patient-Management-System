@@ -11,4 +11,4 @@ FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8082
-ENTRYPOINT ["sh", "-c", "java -Xmx128m -Xms128m -XX:MaxMetaspaceSize=128m -Xss512k -jar app.jar --server.port=${SERVER_PORT:-8082} --spring.flyway.enabled=true --spring.flyway.locations=classpath:db/migration --spring.jpa.hibernate.ddl-auto=validate"]
+ENTRYPOINT ["sh", "-c", "java -Xmx128m -Xms128m -XX:MaxMetaspaceSize=128m -Xss512k -jar app.jar --server.port=${SERVER_PORT:-8082} --spring.flyway.enabled=true --spring.flyway.locations=classpath:db/migration --spring.jpa.hibernate.ddl-auto=update"]
