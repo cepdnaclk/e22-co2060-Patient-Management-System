@@ -1,5 +1,5 @@
-CREATE TYPE profile_change_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
-CREATE TABLE profile_change_requests (
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'profile_change_status') THEN CREATE TYPE profile_change_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED'); END IF; END $$;
+CREATE TABLE IF NOT EXISTS profile_change_requests (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users(id),
     target_role VARCHAR(50) NOT NULL,

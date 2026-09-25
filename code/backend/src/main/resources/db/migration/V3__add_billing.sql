@@ -38,7 +38,23 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     created_at   TIMESTAMP      NOT NULL DEFAULT NOW()
 );
 
+-- ─── PENDING BILL ITEMS ───────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS pending_bill_items (
+    id          BIGSERIAL PRIMARY KEY,
+    patient_id  BIGINT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    department  VARCHAR(50) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    quantity    INTEGER NOT NULL DEFAULT 1,
+    unit_price  NUMERIC(12, 2) NOT NULL DEFAULT 0,
+    total_price NUMERIC(12, 2) NOT NULL DEFAULT 0,
+    status      VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP DEFAULT NOW()
+);
+
 -- ─── INDEXES ───────────────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_invoices_patient    ON invoices(patient_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_status     ON invoices(status);
 CREATE INDEX IF NOT EXISTS idx_invoice_items_inv   ON invoice_items(invoice_id);
+CREATE INDEX IF NOT EXISTS idx_pending_bill_items_patient ON pending_bill_items(patient_id);
+CREATE INDEX IF NOT EXISTS idx_pending_bill_items_status  ON pending_bill_items(status);

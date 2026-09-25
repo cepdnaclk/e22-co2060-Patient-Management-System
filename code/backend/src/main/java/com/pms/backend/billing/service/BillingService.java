@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
+@org.springframework.context.annotation.DependsOn("flyway")
 public class BillingService {
 
     private final InvoiceRepository invoiceRepo;
