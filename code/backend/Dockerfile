@@ -11,4 +11,4 @@ FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8082
-ENTRYPOINT ["sh", "-c", "java -Xmx384m -jar app.jar --server.port=${PORT:-8082}"]
+ENTRYPOINT ["sh", "-c", "java -Xmx128m -Xms128m -XX:MaxMetaspaceSize=128m -Xss512k -jar app.jar --server.port=${PORT:-8082}"]
