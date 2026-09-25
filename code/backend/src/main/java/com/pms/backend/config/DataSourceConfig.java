@@ -26,7 +26,7 @@ public class DataSourceConfig {
                 String user     = userInfo != null ? userInfo.split(":")[0] : "";
                 String password = userInfo != null && userInfo.contains(":") ? userInfo.split(":", 2)[1] : "";
 
-                String jdbcUrl  = "jdbc:postgresql://" + host + ":" + port + "/" + path + "?sslmode=require";
+                String jdbcUrl  = "jdbc:postgresql://" + host + ":" + port + "/" + path;
 
                 System.setProperty("spring.datasource.url",      jdbcUrl);
                 System.setProperty("spring.datasource.username", user);

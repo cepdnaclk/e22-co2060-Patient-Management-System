@@ -34,7 +34,7 @@ public class DatabaseUrlProcessor implements EnvironmentPostProcessor {
             String user     = userInfo != null ? userInfo.split(":")[0] : "";
             String password = userInfo != null && userInfo.contains(":") ? userInfo.split(":", 2)[1] : "";
 
-            String jdbcUrl  = "jdbc:postgresql://" + host + ":" + port + "/" + dbName + "?sslmode=require";
+            String jdbcUrl  = "jdbc:postgresql://" + host + ":" + port + "/" + dbName;
 
             Map<String, Object> props = new HashMap<>();
             props.put("spring.datasource.url",      jdbcUrl);
