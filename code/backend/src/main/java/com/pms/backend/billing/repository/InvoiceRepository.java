@@ -14,17 +14,20 @@ import java.util.Optional;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
+    @Query("SELECT MAX(i.id) FROM Invoice i")
+    Long getMaxId();
+
     Optional<Invoice> findByInvoiceNumber(String invoiceNumber);
 
     Page<Invoice> findByPatientIdOrderByCreatedAtDesc(Long patientId, Pageable pageable);
 
     Page<Invoice> findByStatusOrderByCreatedAtDesc(String status, Pageable pageable);
 
-    @Query("SELECT SUM(i.paidAmount) FROM Invoice i WHERE i.status IN ('PAID', 'PARTIALLY_PAID')")
+    @Query("SELECT SUM(i.totalAmount) FROM Invoice i")
     BigDecimal getTotalRevenue();
 
-    @Query("SELECT COUNT(i) FROM Invoice i WHERE i.status = 'ISSUED' OR i.status = 'PARTIALLY_PAID'")
-    long countOutstandingInvoices();
+    @Query("SELECT COUNT(i) FROM Invoice i WHERE i.status = 'PAID'")
+    long countCompletedInvoices();
 
     Page<Invoice> findByCreatedAtBetweenOrderByCreatedAtDesc(
             LocalDateTime from, LocalDateTime to, Pageable pageable);

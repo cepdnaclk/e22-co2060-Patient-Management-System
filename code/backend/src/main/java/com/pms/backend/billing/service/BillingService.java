@@ -15,6 +15,7 @@ import com.pms.backend.patient.repository.PatientRepository;
 import com.pms.backend.user.entity.User;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import jakarta.annotation.PostConstruct;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,6 +38,14 @@ public class BillingService {
 
     // Thread-safe counter for generating invoice numbers
     private final AtomicLong invoiceCounter = new AtomicLong(1000);
+
+    @PostConstruct
+    public void init() {
+        Long maxId = invoiceRepo.getMaxId();
+        if (maxId != null) {
+            invoiceCounter.set(1000 + maxId);
+        }
+    }
 
     // ── CREATE INVOICE ───────────────────────────────────────────────────────
     @Transactional
@@ -198,8 +207,8 @@ public class BillingService {
         return total != null ? total : BigDecimal.ZERO;
     }
 
-    public long getOutstandingCount() {
-        return invoiceRepo.countOutstandingInvoices();
+    public long getCompletedCount() {
+        return invoiceRepo.countCompletedInvoices();
     }
 
     // ── PRIVATE HELPERS ───────────────────────────────────────────────────────

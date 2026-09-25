@@ -11,7 +11,7 @@ import CreateInvoice from "./CreateInvoice.jsx";
 
 export default function BillingOverview() {
   const [view, setView] = useState("list"); // 'list' or 'create'
-  const [summary, setSummary] = useState({ totalRevenue: 0, outstandingInvoices: 0 });
+  const [summary, setSummary] = useState({ totalRevenue: 0, completedInvoices: 0 });
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,6 +34,8 @@ export default function BillingOverview() {
   useEffect(() => {
     if (view === "list") {
       fetchDashboardData();
+      const intervalId = setInterval(fetchDashboardData, 5000);
+      return () => clearInterval(intervalId);
     }
   }, [view]);
 
@@ -89,10 +91,10 @@ export default function BillingOverview() {
               <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
                 <FileText className="w-6 h-6" />
               </div>
-              <h3 className="font-medium text-amber-50">Outstanding Invoices</h3>
+              <h3 className="font-medium text-amber-50">Completed Invoices</h3>
             </div>
             <p className="text-4xl font-bold tracking-tight">
-              {summary.outstandingInvoices || 0}
+              {summary.completedInvoices || 0}
             </p>
           </CardContent>
         </Card>
@@ -125,14 +127,12 @@ export default function BillingOverview() {
                   <th className="p-4 whitespace-nowrap">Patient ID</th>
                   <th className="p-4 whitespace-nowrap">Amount</th>
                   <th className="p-4 whitespace-nowrap">Due</th>
-                  <th className="p-4 whitespace-nowrap">Status</th>
-                  <th className="p-4 whitespace-nowrap text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {invoices.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="p-8 text-center text-slate-500">No invoices found.</td>
+                    <td colSpan="5" className="p-8 text-center text-slate-500">No invoices found.</td>
                   </tr>
                 ) : (
                   invoices.map((inv) => (
@@ -151,29 +151,6 @@ export default function BillingOverview() {
                       </td>
                       <td className="p-4 font-semibold text-amber-600">
                         Rs. {inv.dueAmount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                      </td>
-                      <td className="p-4">
-                        {inv.status === "PAID" ? (
-                          <Badge variant="success">Paid</Badge>
-                        ) : inv.status === "PARTIAL" ? (
-                          <Badge variant="warning">Partial</Badge>
-                        ) : (
-                          <Badge variant="error">Pending</Badge>
-                        )}
-                      </td>
-                      <td className="p-4 text-right">
-                        {inv.status !== "PAID" ? (
-                          <button 
-                            onClick={() => handlePayment(inv.id)}
-                            className="text-sky-600 hover:text-sky-700 font-medium text-sm flex items-center justify-end gap-1 w-full"
-                          >
-                            Pay <ArrowRight className="w-4 h-4" />
-                          </button>
-                        ) : (
-                          <span className="text-emerald-500 flex items-center justify-end gap-1">
-                            <CheckCircle2 className="w-4 h-4" /> Done
-                          </span>
-                        )}
                       </td>
                     </tr>
                   ))
