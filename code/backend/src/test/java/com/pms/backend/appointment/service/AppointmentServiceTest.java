@@ -11,6 +11,7 @@ import com.pms.backend.notification.service.NotificationService;
 import com.pms.backend.patient.entity.Patient;
 import com.pms.backend.patient.repository.PatientRepository;
 import com.pms.backend.user.entity.User;
+import com.pms.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,6 +41,9 @@ class AppointmentServiceTest {
 
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private AppointmentService appointmentService;
@@ -87,7 +91,7 @@ class AppointmentServiceTest {
         // Verify notification to Doctor
         verify(notificationService, times(1)).createNotification(
                 eq(20L),
-                eq("New Appointment Scheduled"),
+                eq("New Appointment Request"),
                 contains("Alice Smith"),
                 eq(NotificationType.APPOINTMENT),
                 eq(100L)
@@ -96,7 +100,7 @@ class AppointmentServiceTest {
         // Verify notification to Patient
         verify(notificationService, times(1)).createNotification(
                 eq(10L),
-                eq("Appointment Confirmed"),
+                eq("Appointment Pending"),
                 contains("Dr. John Watson"),
                 eq(NotificationType.APPOINTMENT),
                 eq(100L)
