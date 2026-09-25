@@ -100,22 +100,28 @@ async function uploadFile(token, fileName, fileContent, mimeType = 'application/
   });
 }
 
-function getOtpForEmail(email) {
-  try {
-    const dbOtp = queryDb(`SELECT otp_code FROM email_otps WHERE email='${email}' ORDER BY created_at DESC LIMIT 1;`);
-    if (dbOtp && dbOtp.length === 6) return dbOtp;
-  } catch (_) {}
+async function getOtpForEmail(email, maxWaitMs = 4000) {
+  const tasksDir = 'C:\\Users\\User\\.gemini\\antigravity-ide\\brain\\41e73b54-ff3f-4ff3-a122-ee085a412859\\.system_generated\\tasks';
+  const start = Date.now();
 
-  // Fallback to logs
-  if (fs.existsSync(BACKEND_LOG_PATH)) {
-    const logs = fs.readFileSync(BACKEND_LOG_PATH, 'utf8');
-    const regex = new RegExp(`Dispatching OTP email to ${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\[OTP=(\\d{6})\\]`, 'g');
-    let match;
-    let lastOtp = null;
-    while ((match = regex.exec(logs)) !== null) {
-      lastOtp = match[1];
+  while (Date.now() - start < maxWaitMs) {
+    if (fs.existsSync(tasksDir)) {
+      const files = fs.readdirSync(tasksDir).filter(f => f.endsWith('.log'));
+      files.sort((a, b) => fs.statSync(`${tasksDir}\\${b}`).mtimeMs - fs.statSync(`${tasksDir}\\${a}`).mtimeMs);
+      for (const file of files) {
+        try {
+          const content = fs.readFileSync(`${tasksDir}\\${file}`, 'utf8');
+          const regex = new RegExp(`Dispatching OTP email to ${email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\[OTP=(\\d{6})\\]`, 'g');
+          let match;
+          let lastOtp = null;
+          while ((match = regex.exec(content)) !== null) {
+            lastOtp = match[1];
+          }
+          if (lastOtp) return lastOtp;
+        } catch (_) {}
+      }
     }
-    if (lastOtp) return lastOtp;
+    await new Promise(r => setTimeout(r, 250));
   }
   return null;
 }
@@ -462,7 +468,7 @@ async function main() {
     if (signupRes.status !== 201) throw new Error('Signup failed with status ' + signupRes.status);
 
     // Get OTP from DB or logs
-    const otp = getOtpForEmail(testSignupEmail);
+    const otp = await getOtpForEmail(testSignupEmail);
     console.log(`  2. Retrieved OTP: ${otp}`);
     if (!otp) throw new Error('Could not find OTP');
 

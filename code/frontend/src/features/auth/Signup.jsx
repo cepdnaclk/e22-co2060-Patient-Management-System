@@ -203,12 +203,20 @@ export default function SignupPage() {
     setOtpError("");
     try {
       const data = await authService.verifySignupOtp(otpEmail, otp);
-      setOtpSuccess("Email verified successfully!");
-      // Small delay so user sees the success message
-      setTimeout(() => {
-        saveLogin(data.accessToken, data.refreshToken, data.user);
-        navigate(ROLE_ROUTES[data.user.role] || "/dashboard");
-      }, 1200);
+      if (data.user && !data.user.isActive) {
+        setOtpSuccess(
+          "Email verified successfully! Your account is pending management approval. Please wait for activation.",
+        );
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
+      } else {
+        setOtpSuccess("Email verified successfully!");
+        setTimeout(() => {
+          saveLogin(data.accessToken, data.refreshToken, data.user);
+          navigate(ROLE_ROUTES[data.user.role] || "/dashboard");
+        }, 1200);
+      }
     } catch (err) {
       setOtpError(
         err.response?.data?.message || "Invalid OTP. Please try again.",
