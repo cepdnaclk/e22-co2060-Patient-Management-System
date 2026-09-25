@@ -2,11 +2,15 @@ package com.pms.backend.user.dto;
 
 import com.pms.backend.role.entity.Role;
 import com.pms.backend.user.entity.User;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserDto {
     private Long id;
     private String firstName;
