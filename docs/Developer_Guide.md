@@ -74,6 +74,41 @@ The **Patient Management System (PMS)** is a full-stack web application for mana
                  └──────────────────────┘
 ```
 
+### 2.1 Billing Subsystem Architecture
+
+The billing module implements a **Decentralized Staging $\rightarrow$ Centralized Aggregation Pipeline**:
+
+```
+┌──────────────────┐       ┌──────────────────┐       ┌──────────────────┐
+│ Pharmacy Module  │       │Laboratory Module │       │Reception / Clinic│
+│ (Prescriptions)  │       │  (Test Orders)   │       │ (Consultations)  │
+└────────┬─────────┘       └────────┬─────────┘       └────────┬─────────┘
+         │                          │                          │
+         │ POST /api/billing/pending-items                     │
+         └──────────────────────────┼──────────────────────────┘
+                                    │
+                                    ▼
+                     ┌──────────────────────────────┐
+                     │      pending_bill_items      │
+                     │   (Staging Queue: PENDING)   │
+                     └──────────────┬───────────────┘
+                                    │
+                                    │ Consolidated in MainBillingPanel
+                                    ▼
+                     ┌──────────────────────────────┐
+                     │      invoices & items        │
+                     │(Status: ISSUED, items BILLED)│
+                     └──────────────┬───────────────┘
+                                    │
+                      POST /api/invoices/{id}/pay
+                                    │
+                                    ▼
+                     ┌──────────────────────────────┐
+                     │    PAID / PARTIALLY_PAID     │
+                     │ (Audit Log & Revenue Summary)│
+                     └──────────────────────────────┘
+```
+
 ---
 
 ## 3. Technology Stack
@@ -288,7 +323,12 @@ e22-co2060-Patient-Management-System/
 │   │   │   ├── appointment/        # Appointment scheduling
 │   │   │   ├── audit/              # Audit logging
 │   │   │   ├── auth/               # Authentication (JWT, OAuth)
-│   │   │   ├── billing/            # Billing & payments
+│   │   │   ├── billing/            # Billing domain (Invoices, Items, Pending Staging)
+│   │   │   │   ├── controller/     # InvoiceController, PendingBillItemController
+│   │   │   │   ├── dto/            # CreateInvoiceRequest, CreatePendingItemRequest, PendingBillItemDto
+│   │   │   │   ├── entity/         # Invoice, InvoiceItem, PendingBillItem
+│   │   │   │   ├── repository/     # InvoiceRepository, PendingBillItemRepository
+│   │   │   │   └── service/        # BillingService (aggregation & payments)
 │   │   │   ├── common/             # Shared exceptions & utilities
 │   │   │   ├── config/             # Security, CORS, WebSocket config
 │   │   │   ├── doctor/             # Doctor profiles & management
@@ -513,20 +553,45 @@ Base URL: `http://localhost:8082/api`
 
 **Record Types:** `DIAGNOSIS`, `PRESCRIPTION`, `LAB_RESULT`, `IMAGING`
 
-### 10.6 Users (Admin Only)
+### 10.6 Invoices (`/api/invoices`)
+
+| Method | Endpoint | Description | Auth Required / Roles |
+|---|---|---|---|
+| `POST` | `/invoices` | Create consolidated invoice from items | ✅ ADMIN, SUPER_ADMIN, BILLING_STAFF, RECEPTIONIST |
+| `GET` | `/invoices` | List all invoices (paginated: `?page=0&size=10`) | ✅ ADMIN, SUPER_ADMIN, BILLING_STAFF, RECEPTIONIST |
+| `GET` | `/invoices/{id}` | Get invoice details and line items by ID | ✅ ADMIN, SUPER_ADMIN, BILLING_STAFF, DOCTOR, RECEPTIONIST, PATIENT |
+| `POST` | `/invoices/{id}/pay` | Record payment (`amount`, `paymentMethod`) | ✅ ADMIN, SUPER_ADMIN, BILLING_STAFF, RECEPTIONIST |
+| `GET` | `/invoices/patient/{patientId}` | Get invoices for specific patient | ✅ ADMIN, SUPER_ADMIN, BILLING_STAFF, DOCTOR, PATIENT |
+| `GET` | `/invoices/summary` | Get revenue summary (`totalRevenue`, `completedInvoices`) | ✅ ADMIN, SUPER_ADMIN, BILLING_STAFF |
+
+**Invoice Statuses:** `ISSUED`, `PARTIALLY_PAID`, `PAID`, `CANCELLED`  
+**Payment Methods:** `CASH`, `CARD`, `INSURANCE`, `BANK_TRANSFER`
+
+### 10.7 Pending Bill Items (`/api/billing/pending-items`)
+
+| Method | Endpoint | Description | Auth Required / Roles |
+|---|---|---|---|
+| `POST` | `/billing/pending-items` | Batch enqueue pending charges from clinical depts | ✅ ADMIN, SUPER_ADMIN, PHARMACIST, LAB_TECHNICIAN, RECEPTIONIST |
+| `GET` | `/billing/pending-items/patients` | Get list of distinct patient IDs with unbilled items | ✅ ADMIN, SUPER_ADMIN, RECEPTIONIST, BILLING_STAFF |
+| `GET` | `/billing/pending-items/patient/{patientId}` | Get all pending charges for a specific patient | ✅ ADMIN, SUPER_ADMIN, RECEPTIONIST, BILLING_STAFF |
+
+**Departments:** `PHARMACY`, `LAB`, `RECEPTION`, `OTHER`  
+**Item Statuses:** `PENDING` (staged), `BILLED` (invoiced)
+
+### 10.8 Users (Admin Only)
 
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
 | `GET` | `/users` | List all users | ✅ (ADMIN, SUPER_ADMIN, MANAGEMENT, DOCTOR) |
 | Various | `/users/**` | User management | ✅ (ADMIN, SUPER_ADMIN) |
 
-### 10.7 Audit Logs (Admin Only)
+### 10.9 Audit Logs (Admin Only)
 
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
 | `GET` | `/audit/**` | View audit logs | ✅ (ADMIN, SUPER_ADMIN) |
 
-### 10.8 File Operations
+### 10.10 File Operations
 
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
@@ -548,6 +613,9 @@ The schema is auto-managed by Hibernate (`ddl-auto=update`) with Flyway migratio
 | `doctors` | Doctor profiles (specialization, license, availability, fees) |
 | `appointments` | Scheduled appointments (patient-doctor, status, notes) |
 | `medical_records` | Clinical records (diagnosis, prescription, lab results, imaging) |
+| `invoices` | Consolidated billing invoices (patient, created_by, status, total, paid, tax, discount) |
+| `invoice_items` | Itemized charges under an invoice (description, quantity, unit_price, total_price, item_type) |
+| `pending_bill_items` | Inter-departmental charge staging queue (patient, department, status: PENDING/BILLED) |
 
 ### 11.2 Key Relationships
 
@@ -558,6 +626,9 @@ patients ──1:N──▶ appointments
 doctors ──1:N──▶ appointments
 patients ──1:N──▶ medical_records
 doctors ──1:N──▶ medical_records
+patients ──1:N──▶ invoices ──1:N──▶ invoice_items
+patients ──1:N──▶ pending_bill_items
+users (staff) ──1:N──▶ invoices (created_by)
 ```
 
 ### 11.3 Audit Columns
@@ -574,7 +645,14 @@ Flyway migration files are located at:
 code/backend/src/main/resources/db/migration/
 ```
 
-Migration naming convention: `V{version}__{description}.sql`
+Key migration scripts:
+- `V1__init_schema.sql` — Core users, roles, patients, doctors, appointments, medical records
+- `V2__add_refresh_tokens.sql` — Refresh token authentication storage
+- `V3__add_billing.sql` — Invoices, invoice items, and pending bill items staging schema
+- `V4__add_audit_logs.sql` — Audit logging subsystem
+- `V5__add_notifications.sql` — Real-time notification entity storage
+- `V14__add_nurse_workflow_tables.sql` — Nurse vitals and medication orders
+- `V15__add_medicines_with_prices.sql` — Pharmacy inventory pricing lookup
 
 ---
 
@@ -632,7 +710,7 @@ Defined in `Role.java`:
 
 ### 13.2 Endpoint Authorization
 
-Configured in `SecurityConfig.java`:
+Global URL filters are configured in `SecurityConfig.java`:
 
 ```java
 .authorizeHttpRequests(auth -> auth
@@ -644,6 +722,17 @@ Configured in `SecurityConfig.java`:
     .anyRequest().authenticated()
 )
 ```
+
+Granular role authorization is enforced via `@PreAuthorize` on controller methods:
+
+| Controller Endpoint | Allowed Roles | Business Purpose |
+|---|---|---|
+| `POST /api/billing/pending-items` | `ADMIN`, `SUPER_ADMIN`, `PHARMACIST`, `LAB_TECHNICIAN`, `RECEPTIONIST` | Enqueue departmental service charges |
+| `GET /api/billing/pending-items/**` | `ADMIN`, `SUPER_ADMIN`, `RECEPTIONIST`, `BILLING_STAFF` | Inspect pending charges to prepare invoices |
+| `POST /api/invoices` | `ADMIN`, `SUPER_ADMIN`, `BILLING_STAFF`, `RECEPTIONIST` | Create and issue consolidated invoices |
+| `POST /api/invoices/{id}/pay` | `ADMIN`, `SUPER_ADMIN`, `BILLING_STAFF`, `RECEPTIONIST` | Record customer payments |
+| `GET /api/invoices/summary` | `ADMIN`, `SUPER_ADMIN`, `BILLING_STAFF` | Access financial revenue statistics |
+| `GET /api/invoices/patient/{id}` | `ADMIN`, `SUPER_ADMIN`, `BILLING_STAFF`, `DOCTOR`, `PATIENT` | Access personal or patient invoices |
 
 ### 13.3 Frontend Route Protection
 
@@ -752,6 +841,32 @@ Global exception handling is managed by `GlobalExceptionHandler`:
 
 - `AppException` — Custom application-level exceptions with HTTP status codes.
 - All unhandled exceptions return structured JSON error responses.
+
+### 15.4 Billing Domain Architecture & Lifecycle
+
+The billing subsystem solves the multi-department charge synchronization challenge through an event staging model:
+
+#### 1. Staged Staging Queue (`PendingBillItem`)
+- Clinical modules (Pharmacy, Lab, Reception) do not directly manipulate finalized invoices. Instead, they write to `pending_bill_items` with initial status `PENDING`.
+- Each item tracks its origin department (`PHARMACY`, `LAB`, `RECEPTION`, `OTHER`), patient foreign key, description, quantity, unit price, and computed total.
+
+#### 2. Consolidation & Atomic Invoicing (`BillingService.createInvoice`)
+- When billing staff trigger invoice creation, the backend:
+  1. Generates a thread-safe sequence invoice number: `INV-YYYY-XXXXX` (initialized from `invoiceRepo.getMaxId()`).
+  2. Creates an `Invoice` entity with status `ISSUED`, applying optional taxes, discounts, and payment terms.
+  3. Maps incoming line items into `InvoiceItem` records attached to the invoice.
+  4. Automatically queries all `PENDING` items for that patient and transitions them to `BILLED` (`pendingBillItem.setStatus("BILLED")`), preventing duplicate invoicing.
+  5. Records an asynchronous audit log entry (`CREATE_INVOICE`).
+
+#### 3. Payment Processing & State Machine (`BillingService.recordPayment`)
+- Invoices support incremental partial payments or lump-sum settlements:
+  ```
+  [ISSUED] ──(partial amount)──▶ [PARTIALLY_PAID] ──(settlement)──▶ [PAID]
+     │
+     └──(full amount)────────────────────────────────────────────▶ [PAID]
+  ```
+- Payments update `paidAmount` and record the transaction timestamp `paidAt`.
+- Audit logs capture financial transactions (`RECORD_PAYMENT`) with exact amounts and remaining balance.
 
 ---
 

@@ -98,13 +98,13 @@ The PMS uses **role-based access control (RBAC)**. Each role has access to speci
 
 | Role | Key Permissions |
 |---|---|
-| **Patient** | View own medical records, appointments, prescriptions, and lab results |
+| **Patient** | View own medical records, appointments, prescriptions, lab results, and itemized billing/invoices |
 | **Doctor** | Full clinical access — diagnoses, prescriptions, medical records, appointments |
 | **Nurse** | Record vitals, assist doctors, view patient information |
-| **Receptionist** | Book/manage appointments, register patients |
-| **Pharmacist** | View and manage prescriptions, dispense medications |
-| **Lab Technician** | Enter and manage lab test results, upload reports |
-| **Billing Staff** | Manage billing, invoices, and payment records |
+| **Receptionist** | Book/manage appointments, register patients, queue consultation fees, front-desk invoicing & payments |
+| **Pharmacist** | View and manage prescriptions, dispense medications, auto-queue medication charges to billing |
+| **Lab Technician** | Enter and manage lab test results, upload reports, auto-queue lab diagnostic fees to billing |
+| **Billing Staff** | Centralized billing hub — process pending department charges, issue consolidated invoices, record payments, revenue analytics |
 | **Admin** | Manage users, view audit logs, system reports |
 | **Super Admin** | Full system access, manage all users and configurations |
 | **Management** | User & staff management, administrative reporting |
@@ -134,11 +134,19 @@ After logging in as a **Patient**, you will see your personalized dashboard with
   - **Clinical Notes** — Notes from your healthcare providers
 
 ### 5.4 Profile Management
-
 - View and update your personal information:
   - Contact details
   - Emergency contact information
   - Medical history and allergies
+
+### 5.5 Billing & Invoices
+- **View Invoices** — Access past and current invoices issued by the healthcare facility.
+- **Itemized Charge Breakdown** — Review specific line items categorized by department:
+  - Pharmacy charges (prescribed medications, dosage quantities, unit prices)
+  - Laboratory charges (tests conducted, diagnostic panel fees)
+  - Consultation and clinical procedure fees
+- **Payment Status Tracking** — Check invoice payment status (`ISSUED`, `PARTIALLY_PAID`, `PAID`).
+- **View Payment History & Receipts** — Inspect payment amounts, dates, payment methods, and remaining balance.
 
 ---
 
@@ -210,8 +218,12 @@ The **Receptionist Dashboard** focuses on front-desk operations:
 - View doctor availability and schedules.
 
 ### 8.3 Patient Queue
-
 - Manage the daily patient check-in and waiting queue.
+
+### 8.4 Front-Desk Billing & Consultation Charges
+- **Queue Consultation Charges** — Dispatch consultation fees directly to the patient's pending bill queue.
+- **Direct Invoice Generation** — Issue consolidated invoices for walk-in visits or appointment check-outs.
+- **Process Payments** — Accept payments at the front desk via Cash, Card, or Insurance.
 
 ---
 
@@ -220,13 +232,12 @@ The **Receptionist Dashboard** focuses on front-desk operations:
 The **Pharmacist Dashboard** manages prescription workflows:
 
 ### 9.1 Prescriptions Queue
-
 - View incoming prescriptions from doctors.
 - Mark prescriptions as **Dispensed** or **Pending**.
+- **Automated Billing Staging** — When medications are dispensed, itemized medication costs (unit price × quantity) are automatically dispatched to the billing system's pending bill queue (`pending_bill_items`), eliminating manual reentry.
 
 ### 9.2 Medication Management
-
-- Search medication inventory.
+- Search medication inventory and pricing.
 - Track dispensing history.
 
 ---
@@ -236,17 +247,15 @@ The **Pharmacist Dashboard** manages prescription workflows:
 The **Lab Technician Dashboard** handles laboratory operations:
 
 ### 10.1 Lab Orders
-
 - View pending lab test orders from doctors.
 - Update test status (Pending → In Progress → Completed).
 
-### 10.2 Results Entry
-
+### 10.2 Results Entry & Automated Charge Dispatch
 - Enter lab test results and attach reports.
 - Upload lab report files (PDF, images up to 10 MB).
+- **Automated Billing Staging** — Completing a lab order automatically forwards the corresponding diagnostic test charges to the patient's pending billing queue.
 
 ### 10.3 Report Management
-
 - View and manage completed lab reports.
 - Reports are accessible to the ordering doctor and the patient.
 
@@ -254,17 +263,57 @@ The **Lab Technician Dashboard** handles laboratory operations:
 
 ## 11. Billing Staff Dashboard
 
-The **Billing Staff Dashboard** manages financial operations:
+The **Billing Staff Dashboard** serves as the central financial hub of the hospital, integrating service charges across all clinical departments into consolidated invoices and managing revenue lifecycle.
 
-### 11.1 Invoice Management
+### 11.1 Centralized Billing Workflow Overview
+The system follows a staging-and-consolidation billing architecture:
+1. **Service Delivery**: As patients visit the clinic, receive prescriptions from the Pharmacy, or undergo tests in the Laboratory, each department dispatches line items into the central **Pending Bill Items** staging queue.
+2. **Pending Queue Monitoring**: Billing staff review patients who have unbilled charges accumulated from one or more departments.
+3. **Consolidated Invoicing**: Staff combine pending departmental charges, add optional custom items, apply discounts or tax, and generate a finalized Invoice. Staged items automatically transition from `PENDING` to `BILLED`.
+4. **Payment Collection**: Staff record payments (full or partial) against issued invoices and issue receipts.
 
-- Generate invoices for patient visits, procedures, and lab tests.
-- View and manage billing history.
+### 11.2 Process Pending Bills Panel
+Accessible via the **"Process Pending Bills"** sidebar menu:
+- **Patients with Pending Bills**: Displays a real-time list of all patients who have unbilled charges awaiting processing.
+- **Departmental Item Review**: Selecting a patient displays all staged items grouped by origin:
+  - `PHARMACY` — Medications, dosage quantities, unit prices, and line totals.
+  - `LAB` — Diagnostic investigations, lab panels, and specimen processing fees.
+  - `RECEPTION` / `CLINICAL` — Doctor consultation charges, specialist fees, or registration costs.
+- **Add Additional Line Items**: Staff can add manual charges on the fly (e.g., room charges, medical consumables, emergency care supplements) specifying description, quantity, and unit price.
+- **Adjustments & Calculations**:
+  - Automatically calculates subtotal from pending items and additional entries.
+  - **Discount**: Apply flat discount amounts where applicable (e.g., institutional concessions).
+  - **Tax**: Add applicable government/hospital taxes.
+  - **Clinical Notes**: Add internal or invoice-facing notes (e.g., insurance claim numbers, payment terms).
+- **Generate Invoice**: Clicking **"Generate Invoice"** creates the official invoice with a unique tracking number (e.g., `INV-2026-01042`), sets the initial status to `ISSUED`, and marks all staged items as `BILLED`.
 
-### 11.2 Payment Tracking
+### 11.3 Invoice Management & Invoices List
+Accessible via the **"Billing & Invoices"** sidebar menu:
+- **Search & Filter**: Search invoices by invoice number, patient name, or patient ID. Filter invoices by status:
+  - `ISSUED` — Invoice generated, awaiting payment.
+  - `PARTIALLY_PAID` — Partial installment received, balance remaining.
+  - `PAID` — Fully settled.
+  - `CANCELLED` — Voided invoice.
+- **Invoice Details & Breakdown**: Inspect line-item charges, tax, discounts, timestamps, creating staff member, and customer payment history.
+- **Print / Download**: Generate printable invoice slips and receipts for patients.
 
-- Record payments received.
-- Track outstanding balances.
+### 11.4 Payment Processing
+- **Record Payment**: Click **"Pay"** on any unpaid or partially paid invoice.
+- **Payment Amounts**: Accept full payments or partial installments. The system automatically computes the remaining balance:
+  - If payment settles the full total, status transitions to `PAID`.
+  - If payment is partial, status updates to `PARTIALLY_PAID`.
+- **Supported Payment Methods**:
+  - **Cash**
+  - **Credit / Debit Card**
+  - **Insurance / Third-Party Payer**
+  - **Bank Transfer / Online**
+- **Audit Logging**: Every invoice created and payment recorded is automatically captured in the immutable audit log for financial compliance.
+
+### 11.5 Revenue Summary & Financial Metrics
+Top-level metrics give billing administrators instant visibility into hospital revenue:
+- **Total Revenue Collected** — Cumulative monetary value of all processed payments (`PAID` and `PARTIALLY_PAID`).
+- **Completed Invoices** — Total count of fully paid customer invoices.
+- **Pending Receivables** — Real-time tracking of outstanding hospital balances.
 
 ---
 
