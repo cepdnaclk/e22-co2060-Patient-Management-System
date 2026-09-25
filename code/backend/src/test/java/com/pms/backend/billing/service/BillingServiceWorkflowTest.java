@@ -162,12 +162,12 @@ class BillingServiceWorkflowTest {
     @Test
     void testGetSummary_ReconcilesRevenue() {
         when(invoiceRepo.getTotalRevenue()).thenReturn(new BigDecimal("15450.75"));
-        when(invoiceRepo.countOutstandingInvoices()).thenReturn(14L);
+        when(invoiceRepo.countCompletedInvoices()).thenReturn(14L);
 
         BigDecimal revenue = billingService.getTotalRevenue();
-        long outstanding = billingService.getOutstandingCount();
+        long completed = billingService.getCompletedCount();
 
         assertEquals(new BigDecimal("15450.75"), revenue);
-        assertEquals(14L, outstanding);
+        assertEquals(14L, completed);
     }
 }
