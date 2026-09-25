@@ -8,6 +8,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
@@ -22,8 +23,31 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
+    @Value("${spring.mail.host:NOT_SET}")
+    private String mailHost;
+
+    @Value("${spring.mail.port:NOT_SET}")
+    private String mailPort;
+
     @Value("${spring.mail.username:noreply@pms.local}")
     private String fromEmail;
+
+    @Value("${spring.mail.password:}")
+    private String mailPassword;
+
+    @PostConstruct
+    public void logSmtpConfig() {
+        boolean hasPassword = mailPassword != null && !mailPassword.isBlank();
+        log.info("========== SMTP CONFIG ==========");
+        log.info("  Host     : {}", mailHost);
+        log.info("  Port     : {}", mailPort);
+        log.info("  Username : {}", fromEmail);
+        log.info("  Password : {}", hasPassword ? "SET (" + mailPassword.length() + " chars)" : "*** EMPTY ***");
+        log.info("==================================");
+        if (!hasPassword) {
+            log.error("MAIL_PASSWORD is empty! OTP emails will NOT be sent.");
+        }
+    }
 
     @Async
     public void sendOtpEmail(String toEmail, String otp, String firstName) {
@@ -39,9 +63,9 @@ public class EmailService {
             helper.setText(buildOtpEmailHtml(otp, firstName), true);
 
             mailSender.send(message);
-            log.info("OTP email sent to {}", toEmail);
+            log.info("✅ OTP email SENT successfully to {}", toEmail);
         } catch (Exception e) {
-            log.warn("Could not send SMTP email to {}: {}", toEmail, e.getMessage());
+            log.error("❌ FAILED to send OTP email to {}: {}", toEmail, e.getMessage(), e);
         }
     }
 
