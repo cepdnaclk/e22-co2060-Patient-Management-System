@@ -5,3 +5,5 @@
 -- We drop it so Spring Validation and the Java enum govern valid notification types instead.
 
 ALTER TABLE notifications DROP CONSTRAINT IF EXISTS notifications_type_check;
+
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS related_entity_id BIGINT;

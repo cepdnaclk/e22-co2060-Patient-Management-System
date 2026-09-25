@@ -21,3 +21,6 @@ ALTER TABLE appointments ADD COLUMN IF NOT EXISTS duration_minutes INTEGER;
 
 -- Set default duration if null
 UPDATE appointments SET duration_minutes = 30 WHERE duration_minutes IS NULL;
+
+-- Add decline_reason column if it doesn't exist
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS decline_reason VARCHAR(1000);

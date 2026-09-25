@@ -71,7 +71,7 @@ public class OtpService {
      * Verify the OTP entered by the user.
      * Returns true if valid; throws AppException otherwise.
      */
-    @Transactional
+    @Transactional(noRollbackFor = AppException.class)
     public boolean verifyOtp(String email, String otp) {
         EmailOtp emailOtp = otpRepository.findFirstByEmailAndVerifiedFalseOrderByCreatedAtDesc(email)
                 .orElseThrow(() -> new AppException(
