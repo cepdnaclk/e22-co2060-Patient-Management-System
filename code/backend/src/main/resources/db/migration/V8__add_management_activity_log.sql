@@ -1,4 +1,4 @@
-CREATE TABLE management_activity_log (
+CREATE TABLE IF NOT EXISTS management_activity_log (
     id BIGSERIAL PRIMARY KEY,
     performed_by_id BIGINT NOT NULL,
     target_user_id BIGINT,

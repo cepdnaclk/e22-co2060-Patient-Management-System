@@ -27,6 +27,7 @@ public class EmailService {
 
     @Async
     public void sendOtpEmail(String toEmail, String otp, String firstName) {
+        log.info("Dispatching OTP email to {} [OTP={}]", toEmail, otp);
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -39,8 +40,8 @@ public class EmailService {
 
             mailSender.send(message);
             log.info("OTP email sent to {}", toEmail);
-        } catch (MessagingException e) {
-            log.error("Failed to send OTP email to {}: {}", toEmail, e.getMessage());
+        } catch (Exception e) {
+            log.warn("Could not send SMTP email to {}: {}", toEmail, e.getMessage());
         }
     }
 
