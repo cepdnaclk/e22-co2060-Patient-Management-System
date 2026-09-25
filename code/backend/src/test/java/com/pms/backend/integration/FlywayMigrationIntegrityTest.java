@@ -58,11 +58,11 @@ class FlywayMigrationIntegrityTest extends BasePostgresIntegrationTest {
                 .as("No Flyway migrations should be in FAILED state")
                 .isEmpty();
 
-        // Check that V1 and the latest migration (V17) are present in applied migrations
+        // Check that V1 and the latest migration (V18) are present in applied migrations
         boolean hasV1 = Arrays.stream(appliedMigrations).anyMatch(m -> "1".equals(m.getVersion().getVersion()));
-        boolean hasV17 = Arrays.stream(appliedMigrations).anyMatch(m -> "17".equals(m.getVersion().getVersion()));
+        boolean hasV18 = Arrays.stream(appliedMigrations).anyMatch(m -> "18".equals(m.getVersion().getVersion()));
         assertThat(hasV1).as("Migration V1 should be applied").isTrue();
-        assertThat(hasV17).as("Migration V17 should be applied").isTrue();
+        assertThat(hasV18).as("Migration V18 should be applied").isTrue();
 
         // 2. Clear existing superadmins to test seedSuperAdmin in isolation
         userRepository.deleteAll(userRepository.findByRole(Role.SUPER_ADMIN));
