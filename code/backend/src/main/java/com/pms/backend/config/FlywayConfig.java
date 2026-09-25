@@ -33,6 +33,7 @@ public class FlywayConfig {
                 .baselineOnMigrate(baselineOnMigrate)
                 .baselineVersion(baselineVersion)
                 .load();
+        flyway.repair();
         var result = flyway.migrate();
         System.out.println("[FlywayConfig] Migrations executed successfully: " + result.migrationsExecuted);
         return flyway;
