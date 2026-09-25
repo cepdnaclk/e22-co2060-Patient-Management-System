@@ -4,6 +4,7 @@ import com.pms.backend.audit.service.AuditLogService;
 import com.pms.backend.billing.dto.CreateInvoiceRequest;
 import com.pms.backend.billing.entity.Invoice;
 import com.pms.backend.billing.repository.InvoiceRepository;
+import com.pms.backend.billing.repository.PendingBillItemRepository;
 import com.pms.backend.common.exception.AppException;
 import com.pms.backend.patient.entity.Patient;
 import com.pms.backend.patient.repository.PatientRepository;
@@ -32,6 +33,9 @@ class BillingServiceWorkflowTest {
 
     @Mock
     private InvoiceRepository invoiceRepo;
+
+    @Mock
+    private PendingBillItemRepository pendingBillItemRepo;
 
     @Mock
     private PatientRepository patientRepo;
