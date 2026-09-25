@@ -42,15 +42,17 @@ git push origin main
 
 In Vercel Dashboard → Your Project → Settings → Environment Variables:
 
-**Add this variable:**
+**Add these variables:**
 
 ```
-VITE_API_URL = https://your-backend-url.com:8082
+VITE_API_URL = https://e22-co2060-patient-management-system.onrender.com
+VITE_GOOGLE_CLIENT_ID = your-google-client-id.apps.googleusercontent.com
 ```
 
 Replace `https://your-backend-url.com` with your actual backend URL:
 
 - **Local testing:** `http://localhost:8082`
+- **Render backend:** `https://your-service.onrender.com` (do not append `:8082`)
 - **Heroku backend:** `https://your-heroku-app.herokuapp.com`
 - **Your server:** Your actual backend domain
 

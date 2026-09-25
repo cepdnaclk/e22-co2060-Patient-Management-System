@@ -286,36 +286,6 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Google Sign-In */}
-          {GOOGLE_CLIENT_ID && (
-            <div className="mt-6 flex flex-col items-center">
-              <div className="flex items-center w-full mb-4">
-                <div className="flex-1 border-t border-slate-200 dark:border-slate-800"></div>
-                <span className="px-3 text-xs text-slate-500 bg-white dark:bg-slate-950 uppercase font-semibold">Or continue with</span>
-                <div className="flex-1 border-t border-slate-200 dark:border-slate-800"></div>
-              </div>
-              <GoogleLogin
-                onSuccess={async (credentialResponse) => {
-                  try {
-                    const data = await authService.googleLogin(credentialResponse.credential);
-                    saveLogin(data.accessToken, data.refreshToken, data.user);
-                    navigate(ROLE_ROUTES[data.user.role] || "/dashboard");
-                  } catch (err) {
-                    setError(err.response?.data?.message || "Google sign-in failed.");
-                  }
-                }}
-                onError={() => setError("Google sign-in failed. Please try again.")}
-                theme="outline"
-                size="large"
-                text="signin_with"
-                shape="rectangular"
-                width="300"
-                locale="en"
-              />
-            </div>
-          )}
-
-
           {/* Register link */}
           <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
             <p className="text-sm text-slate-500 dark:text-slate-400">
