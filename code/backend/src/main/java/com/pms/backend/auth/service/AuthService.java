@@ -67,11 +67,26 @@ public class AuthService {
     @Transactional
     public SignupResponse signup(SignupRequest req, String ipAddress) {
 
-        if (userRepo.existsByEmail(req.getEmail())) {
-            throw AppException.conflict("This email is already registered");
+        User existingByEmail = userRepo.findByEmail(req.getEmail()).orElse(null);
+        if (existingByEmail != null) {
+            if (existingByEmail.isEmailVerified()) {
+                throw AppException.conflict("This email is already registered");
+            } else {
+                // If they haven't verified yet, allow them to restart the signup process.
+                // We delete the unverified placeholder so we can create a fresh one.
+                userRepo.delete(existingByEmail);
+                userRepo.flush();
+            }
         }
-        if (userRepo.existsByMobileNumber(req.getMobileNumber())) {
-            throw AppException.conflict("This mobile number is already registered");
+
+        User existingByMobile = userRepo.findByMobileNumber(req.getMobileNumber()).orElse(null);
+        if (existingByMobile != null) {
+            if (existingByMobile.isEmailVerified()) {
+                throw AppException.conflict("This mobile number is already registered");
+            } else {
+                userRepo.delete(existingByMobile);
+                userRepo.flush();
+            }
         }
 
         User user = User.builder()
