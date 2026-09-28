@@ -20,15 +20,73 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class BackendApplication {
 
 	public static void main(String[] args) {
+		loadDotenv();
+
 		// 1. Check the variable first
 		String secret = System.getenv("JWT_SECRET");
+		if (secret == null) {
+			secret = System.getProperty("JWT_SECRET");
+		}
+
+		String mailUser = System.getenv("MAIL_USERNAME");
+		if (mailUser == null) {
+			mailUser = System.getProperty("MAIL_USERNAME");
+		}
 
 		System.out.println("=======================================");
-		System.out.println("JWT Secret check: " + (secret != null ? "FOUND " : "NOT FOUND "));
+		System.out.println("JWT Secret check: " + (secret != null ? "FOUND" : "NOT FOUND"));
+		System.out.println("Mail User check:  " + (mailUser != null ? mailUser : "NOT FOUND (defaulting)"));
 		System.out.println("=======================================");
 
 		// 2. Then start the Spring app
 		SpringApplication.run(BackendApplication.class, args);
+	}
+
+	private static void loadDotenv() {
+		java.io.File[] candidates = new java.io.File[] {
+				new java.io.File(".env"),
+				new java.io.File("backend/.env"),
+				new java.io.File("code/backend/.env"),
+				new java.io.File("../.env")
+		};
+
+		for (java.io.File file : candidates) {
+			if (file.exists() && file.isFile()) {
+				try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(file))) {
+					String line;
+					while ((line = reader.readLine()) != null) {
+						line = line.trim();
+						if (line.isEmpty() || line.startsWith("#")) {
+							continue;
+						}
+						// Support both standard multiline .env and semicolon-separated lines
+						String[] entries = line.split(";");
+						for (String entry : entries) {
+							entry = entry.trim();
+							if (entry.isEmpty() || entry.startsWith("#")) {
+								continue;
+							}
+							int eqIdx = entry.indexOf('=');
+							if (eqIdx > 0) {
+								String key = entry.substring(0, eqIdx).trim();
+								String val = entry.substring(eqIdx + 1).trim();
+								if ((val.startsWith("\"") && val.endsWith("\"")) ||
+										(val.startsWith("'") && val.endsWith("'"))) {
+									val = val.substring(1, val.length() - 1);
+								}
+								if (System.getProperty(key) == null && System.getenv(key) == null) {
+									System.setProperty(key, val);
+								}
+							}
+						}
+					}
+					System.out.println("[BackendApplication] Loaded environment from: " + file.getAbsolutePath());
+					break;
+				} catch (Exception e) {
+					System.err.println("[BackendApplication] Warning: Failed to parse " + file.getName() + ": " + e.getMessage());
+				}
+			}
+		}
 	}
 
 	@Bean

@@ -26,11 +26,20 @@ public class EmailService {
 
     private static final String RESEND_API_URL = "https://api.resend.com/emails";
 
-    @Value("${RESEND_API_KEY:}")
+    @Value("${RESEND_API_KEY:${resend.api.key:}}")
     private String resendApiKey;
 
-    @Value("${RESEND_FROM_EMAIL:onboarding@resend.dev}")
-    private String fromEmail;
+    @Value("${RESEND_FROM_EMAIL:${resend.from.email:onboarding@resend.dev}}")
+    private String resendFromEmail;
+
+    @Value("${spring.mail.username:}")
+    private String smtpUsername;
+
+    @Value("${spring.mail.password:}")
+    private String smtpPassword;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private org.springframework.mail.javamail.JavaMailSender mailSender;
 
     private HttpClient httpClient;
 
@@ -40,57 +49,105 @@ public class EmailService {
                 .connectTimeout(Duration.ofSeconds(15))
                 .build();
 
-        boolean hasKey = resendApiKey != null && !resendApiKey.isBlank();
-        log.info("========== EMAIL CONFIG (Resend) ==========");
-        log.info("  API Key  : {}", hasKey ? "SET (" + resendApiKey.length() + " chars)" : "*** NOT SET ***");
-        log.info("  From     : {}", fromEmail);
-        log.info("============================================");
-        if (!hasKey) {
-            log.error("RESEND_API_KEY is not set! OTP emails will NOT be sent.");
-        }
+        boolean hasResendKey = resendApiKey != null && !resendApiKey.isBlank();
+        boolean hasSmtp = smtpPassword != null && !smtpPassword.isBlank() && mailSender != null;
+
+        log.info("========== EMAIL SERVICE CONFIGURATION ==========");
+        log.info("  Resend API Key : {}", hasResendKey ? "CONFIGURED (" + resendApiKey.length() + " chars)" : "NOT SET");
+        log.info("  SMTP Host/User : {}", hasSmtp ? smtpUsername : "NOT CONFIGURED");
+        log.info("  Active Mode    : {}", hasResendKey ? "Resend HTTPS API" : (hasSmtp ? "Gmail / SMTP Relay" : "Console / Dev Mode"));
+        log.info("=================================================");
     }
 
     @Async
     public void sendOtpEmail(String toEmail, String otp, String firstName) {
-        log.info("Dispatching OTP email to {} [OTP={}]", toEmail, otp);
+        log.info("======================================================================");
+        log.info("🔐 [OTP DISPATCH] To: {} | Code: {} | User: {}", toEmail, otp, firstName);
+        log.info("======================================================================");
 
-        if (resendApiKey == null || resendApiKey.isBlank()) {
-            log.error("❌ Cannot send email: RESEND_API_KEY is not configured.");
-            return;
+        boolean emailSent = false;
+
+        // 1. Try Resend HTTP API (if configured)
+        if (resendApiKey != null && !resendApiKey.isBlank()) {
+            try {
+                emailSent = sendViaResend(toEmail, otp, firstName);
+            } catch (Exception e) {
+                log.error("❌ Resend API sending failed: {}", e.getMessage());
+            }
         }
 
-        try {
-            String htmlContent = buildOtpEmailHtml(otp, firstName)
-                    .replace("\"", "\\\"")
-                    .replace("\n", "\\n")
-                    .replace("\r", "");
-
-            String jsonBody = """
-                    {
-                      "from": "%s",
-                      "to": ["%s"],
-                      "subject": "PatientMS — Verify Your Email Address",
-                      "html": "%s"
-                    }
-                    """.formatted(fromEmail, toEmail, htmlContent);
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(RESEND_API_URL))
-                    .header("Authorization", "Bearer " + resendApiKey)
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
-                    .timeout(Duration.ofSeconds(30))
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                log.info("✅ OTP email SENT successfully to {} | Response: {}", toEmail, response.body());
-            } else {
-                log.error("❌ Resend API returned HTTP {}: {}", response.statusCode(), response.body());
+        // 2. Try SMTP / Gmail (if Resend didn't send and SMTP is configured)
+        if (!emailSent && mailSender != null && smtpPassword != null && !smtpPassword.isBlank()) {
+            try {
+                emailSent = sendViaSmtp(toEmail, otp, firstName);
+            } catch (Exception e) {
+                log.error("❌ SMTP sending failed: {}", e.getMessage());
             }
+        }
+
+        // 3. Status summary
+        if (emailSent) {
+            log.info("✅ OTP email successfully delivered to {}", toEmail);
+        } else {
+            log.warn("⚠️ OTP email could not be delivered externally. Please use code [{}] from console for verification.", otp);
+        }
+    }
+
+    private boolean sendViaResend(String toEmail, String otp, String firstName) throws Exception {
+        String htmlContent = buildOtpEmailHtml(otp, firstName)
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "");
+
+        String jsonBody = """
+                {
+                  "from": "%s",
+                  "to": ["%s"],
+                  "subject": "PatientMS — Verify Your Email Address",
+                  "html": "%s"
+                }
+                """.formatted(resendFromEmail, toEmail, htmlContent);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(RESEND_API_URL))
+                .header("Authorization", "Bearer " + resendApiKey)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .timeout(Duration.ofSeconds(30))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+            log.info("✅ OTP email SENT via Resend to {} | Response: {}", toEmail, response.body());
+            return true;
+        } else {
+            log.error("❌ Resend API returned HTTP {}: {}", response.statusCode(), response.body());
+            return false;
+        }
+    }
+
+    private boolean sendViaSmtp(String toEmail, String otp, String firstName) {
+        try {
+            jakarta.mail.internet.MimeMessage message = mailSender.createMimeMessage();
+            org.springframework.mail.javamail.MimeMessageHelper helper =
+                    new org.springframework.mail.javamail.MimeMessageHelper(message, true, "UTF-8");
+
+            String from = (smtpUsername == null || smtpUsername.isBlank() || "noreply@pms.local".equals(smtpUsername))
+                    ? "noreply@pms.local"
+                    : smtpUsername;
+
+            helper.setFrom(from);
+            helper.setTo(toEmail);
+            helper.setSubject("PatientMS — Verify Your Email Address");
+            helper.setText(buildOtpEmailHtml(otp, firstName), true);
+
+            mailSender.send(message);
+            log.info("✅ OTP email SENT via SMTP to {}", toEmail);
+            return true;
         } catch (Exception e) {
-            log.error("❌ FAILED to send OTP email to {}: {}", toEmail, e.getMessage(), e);
+            log.error("❌ SMTP failed to send to {}: {}", toEmail, e.getMessage());
+            return false;
         }
     }
 
