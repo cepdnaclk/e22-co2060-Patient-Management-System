@@ -60,6 +60,11 @@ public class EmailService {
             return;
         }
 
+        if (fromEmail == null || fromEmail.isBlank()) {
+            log.error("❌ Cannot send email: BREVO_FROM_EMAIL is not configured. Check your .env file.");
+            return;
+        }
+
         try {
             String htmlContent = buildOtpEmailHtml(otp, firstName)
                     .replace("\"", "\\\"")
