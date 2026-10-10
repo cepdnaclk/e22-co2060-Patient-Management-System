@@ -17,6 +17,7 @@ import java.time.Duration;
  * 
  * Render's free tier blocks SMTP ports (25, 465, 587), so we use Brevo's
  * REST API over HTTPS (port 443) which is always allowed.
+ * Brevo allows sending to any email address after you verify just your sender email (no custom domain required).
  */
 @Service
 @Slf4j
@@ -50,7 +51,9 @@ public class EmailService {
 
     @Async
     public void sendOtpEmail(String toEmail, String otp, String firstName) {
-        log.info("Dispatching OTP email to {} [OTP={}]", toEmail, otp);
+        log.info("======================================================================");
+        log.info("🔐 [OTP DISPATCH] To: {} | Code: {} | User: {}", toEmail, otp, firstName);
+        log.info("======================================================================");
 
         if (brevoApiKey == null || brevoApiKey.isBlank()) {
             log.error("❌ Cannot send email: BREVO_API_KEY is not configured.");
