@@ -13,23 +13,21 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 /**
- * Sends HTML-formatted OTP verification emails via Resend HTTP API.
+ * Sends HTML-formatted OTP verification emails via Brevo (formerly Sendinblue) HTTP API.
  * 
- * Render's free tier blocks SMTP ports (25, 465, 587), so we use Resend's
+ * Render's free tier blocks SMTP ports (25, 465, 587), so we use Brevo's
  * REST API over HTTPS (port 443) which is always allowed.
- * 
- * Emails are sent asynchronously so the API response is not delayed.
  */
 @Service
 @Slf4j
 public class EmailService {
 
-    private static final String RESEND_API_URL = "https://api.resend.com/emails";
+    private static final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
-    @Value("${RESEND_API_KEY:}")
-    private String resendApiKey;
+    @Value("${BREVO_API_KEY:}")
+    private String brevoApiKey;
 
-    @Value("${RESEND_FROM_EMAIL:onboarding@resend.dev}")
+    @Value("${BREVO_FROM_EMAIL:}")
     private String fromEmail;
 
     private HttpClient httpClient;
@@ -40,13 +38,13 @@ public class EmailService {
                 .connectTimeout(Duration.ofSeconds(15))
                 .build();
 
-        boolean hasKey = resendApiKey != null && !resendApiKey.isBlank();
-        log.info("========== EMAIL CONFIG (Resend) ==========");
-        log.info("  API Key  : {}", hasKey ? "SET (" + resendApiKey.length() + " chars)" : "*** NOT SET ***");
+        boolean hasKey = brevoApiKey != null && !brevoApiKey.isBlank();
+        log.info("========== EMAIL CONFIG (Brevo) ==========");
+        log.info("  API Key  : {}", hasKey ? "SET (" + brevoApiKey.length() + " chars)" : "*** NOT SET ***");
         log.info("  From     : {}", fromEmail);
         log.info("============================================");
         if (!hasKey) {
-            log.error("RESEND_API_KEY is not set! OTP emails will NOT be sent.");
+            log.error("BREVO_API_KEY is not set! OTP emails will NOT be sent.");
         }
     }
 
@@ -54,40 +52,48 @@ public class EmailService {
     public void sendOtpEmail(String toEmail, String otp, String firstName) {
         log.info("Dispatching OTP email to {} [OTP={}]", toEmail, otp);
 
-        if (resendApiKey == null || resendApiKey.isBlank()) {
-            log.error("❌ Cannot send email: RESEND_API_KEY is not configured.");
+        if (brevoApiKey == null || brevoApiKey.isBlank()) {
+            log.error("❌ Cannot send email: BREVO_API_KEY is not configured.");
             return;
         }
 
         try {
             String htmlContent = buildOtpEmailHtml(otp, firstName)
                     .replace("\"", "\\\"")
-                    .replace("\n", "\\n")
+                    .replace("\n", "")
                     .replace("\r", "");
 
             String jsonBody = """
                     {
-                      "from": "%s",
-                      "to": ["%s"],
+                      "sender": {
+                        "name": "PatientMS",
+                        "email": "%s"
+                      },
+                      "to": [
+                        {
+                          "email": "%s"
+                        }
+                      ],
                       "subject": "PatientMS — Verify Your Email Address",
-                      "html": "%s"
+                      "htmlContent": "%s"
                     }
                     """.formatted(fromEmail, toEmail, htmlContent);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(RESEND_API_URL))
-                    .header("Authorization", "Bearer " + resendApiKey)
+                    .uri(URI.create(BREVO_API_URL))
+                    .header("api-key", brevoApiKey)
                     .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .timeout(Duration.ofSeconds(30))
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() == 200) {
+            if (response.statusCode() == 201) {
                 log.info("✅ OTP email SENT successfully to {} | Response: {}", toEmail, response.body());
             } else {
-                log.error("❌ Resend API returned HTTP {}: {}", response.statusCode(), response.body());
+                log.error("❌ Brevo API returned HTTP {}: {}", response.statusCode(), response.body());
             }
         } catch (Exception e) {
             log.error("❌ FAILED to send OTP email to {}: {}", toEmail, e.getMessage(), e);
